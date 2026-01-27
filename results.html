@@ -20,10 +20,18 @@
   <h1>I tuoi match</h1>
   <div id="list"></div>
 
-  <button class="reset" onclick="resetEvent()">Reset serata</button>
-</div>
+  <button class="reset" id="resetBtn" onclick="resetEvent()" style="display:none;">
+  Reset serata
+</button>
 
 <script>
+  // mostra reset solo se admin (per ora manuale)
+const IS_ADMIN = false; // <-- metti true solo tu
+
+if(IS_ADMIN){
+  document.getElementById("resetBtn").style.display = "block";
+}
+
 const EVENT_ID = "GAETA_TEST";
 
 async function load(){

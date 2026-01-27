@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Match Me – Step 2</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <h1>Preferenze</h1>
+
+  <label>Io sono</label><br>
+  <select id="gender">
+    <option value="">Seleziona</option>
+    <option value="uomo">Uomo</option>
+    <option value="donna">Donna</option>
+  </select><br><br>
+
+  <label>Mi piacciono</label><br>
+  <select id="like">
+    <option value="">Seleziona</option>
+    <option value="uomo">Uomo</option>
+    <option value="donna">Donna</option>
+    <option value="entrambi">Entrambi</option>
+  </select><br><br>
+
+  <button onclick="go()">Continua</button>
+
+<script>
+function go(){
+  const gender = document.getElementById("gender").value;
+  const like = document.getElementById("like").value;
+
+  if(!gender || !like){
+    alert("Seleziona tutto");
+    return;
+  }
+
+  sessionStorage.setItem("gender", gender);
+  sessionStorage.setItem("like", like);
+
+  window.location.href = "step3.html";
+}
+</script>
+
+</body>
+</html>

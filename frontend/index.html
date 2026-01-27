@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Match Me</title>
+  <link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+  <h1>Match Me</h1>
+  <button onclick="test()">Test backend</button>
+  <p id="out"></p>
+
+<script>
+async function test(){
+  const res = await fetch("http://127.0.0.1:5000/");
+  const text = await res.text();
+  document.getElementById("out").innerText = text;
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Match Me – Step 1</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="wrap">
+
+  <h1>Match Me</h1>
+  <p>Inserisci i tuoi dati</p>
+
+  <label>Nome</label><br>
+  <input id="name"><br><br>
+
+  <label>Numero tavolo</label><br>
+  <input id="table"><br><br>
+
+  <button onclick="go()">Continua</button>
+
+<script>
+function go(){
+  const name = document.getElementById("name").value;
+  const table = document.getElementById("table").value;
+
+  if(!name || !table){
+    alert("Compila tutto");
+    return;
+  }
+
+  sessionStorage.setItem("name", name);
+  sessionStorage.setItem("table", table);
+
+  window.location.href = "step2.html";
+}
+</script>
+</div>
+</body>
+</html>

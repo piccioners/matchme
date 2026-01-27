@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Match Me – Risultati</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .wrap{max-width:520px;margin:0 auto;padding:20px}
+    .match{background:#151515;padding:14px;border-radius:12px;margin-bottom:12px}
+    .top{display:flex;justify-content:space-between;align-items:center}
+    .score{font-weight:bold;color:#ff3b6b}
+    .meta{opacity:.8;font-size:.9em}
+    .reset{margin-top:30px;background:#444}
+  </style>
+</head>
+<body>
+
+<div class="wrap">
+  <h1>I tuoi match</h1>
+  <div id="list"></div>
+
+  <button class="reset" onclick="resetEvent()">Reset serata</button>
+</div>
+
+<script>
+const EVENT_ID = "GAETA_TEST";
+
+async function load(){
+  const list = document.getElementById("list");
+  list.innerHTML = "";
+
+  const name = sessionStorage.getItem("name");
+  const table = sessionStorage.getItem("table");
+  const gender = sessionStorage.getItem("gender");
+  const like = sessionStorage.getItem("like");
+  const interests = JSON.parse(sessionStorage.getItem("interests") || "null");
+
+  if(!name || !table || !gender || !like || !interests){
+    list.innerHTML = "<p>Dati mancanti. Riparti dallo Step 1.</p>";
+    return;
+  }
+
+  const res = await fetch("http://127.0.0.1:5000/matches", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({
+      event_id: EVENT_ID,
+      name, table, gender, like, interests
+    })
+  });
+
+  const data = await res.json();
+
+  if(!data.matches || data.matches.length === 0){
+    list.innerHTML = "<p>Nessun match trovato.</p>";
+    return;
+  }
+
+  data.matches.forEach(m => {
+    const div = document.createElement("div");
+    div.className = "match";
+    div.innerHTML = `
+      <div class="top">
+        <div>${m.name}</div>
+        <div class="score">${m.score}%</div>
+      </div>
+      <div class="meta">Tavolo ${m.table}</div>
+    `;
+    list.appendChild(div);
+  });
+}
+
+async function resetEvent(){
+  if(!confirm("Sei sicuro di voler resettare la serata?")) return;
+
+  await fetch("http://127.0.0.1:5000/reset", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({ event_id: EVENT_ID })
+  });
+
+  alert("Serata resettata");
+  sessionStorage.clear();
+  window.location.href = "step1.html";
+}
+
+load();
+</script>
+
+</body>
+</html>

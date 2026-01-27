@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Match Me – Step 3</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .wrap{max-width:520px;margin:0 auto;padding:20px}
+    .row{margin:14px 0}
+    .row label{display:block;margin-bottom:6px}
+    .val{float:right;opacity:.8}
+    input[type=range]{width:100%}
+    .cta{margin-top:22px;width:100%}
+  </style>
+</head>
+<body>
+
+<div class="wrap">
+  <h1>Interessi</h1>
+  <p>Vota da 1 a 5 quanto ti rappresentano</p>
+
+  <div class="row">
+    <label>Musica <span id="v_musica" class="val">3</span></label>
+    <input id="musica" type="range" min="1" max="5" value="3"
+           oninput="v_musica.textContent=this.value">
+  </div>
+
+  <div class="row">
+    <label>Sport <span id="v_sport" class="val">3</span></label>
+    <input id="sport" type="range" min="1" max="5" value="3"
+           oninput="v_sport.textContent=this.value">
+  </div>
+
+  <div class="row">
+    <label>Viaggi <span id="v_viaggi" class="val">3</span></label>
+    <input id="viaggi" type="range" min="1" max="5" value="3"
+           oninput="v_viaggi.textContent=this.value">
+  </div>
+
+  <div class="row">
+    <label>Cinema <span id="v_cinema" class="val">3</span></label>
+    <input id="cinema" type="range" min="1" max="5" value="3"
+           oninput="v_cinema.textContent=this.value">
+  </div>
+
+  <div class="row">
+    <label>Tech <span id="v_tech" class="val">3</span></label>
+    <input id="tech" type="range" min="1" max="5" value="3"
+           oninput="v_tech.textContent=this.value">
+  </div>
+
+  <div class="row">
+    <label>Nightlife <span id="v_nightlife" class="val">3</span></label>
+    <input id="nightlife" type="range" min="1" max="5" value="3"
+           oninput="v_nightlife.textContent=this.value">
+  </div>
+
+  <button class="cta" onclick="send()">Conferma e trova i match</button>
+</div>
+
+<script>
+async function send(){
+  const data = {
+    event_id: "GAETA_TEST",
+    name: sessionStorage.getItem("name"),
+    table: sessionStorage.getItem("table"),
+    gender: sessionStorage.getItem("gender"),
+    like: sessionStorage.getItem("like"),
+    interests: {
+      musica: Number(musica.value),
+      sport: Number(sport.value),
+      viaggi: Number(viaggi.value),
+      cinema: Number(cinema.value),
+      tech: Number(tech.value),
+      nightlife: Number(nightlife.value)
+    }
+  };
+
+  sessionStorage.setItem("interests", JSON.stringify(data.interests));
+
+  if(!data.name || !data.table || !data.gender || !data.like){
+    alert("Dati mancanti. Riparti dallo Step 1.");
+    window.location.href = "step1.html";
+    return;
+  }
+
+  await fetch("http://127.0.0.1:5000/register", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify(data)
+  });
+
+  window.location.href = "results.html";
+}
+</script>
+
+</body>
+</html>

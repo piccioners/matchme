@@ -41,7 +41,7 @@ async function load(){
     return;
   }
 
-  const res = await fetch("http://127.0.0.1:5000/matches", {
+  const res = await fetch("https://matchme-production-73a8.up.railway.app/", {
     method: "POST",
     headers: {"Content-Type":"application/json"},
     body: JSON.stringify({
@@ -74,7 +74,7 @@ async function load(){
 async function resetEvent(){
   if(!confirm("Sei sicuro di voler resettare la serata?")) return;
 
-  await fetch("http://127.0.0.1:5000/reset", {
+  await fetch("https://matchme-production-73a8.up.railway.app/", {
     method: "POST",
     headers: {"Content-Type":"application/json"},
     body: JSON.stringify({ event_id: EVENT_ID })

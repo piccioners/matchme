@@ -9,12 +9,12 @@ CORS(app)
 # ---------- LOGICA MATCH ----------
 
 def is_compatible(me, other):
-    # niente se stesso: stessa coppia nome+tavolo
+    # niente se stesso
     if str(me["name"]) == str(other["name"]) and str(me["table"]) == str(other["table"]):
         return False
 
-    i_ok = (me["like"] == "entrambi") or (other["gender"] == me["like"])
-    o_ok = (other["like"] == "entrambi") or (me["gender"] == other["like"])
+    i_ok = (me["looking_for"] == "entrambi") or (other["gender"] == me["looking_for"])
+    o_ok = (other["looking_for"] == "entrambi") or (me["gender"] == other["looking_for"])
 
     return i_ok and o_ok
 
@@ -41,38 +41,41 @@ def register():
     event_id = data.get("event_id") or "DEFAULT"
 
     with get_conn() as conn:
-        conn.execute(
-            """
-            INSERT INTO users (event_id, name, table_number, gender, like, interests_json)
-            VALUES (?, ?, ?, ?, ?, ?)
-            """,
-            (
-                event_id,
-                data["name"],
-                data["table"],
-                data["gender"],
-                data["like"],
-                json.dumps(data["interests"])
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                INSERT INTO users
+                (event_id, name, table_number, gender, looking_for, interests_json)
+                VALUES (%s, %s, %s, %s, %s, %s)
+                """,
+                (
+                    event_id,
+                    data["name"],
+                    data["table"],
+                    data["gender"],
+                    data["looking_for"],
+                    json.dumps(data["interests"])
+                )
             )
-        )
         conn.commit()
 
-        count = conn.execute(
-            "SELECT COUNT(*) AS c FROM users WHERE event_id = ?",
-            (event_id,)
-        ).fetchone()["c"]
-
-    return jsonify({"status": "ok", "count": count})
+    return jsonify({"status": "ok"})
 
 @app.route("/users")
 def users():
     event_id = request.args.get("event_id") or "DEFAULT"
 
     with get_conn() as conn:
-        rows = conn.execute(
-            "SELECT name, table_number, gender, like, interests_json FROM users WHERE event_id = ?",
-            (event_id,)
-        ).fetchall()
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT name, table_number, gender, looking_for, interests_json
+                FROM users
+                WHERE event_id = %s
+                """,
+                (event_id,)
+            )
+            rows = cur.fetchall()
 
     out = []
     for r in rows:
@@ -80,7 +83,7 @@ def users():
             "name": r["name"],
             "table": r["table_number"],
             "gender": r["gender"],
-            "like": r["like"],
+            "looking_for": r["looking_for"],
             "interests": json.loads(r["interests_json"])
         })
 
@@ -92,10 +95,16 @@ def matches():
     event_id = me.get("event_id") or "DEFAULT"
 
     with get_conn() as conn:
-        rows = conn.execute(
-            "SELECT name, table_number, gender, like, interests_json FROM users WHERE event_id = ?",
-            (event_id,)
-        ).fetchall()
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT name, table_number, gender, looking_for, interests_json
+                FROM users
+                WHERE event_id = %s
+                """,
+                (event_id,)
+            )
+            rows = cur.fetchall()
 
     candidates = []
 
@@ -104,7 +113,7 @@ def matches():
             "name": r["name"],
             "table": r["table_number"],
             "gender": r["gender"],
-            "like": r["like"],
+            "looking_for": r["looking_for"],
             "interests": json.loads(r["interests_json"])
         }
 
@@ -131,10 +140,11 @@ def reset():
     event_id = data.get("event_id") or "DEFAULT"
 
     with get_conn() as conn:
-        conn.execute(
-            "DELETE FROM users WHERE event_id = ?",
-            (event_id,)
-        )
+        with conn.cursor() as cur:
+            cur.execute(
+                "DELETE FROM users WHERE event_id = %s",
+                (event_id,)
+            )
         conn.commit()
 
     return jsonify({"status": "ok", "reset": event_id})
@@ -145,4 +155,3 @@ init_db()
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
-

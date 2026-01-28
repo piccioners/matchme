@@ -66,7 +66,7 @@ async function send(){
     name: sessionStorage.getItem("name"),
     table: sessionStorage.getItem("table"),
     gender: sessionStorage.getItem("gender"),
-    like: sessionStorage.getItem("like"),
+    looking_for: sessionStorage.getItem("like"),
     interests: {
       musica: Number(musica.value),
       sport: Number(sport.value),
@@ -77,20 +77,31 @@ async function send(){
     }
   };
 
-  sessionStorage.setItem("interests", JSON.stringify(data.interests));
-
-  if(!data.name || !data.table || !data.gender || !data.like){
+  if(!data.name || !data.table || !data.gender || !data.looking_for){
     alert("Dati mancanti. Riparti dallo Step 1.");
     window.location.href = "step1.html";
     return;
   }
 
-  await fetch("https://matchme-production-73a8.up.railway.app/", {
-    method: "POST",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify(data)
-  });
+  // salva interessi in sessione (per results)
+  sessionStorage.setItem("interests", JSON.stringify(data.interests));
 
+  // REGISTRAZIONE CORRETTA
+  const res = await fetch(
+    "https://matchme-production-73a8.up.railway.app/register",
+    {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify(data)
+    }
+  );
+
+  if(!res.ok){
+    alert("Errore di registrazione");
+    return;
+  }
+
+  await res.json();
   window.location.href = "results.html";
 }
 </script>

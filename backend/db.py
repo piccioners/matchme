@@ -1,14 +1,27 @@
-import sqlite3
-from pathlib import Path
+import os
+import psycopg2
+import psycopg2.extras
 
-DB_PATH = Path(__file__).with_name("matchme.db")
+DATABASE_URL = os.environ.get("DATABASE_URL")
 
 def get_conn():
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    return conn
+    return psycopg2.connect(
+        DATABASE_URL,
+        cursor_factory=psycopg2.extras.RealDictCursor
+    )
 
 def init_db():
-    schema = Path(__file__).with_name("schema.sql").read_text(encoding="utf-8")
     with get_conn() as conn:
-        conn.executescript(schema)
+        with conn.cursor() as cur:
+            cur.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                id SERIAL PRIMARY KEY,
+                event_id TEXT NOT NULL,
+                name TEXT NOT NULL,
+                table_number TEXT NOT NULL,
+                gender TEXT NOT NULL,
+                like TEXT NOT NULL,
+                interests_json TEXT NOT NULL
+            );
+            """)
+            conn.commit()

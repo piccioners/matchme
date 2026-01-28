@@ -62,11 +62,11 @@
 <script>
 async function send(){
   const data = {
-    event_id: sessionStorage.getItem("event_id"),
-    name: sessionStorage.getItem("name"),
-    table: sessionStorage.getItem("table"),
-    gender: sessionStorage.getItem("gender"),
-    looking_for: sessionStorage.getItem("like"),
+    event_id: localStorage.getItem("event_id"),
+    name: localStorage.getItem("name"),
+    table: localStorage.getItem("table"),
+    gender: localStorage.getItem("gender"),
+    looking_for: localStorage.getItem("like"),
     interests: {
       musica: Number(musica.value),
       sport: Number(sport.value),
@@ -84,7 +84,7 @@ async function send(){
   }
 
   // salva interessi in sessione (per results)
-  sessionStorage.setItem("interests", JSON.stringify(data.interests));
+  localStorage.setItem("interests", JSON.stringify(data.interests));
 
   // REGISTRAZIONE CORRETTA
   const res = await fetch(

@@ -25,40 +25,34 @@
 </button>
 
 <script>
-  // mostra reset solo se admin (per ora manuale)
-const IS_ADMIN = false; // <-- metti true solo tu
-
-if(IS_ADMIN){
-  document.getElementById("resetBtn").style.display = "block";
-}
-
-const EVENT_ID = "GAETA_TEST";
-
 async function load(){
-  const list = document.getElementById("list");
-  list.innerHTML = "";
+  const me = {
+    event_id: "GAETA_TEST",
+    name: sessionStorage.getItem("name"),
+    table: sessionStorage.getItem("table"),
+    gender: sessionStorage.getItem("gender"),
+    looking_for: sessionStorage.getItem("like"),
+    interests: JSON.parse(sessionStorage.getItem("interests") || "{}")
+  };
 
-  const name = sessionStorage.getItem("name");
-  const table = sessionStorage.getItem("table");
-  const gender = sessionStorage.getItem("gender");
-  const like = sessionStorage.getItem("like");
-  const interests = JSON.parse(sessionStorage.getItem("interests") || "null");
-
-  if(!name || !table || !gender || !like || !interests){
-    list.innerHTML = "<p>Dati mancanti. Riparti dallo Step 1.</p>";
+  if(!me.name || !me.table || !me.gender || !me.looking_for || !me.interests.musica){
+    document.getElementById("list").innerHTML =
+      "<p>Dati incompleti. Riparti dallo Step 1.</p>";
     return;
   }
 
-  const res = await fetch("https://matchme-production-73a8.up.railway.app/", {
-    method: "POST",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({
-      event_id: EVENT_ID,
-      name, table, gender, like, interests
-    })
-  });
+  const res = await fetch(
+    "https://matchme-production-73a8.up.railway.app/matches",
+    {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify(me)
+    }
+  );
 
   const data = await res.json();
+  const list = document.getElementById("list");
+  list.innerHTML = "";
 
   if(!data.matches || data.matches.length === 0){
     list.innerHTML = "<p>Nessun match trovato.</p>";
@@ -69,9 +63,9 @@ async function load(){
     const div = document.createElement("div");
     div.className = "match";
     div.innerHTML = `
-      <div class="top">
-        <div>${m.name}</div>
-        <div class="score">${m.score}%</div>
+      <div class="matchTop">
+        <strong>${m.name}</strong>
+        <span>${m.score}%</span>
       </div>
       <div class="meta">Tavolo ${m.table}</div>
     `;
@@ -79,22 +73,9 @@ async function load(){
   });
 }
 
-async function resetEvent(){
-  if(!confirm("Sei sicuro di voler resettare la serata?")) return;
-
-  await fetch("https://matchme-production-73a8.up.railway.app/", {
-    method: "POST",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({ event_id: EVENT_ID })
-  });
-
-  alert("Serata resettata");
-  sessionStorage.clear();
-  window.location.href = "step1.html";
-}
-
 load();
 </script>
+
 
 </body>
 </html>

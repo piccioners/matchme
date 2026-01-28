@@ -20,7 +20,7 @@ def init_db():
                 name TEXT NOT NULL,
                 table_number TEXT NOT NULL,
                 gender TEXT NOT NULL,
-                like TEXT NOT NULL,
+                looking_for TEXT NOT NULL,
                 interests_json TEXT NOT NULL
             );
             """)

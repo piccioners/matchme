@@ -3,31 +3,110 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Match Me – Step 1</title>
+  <title>Match Me – Crea profilo</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    .wrap{max-width:420px;margin:0 auto;padding:24px}
+    h1{text-align:center;margin-bottom:8px}
+    p{text-align:center;opacity:.8;margin-bottom:28px}
+    label{display:block;margin-bottom:6px}
+    input, select{
+      width:100%;
+      padding:14px;
+      border-radius:12px;
+      border:1px solid #3a2248;
+      background:#1b0022;
+      color:#fff;
+      font-size:16px;
+      margin-bottom:18px;
+    }
+    button{
+      width:100%;
+      padding:16px;
+      border-radius:999px;
+      border:none;
+      background:#ff2f92;
+      color:#fff;
+      font-size:18px;
+      font-weight:600;
+      cursor:pointer;
+    }
+    button:active{transform:scale(.98)}
+    .note{
+      font-size:13px;
+      opacity:.6;
+      margin-top:-10px;
+      margin-bottom:18px;
+    }
+  </style>
 </head>
 <body>
-  <div class="wrap">
+
+<div class="wrap">
 
   <h1>Match Me</h1>
-  <p>Inserisci i tuoi dati</p>
+  <p>Crea il tuo profilo per stasera</p>
 
-  <label>Nome</label><br>
-  <input id="name"><br><br>
+  <label for="table">Il tuo tavolo *</label>
+  <select id="table">
+    <option value="">Seleziona tavolo</option>
+  </select>
 
-  <label>Numero tavolo</label><br>
-  <input id="table"><br><br>
+  <label for="name">Il tuo nome *</label>
+  <input id="name" placeholder="Come vuoi apparire">
+  <div class="note">Nomi offensivi verranno eliminati.</div>
 
-  <button onclick="go()">Continua</button>
+  <button onclick="go()">Avanti</button>
+
+</div>
 
 <script>
+/* ========= CONFIG EVENTO ========= */
+
+// 👉 METTI QUI I TAVOLI REALI DELL’EVENTO
+const TAVOLI = [
+  1,2,3,4,5,6,7,8,9,10,
+  20,21,22,23,
+  60,61,62,63,64,65
+];
+
+// 👉 METTI QUI LE PAROLE BANNATE (lowercase)
+const BANNED = [
+  // "cazzo", "merda", "dio", "porco"
+];
+
+/* ========= INIT ========= */
+
+// popola select tavoli
+const tableSelect = document.getElementById("table");
+TAVOLI.forEach(t => {
+  const opt = document.createElement("option");
+  opt.value = t;
+  opt.textContent = "Tavolo " + t;
+  tableSelect.appendChild(opt);
+});
+
+// ripristina dati se già presenti
+if(localStorage.getItem("table")) tableSelect.value = localStorage.getItem("table");
+if(localStorage.getItem("name")) document.getElementById("name").value = localStorage.getItem("name");
+
+/* ========= LOGICA ========= */
+
 function go(){
-  const name = document.getElementById("name").value;
+  const name = document.getElementById("name").value.trim();
   const table = document.getElementById("table").value;
 
   if(!name || !table){
-    alert("Compila tutto");
+    alert("Compila tutti i campi");
     return;
+  }
+
+  const lower = name.toLowerCase();
+  for(const w of BANNED){
+    if(lower.includes(w)){
+      alert("BIRBONE!!! Hai inserito delle parole vietate! Scegli un nome diverso");
+      return;
+    }
   }
 
   localStorage.setItem("name", name);
@@ -36,6 +115,6 @@ function go(){
   window.location.href = "step2.html";
 }
 </script>
-</div>
+
 </body>
 </html>

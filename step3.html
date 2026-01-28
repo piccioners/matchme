@@ -62,7 +62,7 @@
 <script>
 async function send(){
   const data = {
-    event_id: "GAETA_TEST",
+    event_id: sessionStorage.getItem("event_id"),
     name: sessionStorage.getItem("name"),
     table: sessionStorage.getItem("table"),
     gender: sessionStorage.getItem("gender"),

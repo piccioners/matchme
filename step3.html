@@ -3,106 +3,155 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Match Me – Step 3</title>
+  <title>meety – Interessi</title>
   <link rel="stylesheet" href="style.css">
+
   <style>
-    .wrap{max-width:520px;margin:0 auto;padding:20px}
-    .row{margin:14px 0}
-    .row label{display:block;margin-bottom:6px}
-    .val{float:right;opacity:.8}
-    input[type=range]{width:100%}
-    .cta{margin-top:22px;width:100%}
+    body{
+      margin:0;
+      height:100svh;
+      overflow:auto;
+      background:#120018;
+      color:#fff;
+      font-family:system-ui,-apple-system,BlinkMacSystemFont;
+    }
+    .wrap{
+      max-width:420px;
+      margin:0 auto;
+      padding:24px;
+    }
+    h1{
+      text-align:center;
+      margin-bottom:8px;
+    }
+    .subtitle{
+      text-align:center;
+      opacity:.7;
+      margin-bottom:32px;
+    }
+    .row{
+      margin-bottom:22px;
+    }
+    label{
+      display:flex;
+      justify-content:space-between;
+      margin-bottom:6px;
+    }
+    input[type=range]{
+      width:100%;
+    }
+
+    /* ZODIACO */
+    .zodiac{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:12px;
+      margin-top:24px;
+    }
+    .zodiac button{
+      background:#1b0022;
+      border:1px solid #3a2248;
+      border-radius:12px;
+      padding:14px 0;
+      font-size:22px;
+      color:#fff;
+      cursor:pointer;
+    }
+    .zodiac button.active{
+      border-color:#ff2f92;
+      background:#2a0036;
+    }
+
+    .cta{
+      margin-top:32px;
+      width:100%;
+      padding:18px;
+      border-radius:999px;
+      border:none;
+      background:#ff2f92;
+      color:#fff;
+      font-size:20px;
+      font-weight:600;
+    }
   </style>
 </head>
 <body>
 
 <div class="wrap">
-  <h1>Interessi</h1>
-  <p>Vota da 1 a 5 quanto ti rappresentano</p>
+  <h1>I tuoi interessi</h1>
+  <p class="subtitle">Dicci cosa ti rappresenta</p>
 
+  <!-- INTERESSI -->
   <div class="row">
-    <label>Musica <span id="v_musica" class="val">3</span></label>
+    <label>Musica <span id="v_musica">3</span></label>
     <input id="musica" type="range" min="1" max="5" value="3"
            oninput="v_musica.textContent=this.value">
   </div>
 
   <div class="row">
-    <label>Sport <span id="v_sport" class="val">3</span></label>
+    <label>Sport <span id="v_sport">3</span></label>
     <input id="sport" type="range" min="1" max="5" value="3"
            oninput="v_sport.textContent=this.value">
   </div>
 
   <div class="row">
-    <label>Viaggi <span id="v_viaggi" class="val">3</span></label>
+    <label>Viaggi <span id="v_viaggi">3</span></label>
     <input id="viaggi" type="range" min="1" max="5" value="3"
            oninput="v_viaggi.textContent=this.value">
   </div>
 
   <div class="row">
-    <label>Cinema <span id="v_cinema" class="val">3</span></label>
+    <label>Cinema <span id="v_cinema">3</span></label>
     <input id="cinema" type="range" min="1" max="5" value="3"
            oninput="v_cinema.textContent=this.value">
   </div>
 
-  <div class="row">
-    <label>Tech <span id="v_tech" class="val">3</span></label>
-    <input id="tech" type="range" min="1" max="5" value="3"
-           oninput="v_tech.textContent=this.value">
+  <!-- ZODIACO -->
+  <p class="subtitle" style="margin-top:32px">Segno zodiacale (per curiosità)</p>
+
+  <div class="zodiac" id="zodiac">
+    <button data-z="aries">♈︎</button>
+    <button data-z="taurus">♉︎</button>
+    <button data-z="gemini">♊︎</button>
+    <button data-z="cancer">♋︎</button>
+    <button data-z="leo">♌︎</button>
+    <button data-z="virgo">♍︎</button>
+    <button data-z="libra">♎︎</button>
+    <button data-z="scorpio">♏︎</button>
+    <button data-z="sagittarius">♐︎</button>
+    <button data-z="capricorn">♑︎</button>
+    <button data-z="aquarius">♒︎</button>
+    <button data-z="pisces">♓︎</button>
   </div>
 
-  <div class="row">
-    <label>Nightlife <span id="v_nightlife" class="val">3</span></label>
-    <input id="nightlife" type="range" min="1" max="5" value="3"
-           oninput="v_nightlife.textContent=this.value">
-  </div>
-
-  <button class="cta" onclick="send()">Conferma e trova i match</button>
+  <button class="cta" onclick="go()">Continua</button>
 </div>
 
 <script>
-async function send(){
-  const data = {
-    event_id: localStorage.getItem("event_id"),
-    name: localStorage.getItem("name"),
-    table: localStorage.getItem("table"),
-    gender: localStorage.getItem("gender"),
-    looking_for: localStorage.getItem("like"),
-    interests: {
-      musica: Number(musica.value),
-      sport: Number(sport.value),
-      viaggi: Number(viaggi.value),
-      cinema: Number(cinema.value),
-      tech: Number(tech.value),
-      nightlife: Number(nightlife.value)
-    }
+let selectedZodiac = null;
+
+// gestione selezione segno
+document.querySelectorAll(".zodiac button").forEach(btn=>{
+  btn.onclick = ()=>{
+    document.querySelectorAll(".zodiac button").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    selectedZodiac = btn.dataset.z;
+  };
+});
+
+function go(){
+  const interests = {
+    musica:+musica.value,
+    sport:+sport.value,
+    viaggi:+viaggi.value,
+    cinema:+cinema.value
   };
 
-  if(!data.name || !data.table || !data.gender || !data.looking_for){
-    alert("Dati mancanti. Riparti dallo Step 1.");
-    window.location.href = "step1.html";
-    return;
-  }
+  localStorage.setItem("interests", JSON.stringify(interests));
+  localStorage.setItem("zodiac", selectedZodiac || "none");
+  localStorage.setItem("step", "3");
 
-  // salva interessi in sessione (per results)
-  localStorage.setItem("interests", JSON.stringify(data.interests));
-
-  // REGISTRAZIONE CORRETTA
-  const res = await fetch(
-    "https://matchme-production-73a8.up.railway.app/register",
-    {
-      method: "POST",
-      headers: {"Content-Type":"application/json"},
-      body: JSON.stringify(data)
-    }
-  );
-
-  if(!res.ok){
-    alert("Errore di registrazione");
-    return;
-  }
-
-  await res.json();
-  window.location.href = "results.html";
+  location.href = "results.html";
 }
 </script>
 

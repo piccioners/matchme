@@ -3,62 +3,111 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Match Me – Crea profilo</title>
+  <title>meety – Crea profilo</title>
   <link rel="stylesheet" href="style.css">
+
   <style>
-    .wrap{max-width:420px;margin:0 auto;padding:24px}
-    h1{text-align:center;margin-bottom:8px}
-    p{text-align:center;opacity:.8;margin-bottom:28px}
-    label{display:block;margin-bottom:6px}
+    body{
+      margin:0;
+      height:100svh;
+      overflow:hidden;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:#120018;
+      color:#fff;
+      font-family:system-ui,-apple-system,BlinkMacSystemFont;
+    }
+
+    .wrap{
+      width:100%;
+      max-width:420px;
+      padding:24px;
+      text-align:center;
+    }
+
+    h1{
+      font-size:36px;
+      margin:0 0 8px 0;
+      font-weight:700;
+      letter-spacing:.2px;
+    }
+
+    p{
+      margin:0 0 40px 0;
+      opacity:.7;
+      font-size:18px;
+    }
+
+    label{
+      display:block;
+      text-align:left;
+      font-size:14px;
+      opacity:.85;
+      margin:0 0 6px 0;
+    }
+
     input, select{
       width:100%;
-      padding:14px;
-      border-radius:12px;
+      padding:16px;
+      border-radius:14px;
       border:1px solid #3a2248;
       background:#1b0022;
       color:#fff;
       font-size:16px;
-      margin-bottom:18px;
+      margin:0 0 22px 0;
+      outline:none;
+      -webkit-appearance:none;
+      appearance:none;
     }
+
+    input::placeholder{
+      opacity:.5;
+    }
+
+    .note{
+      font-size:12px;
+      opacity:.55;
+      margin-top:-14px;
+      margin-bottom:24px;
+      text-align:left;
+    }
+
     button{
       width:100%;
-      padding:16px;
+      padding:18px;
       border-radius:999px;
       border:none;
       background:#ff2f92;
       color:#fff;
-      font-size:18px;
+      font-size:20px;
       font-weight:600;
       cursor:pointer;
     }
-    button:active{transform:scale(.98)}
-    .note{
-      font-size:13px;
-      opacity:.6;
-      margin-top:-10px;
-      margin-bottom:18px;
+
+    button:active{
+      transform:scale(.97);
     }
   </style>
 </head>
+
 <body>
 
-<div class="wrap">
+  <div class="wrap">
+    <h1>meety</h1>
+    <p>Crea il tuo profilo per stasera</p>
 
-  <h1>Match Me</h1>
-  <p>Crea il tuo profilo per stasera</p>
+    <label for="table">Il tuo tavolo *</label>
+    <select id="table">
+      <option value="">Seleziona tavolo</option>
+    </select>
 
-  <label for="table">Il tuo tavolo *</label>
-  <select id="table">
-    <option value="">Seleziona tavolo</option>
-  </select>
+    <label for="name">Il tuo nome *</label>
+    <input id="name" placeholder="Come vuoi apparire">
+    <div class="note">Nomi offensivi verranno eliminati.</div>
 
-  <label for="name">Il tuo nome *</label>
-  <input id="name" placeholder="Come vuoi apparire">
-  <div class="note">Nomi offensivi verranno eliminati.</div>
-
-  <button onclick="go()">Avanti</button>
-
-</div>
+    <button onclick="go()">Avanti</button>
+  </div>
 
 <script>
 /* ========= CONFIG EVENTO ========= */

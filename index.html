@@ -1,19 +1,9 @@
 <!doctype html>
 <html lang="it">
 <head>
-  <link rel="icon" href="favicon.ico">
-  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
-  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-  <meta name="application-name" content="meety | Gaeta">
-  <meta name="apple-mobile-web-app-title" content="meety | Gaeta">
-  <meta property="og:title" content="meety | Gaeta">
-  <meta property="og:description" content="Con chi matcherai stasera?">
-  <meta property="og:image" content="https://meety-app.it/preview.png">
-  <meta property="og:type" content="website">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>meety | Gaeta </title>
+  <title>meety · Entra nella serata</title>
   <link rel="stylesheet" href="style.css">
 
   <style>
@@ -37,44 +27,90 @@
     .logo-img{
       width:220px;
       max-width:80%;
-      margin-bottom:16px;
+      margin-bottom:18px;
+    }
+    .title{
+      font-size:28px;
+      font-weight:700;
+      margin:0 0 10px 0;
+      letter-spacing:.2px;
     }
     .subtitle{
       opacity:.7;
-      font-size:18px;
-      margin-bottom:48px;
+      font-size:16px;
+      margin:0 0 36px 0;
+      line-height:1.35;
     }
-    .cta{
+    .btn{
       width:100%;
       padding:18px;
       border-radius:999px;
+      font-size:20px;
+      font-weight:700;
+      cursor:pointer;
+      transition:transform .05s ease;
+    }
+    .btn:active{
+      transform:scale(.97);
+    }
+    .btn-primary{
       border:none;
       background:#ff2f92;
       color:#fff;
-      font-size:20px;
-      font-weight:600;
-      cursor:pointer;
+      margin-bottom:14px;
     }
-    .cta:active{
-      transform:scale(.97);
+    .btn-outline{
+      background:transparent;
+      border:2px solid #ff2f92;
+      color:#ff2f92;
+    }
+    .tiny{
+      margin-top:18px;
+      font-size:12px;
+      opacity:.45;
     }
   </style>
 
   <script>
     // ID serata (cambialo SOLO a inizio evento)
     localStorage.setItem("event_id", "GAETA_2026_06_15");
+
+    // Se l'utente è già nel flusso, non deve rivedere "Nuovo utente"
+    // (stessa logica che usi negli step)
+    const currentStep = localStorage.getItem("step");
+    if(currentStep){
+      if(currentStep === "results"){
+        window.location.href = "results.html";
+      } else if(currentStep !== "0"){
+        // step "1", "2", "3", ecc.
+        window.location.href = "step" + currentStep + ".html";
+      }
+    }
   </script>
 </head>
+
 <body>
 
-<div class="wrap">
-  <img src="logo.png" alt="meety" class="logo-img">
-  <p class="subtitle">mettiti in gioco</p>
+  <div class="wrap">
+    <img src="logo.png" alt="meety" class="logo-img">
 
-  <button class="cta" onclick="location.href='step1.html'">
-    Inizia
-  </button>
-</div>
+    <h1 class="title">Entra nella serata</h1>
+    <p class="subtitle">
+      Crea il tuo profilo e scopri con chi combaci di più.
+    </p>
+
+    <button class="btn btn-primary" onclick="location.href='step1.html'">
+      Nuovo utente
+    </button>
+
+    <button class="btn btn-outline" onclick="location.href='come-si-gioca.html'">
+      Come funziona
+    </button>
+
+    <div class="tiny">
+      meety è pensato per essere usato durante l’evento.
+    </div>
+  </div>
 
 </body>
 </html>

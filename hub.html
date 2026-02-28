@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>meety · Home serata</title>
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    :root{
+      --bg1:#120018;
+      --bg2:#0b0012;
+      --pink:#ff2f92;
+      --violet:#7c3aed;
+      --ink:#ffffff;
+      --panel: rgba(27,0,34,.35);
+      --stroke: rgba(255,47,146,.35);
+    }
+
+    body{
+      margin:0;
+      height:100svh;
+      overflow:hidden;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:var(--ink);
+      font-family:system-ui,-apple-system,BlinkMacSystemFont;
+      background: radial-gradient(1200px 800px at 20% 10%, rgba(124,58,237,.22), transparent 55%),
+                  radial-gradient(900px 700px at 80% 20%, rgba(255,47,146,.18), transparent 55%),
+                  linear-gradient(180deg, var(--bg1), var(--bg2));
+    }
+
+    body::before{
+      content:"";
+      position:fixed;
+      inset:-20%;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(255,255,255,.06), transparent 45%),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.18'/%3E%3C/svg%3E");
+      mix-blend-mode:overlay;
+      opacity:.18;
+      pointer-events:none;
+      transform:rotate(6deg);
+    }
+
+    .wrap{
+      width:100%;
+      max-width:420px;
+      padding:24px;
+      text-align:center;
+      position:relative;
+    }
+
+    .top{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      margin-bottom:18px;
+    }
+
+    .logo-mini{
+      width:120px;
+      max-width:46vw;
+      display:block;
+      filter: drop-shadow(0 14px 34px rgba(255,47,146,.18));
+    }
+
+    .hello{
+      margin: 8px 0 6px 0;
+      font-size:20px;
+      font-weight:800;
+      letter-spacing:.2px;
+    }
+
+    .sub{
+      margin: 0 0 22px 0;
+      opacity:.78;
+      font-size:14px;
+      line-height:1.35;
+    }
+
+    .card{
+      text-align:left;
+      background: var(--panel);
+      border: 1px solid var(--stroke);
+      border-radius:18px;
+      padding:14px;
+      backdrop-filter: blur(10px);
+      margin-bottom:16px;
+    }
+
+    .who{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+
+    .who .name{
+      font-weight:800;
+      font-size:16px;
+      margin:0;
+    }
+
+    .who .meta{
+      opacity:.7;
+      font-size:12px;
+      margin:4px 0 0 0;
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:10px 12px;
+      border-radius:999px;
+      background: rgba(255,47,146,.10);
+      border: 1px solid rgba(255,47,146,.25);
+      font-size:13px;
+      font-weight:700;
+      white-space:nowrap;
+    }
+
+    .btn{
+      width:100%;
+      padding:18px;
+      border-radius:999px;
+      font-size:18px;
+      font-weight:800;
+      cursor:pointer;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+      transition: transform .05s ease, box-shadow .15s ease, background .15s ease;
+    }
+    .btn:active{ transform:scale(.97); }
+
+    .btn-primary{
+      border:none;
+      color:#fff;
+      background: linear-gradient(135deg, rgba(255,47,146,1), rgba(124,58,237,.95));
+      box-shadow: 0 18px 50px rgba(255,47,146,.18);
+      margin-bottom:12px;
+    }
+
+    .btn-secondary{
+      background: rgba(27,0,34,.35);
+      border: 1.5px solid rgba(255,47,146,.45);
+      color: rgba(255,255,255,.92);
+      backdrop-filter: blur(8px);
+      margin-bottom:12px;
+    }
+
+    .btn-ghost{
+      background: transparent;
+      border: 1px solid rgba(255,255,255,.14);
+      color: rgba(255,255,255,.82);
+    }
+
+    .tiny{
+      margin-top:14px;
+      font-size:12px;
+      opacity:.5;
+    }
+
+    .danger{
+      margin-top:10px;
+      font-size:12px;
+      opacity:.45;
+      text-decoration:underline;
+      cursor:pointer;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="top">
+      <img src="logo.png" alt="meety" class="logo-mini">
+    </div>
+
+    <div class="card">
+      <div class="who">
+        <div>
+          <p class="name" id="helloName">Il tuo profilo</p>
+          <p class="meta" id="helloMeta">Serata in corso</p>
+        </div>
+        <div class="pill" id="tablePill">Tavolo —</div>
+      </div>
+    </div>
+
+    <p class="hello">Cosa vuoi fare adesso?</p>
+    <p class="sub">Puoi rispondere alle domande per migliorare i match oppure vedere il tuo profilo.</p>
+
+    <button class="btn btn-primary" onclick="location.href='domande.html'">
+      Rispondi alle domande
+    </button>
+
+    <button class="btn btn-secondary" onclick="location.href='profilo.html'">
+      Il tuo profilo
+    </button>
+
+    <button class="btn btn-ghost" onclick="location.href='come-si-gioca.html'">
+      Come funziona
+    </button>
+
+    <div class="tiny">meety è pensato per essere usato durante l’evento.</div>
+    <div class="danger" onclick="resetProfile()">Reset profilo (solo se necessario)</div>
+  </div>
+
+  <script>
+    // Guardrail: se non hai completato il profilo, non puoi stare qui
+    const profileComplete = localStorage.getItem("profile_complete");
+    if(profileComplete !== "true"){
+      window.location.href = "step1.html";
+    }
+
+    // UI: mostra nome e tavolo se disponibili
+    const name = (localStorage.getItem("name") || "").trim();
+    const table = (localStorage.getItem("table") || "").trim();
+    const eventId = (localStorage.getItem("event_id") || "").trim();
+
+    const helloName = document.getElementById("helloName");
+    const helloMeta = document.getElementById("helloMeta");
+    const tablePill = document.getElementById("tablePill");
+
+    if(name) helloName.textContent = "Ciao, " + name;
+    if(table) tablePill.textContent = "Tavolo " + table;
+    if(eventId) helloMeta.textContent = eventId.replaceAll("_"," ");
+
+    // Reset: utile se qualcuno ha incasinato il telefono
+    function resetProfile(){
+      const ok = confirm("Vuoi davvero resettare il profilo su questo telefono?");
+      if(!ok) return;
+
+      // tieni l'event_id, butta via il resto
+      const keepEvent = localStorage.getItem("event_id");
+      localStorage.clear();
+      if(keepEvent) localStorage.setItem("event_id", keepEvent);
+
+      window.location.href = "index.html";
+    }
+  </script>
+</body>
+</html>

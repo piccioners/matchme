@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>meety · Domande</title>
+<link rel="stylesheet" href="style.css">
+
+<style>
+:root{
+  --bg1:#120018;--bg2:#0b0012;
+  --pink:#ff2f92;--violet:#7c3aed;
+  --panel:rgba(27,0,34,.35);
+  --stroke:rgba(255,47,146,.35);
+  --ink:#fff;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;height:100svh;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--ink);
+  font-family:system-ui,-apple-system,BlinkMacSystemFont;
+  background:
+    radial-gradient(1200px 800px at 20% 10%, rgba(124,58,237,.22), transparent 55%),
+    radial-gradient(900px 700px at 80% 20%, rgba(255,47,146,.18), transparent 55%),
+    linear-gradient(180deg,var(--bg1),var(--bg2));
+  padding:20px;
+}
+
+.page{
+  width:100%;max-width:420px;
+  animation:var(--anim,none) 260ms cubic-bezier(.2,.8,.2,1) both;
+}
+@keyframes inRight{from{transform:translateX(24px);opacity:0}to{transform:none;opacity:1}}
+@keyframes inLeft{from{transform:translateX(-24px);opacity:0}to{transform:none;opacity:1}}
+
+.top{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:12px;margin-bottom:14px
+}
+.logo-mini{
+  width:92px;max-width:44vw;
+  filter: drop-shadow(0 14px 34px rgba(255,47,146,.18));
+}
+.step-pill{
+  font-size:12px;opacity:.75;padding:8px 10px;border-radius:999px;
+  background:rgba(27,0,34,.35);
+  border:1px solid rgba(255,255,255,.12)
+}
+
+.card{
+  background:var(--panel);
+  border:1px solid var(--stroke);
+  border-radius:18px;
+  padding:18px;
+  backdrop-filter:blur(10px);
+}
+
+h1{margin:0 0 10px 0;font-size:20px;font-weight:900}
+.question{
+  font-size:16px;
+  line-height:1.4;
+  margin-bottom:18px;
+  font-weight:600;
+}
+
+.scale{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+}
+
+.dot{
+  width:18px;height:18px;border-radius:999px;
+  border:2px solid rgba(255,255,255,.4);
+  cursor:pointer;
+  transition:all .15s ease;
+}
+.dot.active{
+  background:var(--pink);
+  border-color:var(--pink);
+  transform:scale(1.2);
+}
+
+.scale-labels{
+  display:flex;
+  justify-content:space-between;
+  font-size:11px;
+  opacity:.6;
+  margin-top:6px;
+}
+
+.btn{
+  width:100%;
+  padding:16px;
+  border-radius:999px;
+  font-size:16px;
+  font-weight:900;
+  cursor:pointer;
+  user-select:none;
+  margin-top:18px;
+}
+.btn-primary{
+  border:none;color:#fff;
+  background:linear-gradient(135deg,var(--pink),rgba(124,58,237,.95));
+  box-shadow:0 18px 50px rgba(255,47,146,.18);
+}
+.btn-secondary{
+  background:rgba(27,0,34,.35);
+  border:1.5px solid rgba(255,47,146,.40);
+  color:#fff;
+}
+
+.dots{
+  display:flex;
+  justify-content:center;
+  gap:6px;
+  margin-top:14px;
+}
+.small-dot{
+  width:6px;height:6px;border-radius:999px;
+  background:rgba(255,255,255,.2);
+}
+.small-dot.active{
+  background:var(--pink);
+  transform:scale(1.4);
+}
+</style>
+</head>
+
+<body>
+<div class="page">
+  <div class="top">
+    <img src="logo.png" class="logo-mini">
+    <div class="step-pill" id="stepCounter">1/10</div>
+  </div>
+
+  <div class="card">
+    <h1>Match mindset</h1>
+    <div class="question" id="questionText"></div>
+
+    <div class="scale" id="scale"></div>
+
+    <div class="scale-labels">
+      <span>Disaccordo</span>
+      <span>Accordo</span>
+    </div>
+
+    <button class="btn btn-secondary" onclick="prev()">Indietro</button>
+    <button class="btn btn-primary" onclick="next()">Avanti</button>
+  </div>
+
+  <div class="dots" id="progressDots"></div>
+</div>
+
+<script>
+
+// Guardrail: profilo non completo -> hub
+if(localStorage.getItem("profile_complete") !== "true"){
+  location.href = "hub.html";
+}
+
+const QUESTIONS = [
+  "Mi piace conoscere persone molto diverse da me.",
+  "Credo che l'attrazione mentale sia più importante di quella fisica.",
+  "Mi annoio facilmente nelle conversazioni superficiali.",
+  "Mi piace prendere l'iniziativa.",
+  "Cerco qualcuno con ambizione.",
+  "Mi piace stare al centro dell'attenzione.",
+  "Preferisco relazioni stabili rispetto a qualcosa di casuale.",
+  "Mi affido molto all'intuito.",
+  "Mi piace mettermi in gioco.",
+  "Per me il divertimento viene prima di tutto."
+];
+
+let current = 1;
+
+const qText = document.getElementById("questionText");
+const scale = document.getElementById("scale");
+const stepCounter = document.getElementById("stepCounter");
+const progressDots = document.getElementById("progressDots");
+
+QUESTIONS.forEach((_,i)=>{
+  const d=document.createElement("div");
+  d.className="small-dot";
+  progressDots.appendChild(d);
+});
+
+function render(){
+  qText.textContent = QUESTIONS[current-1];
+  stepCounter.textContent = current + "/10";
+
+  scale.innerHTML="";
+  for(let i=1;i<=5;i++){
+    const dot=document.createElement("div");
+    dot.className="dot";
+    if(parseInt(localStorage.getItem("q"+current))===i){
+      dot.classList.add("active");
+    }
+    dot.onclick=()=>{
+      localStorage.setItem("q"+current,i);
+      render();
+    };
+    scale.appendChild(dot);
+  }
+
+  document.querySelectorAll(".small-dot").forEach((d,i)=>{
+    d.classList.toggle("active", i===current-1);
+  });
+}
+
+function next(){
+  if(!localStorage.getItem("q"+current)){
+    alert("Seleziona una risposta");
+    return;
+  }
+  if(current<10){
+    current++;
+    render();
+  }else{
+    location.href="results.html";
+  }
+}
+
+function prev(){
+  if(current>1){
+    current--;
+    render();
+  }
+}
+
+render();
+
+</script>
+</body>
+</html>

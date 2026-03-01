@@ -2,47 +2,117 @@
 <html lang="it">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Match Me – Step 2</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>meety · Profilo (2/4)</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    :root{--bg1:#120018;--bg2:#0b0012;--pink:#ff2f92;--panel:rgba(27,0,34,.35);--stroke:rgba(255,47,146,.35);--ink:#fff}
+    *{box-sizing:border-box}
+    body{margin:0;height:100svh;overflow:hidden;display:flex;align-items:center;justify-content:center;color:var(--ink);
+      font-family:system-ui,-apple-system,BlinkMacSystemFont;
+      background: radial-gradient(1200px 800px at 20% 10%, rgba(124,58,237,.22), transparent 55%),
+                  radial-gradient(900px 700px at 80% 20%, rgba(255,47,146,.18), transparent 55%),
+                  linear-gradient(180deg,var(--bg1),var(--bg2));
+      padding:20px;}
+    .page{width:100%;max-width:420px;animation:var(--anim,none) 260ms cubic-bezier(.2,.8,.2,1) both;}
+    @keyframes inRight{from{transform:translateX(24px);opacity:0}to{transform:none;opacity:1}}
+    @keyframes inLeft{from{transform:translateX(-24px);opacity:0}to{transform:none;opacity:1}}
+    .top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+    .logo-mini{width:92px;max-width:44vw;filter:drop-shadow(0 14px 34px rgba(255,47,146,.18))}
+    .step-pill{font-size:12px;opacity:.75;padding:8px 10px;border-radius:999px;background:rgba(27,0,34,.35);border:1px solid rgba(255,255,255,.12)}
+    .card{background:var(--panel);border:1px solid var(--stroke);border-radius:18px;padding:16px;backdrop-filter:blur(10px)}
+    h1{margin:0 0 6px;font-size:22px;font-weight:900}
+    .sub{margin:0 0 14px;opacity:.78;font-size:14px;line-height:1.35}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+    .pill{padding:14px 12px;border-radius:14px;border:1px solid rgba(255,255,255,.12);background:rgba(27,0,34,.45);
+      color:rgba(255,255,255,.92);font-size:14px;font-weight:800;text-align:center;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;
+      white-space:normal;word-break:break-word;line-height:1.15}
+    .pill.active{border-color:rgba(255,47,146,.75);background:rgba(255,47,146,.14);box-shadow:0 12px 30px rgba(255,47,146,.12)}
+    .btn{width:100%;padding:16px;border-radius:999px;font-size:16px;font-weight:900;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;margin-top:12px}
+    .btn-primary{border:none;color:#fff;background:linear-gradient(135deg,var(--pink),rgba(124,58,237,.95));box-shadow:0 18px 50px rgba(255,47,146,.18)}
+    .btn-secondary{background:rgba(27,0,34,.35);border:1.5px solid rgba(255,47,146,.40);color:rgba(255,255,255,.92)}
+    .dots{display:flex;justify-content:center;gap:8px;margin-top:14px}
+    .dot{width:8px;height:8px;border-radius:999px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.10)}
+    .dot.active{background:rgba(255,47,146,.85);transform:scale(1.25)}
+    @media(max-width:360px){.grid{grid-template-columns:1fr}}
+  </style>
 </head>
 <body>
+  <div class="page">
+    <div class="top">
+      <img src="logo.png" class="logo-mini" alt="meety">
+      <div class="step-pill">Step 2/4</div>
+    </div>
 
-  <h1>Preferenze</h1>
+    <div class="card">
+      <h1>Preferenze</h1>
+      <p class="sub">Scegli in modo semplice.</p>
 
-  <label>Io sono</label><br>
-  <select id="gender">
-    <option value="">Seleziona</option>
-    <option value="uomo">Uomo</option>
-    <option value="donna">Donna</option>
-  </select><br><br>
+      <div style="opacity:.85;font-size:13px;margin-top:6px">Io sono *</div>
+      <div class="grid" id="me">
+        <div class="pill" data-v="Uomo">Uomo</div>
+        <div class="pill" data-v="Donna">Donna</div>
+        <div class="pill" data-v="Altro">Altro</div>
+        <div class="pill" data-v="Preferisco non dirlo">Preferisco non dirlo</div>
+      </div>
 
-  <label>Mi piacciono</label><br>
-  <select id="like">
-    <option value="">Seleziona</option>
-    <option value="uomo">Uomo</option>
-    <option value="donna">Donna</option>
-    <option value="entrambi">Entrambi</option>
-  </select><br><br>
+      <div style="opacity:.85;font-size:13px;margin-top:16px">Cerco *</div>
+      <div class="grid" id="seek">
+        <div class="pill" data-v="Uomo">Uomo</div>
+        <div class="pill" data-v="Donna">Donna</div>
+        <div class="pill" data-v="Tutti">Tutti</div>
+        <div class="pill" data-v="Indifferente">Indifferente</div>
+      </div>
 
-  <button onclick="go()">Continua</button>
+      <button class="btn btn-secondary" onclick="back()">Indietro</button>
+      <button class="btn btn-primary" onclick="next()">Avanti</button>
+    </div>
+
+    <div class="dots">
+      <div class="dot"></div><div class="dot active"></div><div class="dot"></div><div class="dot"></div>
+    </div>
+  </div>
 
 <script>
-function go(){
-  const gender = document.getElementById("gender").value;
-  const like = document.getElementById("like").value;
+  const dir=sessionStorage.getItem("nav_dir");
+  if(dir==="prev") document.documentElement.style.setProperty("--anim","inLeft");
+  if(dir==="next") document.documentElement.style.setProperty("--anim","inRight");
+  sessionStorage.removeItem("nav_dir");
 
-  if(!gender || !like){
-    alert("Seleziona tutto");
-    return;
+  // guardrail: se step1 non completato, torna lì
+  if(!localStorage.getItem("name") || !localStorage.getItem("table")) location.href="step1.html";
+
+  function pick(containerId, key){
+    const box=document.getElementById(containerId);
+    box.querySelectorAll(".pill").forEach(p=>{
+      p.addEventListener("click",()=>{
+        box.querySelectorAll(".pill").forEach(x=>x.classList.remove("active"));
+        p.classList.add("active");
+        localStorage.setItem(key,p.dataset.v);
+      });
+    });
+    const saved=localStorage.getItem(key);
+    if(saved){
+      box.querySelectorAll(".pill").forEach(p=>p.classList.toggle("active", p.dataset.v===saved));
+    }
   }
+  pick("me","gender_me");
+  pick("seek","gender_seek");
 
-  localStorage.setItem("gender", gender);
-  localStorage.setItem("like", like);
-
-  window.location.href = "step3.html";
-}
+  function back(){
+    localStorage.setItem("profile_step","1");
+    sessionStorage.setItem("nav_dir","prev");
+    location.href="step1.html";
+  }
+  function next(){
+    if(!localStorage.getItem("gender_me") || !localStorage.getItem("gender_seek")){
+      alert("Seleziona entrambe le opzioni");
+      return;
+    }
+    localStorage.setItem("profile_step","3");
+    sessionStorage.setItem("nav_dir","next");
+    location.href="step3.html";
+  }
 </script>
-
 </body>
 </html>

@@ -1,157 +1,214 @@
+import os
+import uuid
+import json
+from datetime import datetime, timezone
+
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from db import get_conn, init_db
-import json
+import psycopg2
+import psycopg2.extras
+
+APP_NAME = "meety-api"
+
+def now_utc():
+    return datetime.now(timezone.utc)
+
+def get_db():
+    db_url = os.environ.get("DATABASE_URL")
+    if not db_url:
+        raise RuntimeError("DATABASE_URL missing (Railway Postgres not connected).")
+    return psycopg2.connect(db_url)
+
+def init_db():
+    conn = get_db()
+    try:
+        with conn, conn.cursor() as cur:
+            cur.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+              id UUID PRIMARY KEY,
+              event_id TEXT NOT NULL,
+              session_token TEXT UNIQUE NOT NULL,
+              created_at TIMESTAMPTZ NOT NULL,
+
+              name TEXT NOT NULL,
+              table_no TEXT NOT NULL,
+
+              gender_me TEXT,
+              gender_seek TEXT,
+              status TEXT,
+              purpose TEXT,
+              zodiac TEXT,
+              drink TEXT,
+              music TEXT,
+
+              answers JSONB
+            );
+            """)
+            cur.execute("CREATE INDEX IF NOT EXISTS idx_users_event_id ON users(event_id);")
+            cur.execute("CREATE INDEX IF NOT EXISTS idx_users_session_token ON users(session_token);")
+    finally:
+        conn.close()
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 
-# ---------- LOGICA MATCH ----------
+@app.get("/api/health")
+def health():
+    return jsonify({"ok": True, "name": APP_NAME})
 
-def is_compatible(me, other):
-    # niente se stesso
-    if str(me["name"]) == str(other["name"]) and str(me["table"]) == str(other["table"]):
-        return False
+def auth_user():
+    token = request.headers.get("Authorization", "").replace("Bearer ", "").strip()
+    if not token:
+        return None, jsonify({"error": "missing_token"}), 401
 
-    i_ok = (me["looking_for"] == "entrambi") or (other["gender"] == me["looking_for"])
-    o_ok = (other["looking_for"] == "entrambi") or (me["gender"] == other["looking_for"])
+    conn = get_db()
+    try:
+        with conn, conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            cur.execute("SELECT * FROM users WHERE session_token=%s", (token,))
+            row = cur.fetchone()
+            if not row:
+                return None, jsonify({"error": "invalid_token"}), 401
+            return row, None, None
+    finally:
+        conn.close()
 
-    return i_ok and o_ok
-
-def interest_score(me, other):
-    keys = ["musica","sport","viaggi","cinema","tech","nightlife"]
-    diffs = []
-    for k in keys:
-        a = int(me["interests"][k])
-        b = int(other["interests"][k])
-        diffs.append(abs(a - b))
-    avg = sum(diffs) / len(diffs)
-    score = round((1 - (avg / 4)) * 100)
-    return max(0, min(100, score))
-
-# ---------- ROUTES ----------
-
-@app.route("/")
-def home():
-    return "Backend Match Me attivo"
-
-@app.route("/register", methods=["POST"])
+@app.post("/api/register")
 def register():
-    data = request.json
-    event_id = data.get("event_id") or "DEFAULT"
+    data = request.get_json(force=True, silent=True) or {}
 
-    with get_conn() as conn:
-        with conn.cursor() as cur:
-            cur.execute(
-                """
-                INSERT INTO users
-                (event_id, name, table_number, gender, looking_for, interests_json)
-                VALUES (%s, %s, %s, %s, %s, %s)
-                """,
-                (
-                    event_id,
-                    data["name"],
-                    data["table"],
-                    data["gender"],
-                    data["looking_for"],
-                    json.dumps(data["interests"])
-                )
-            )
-        conn.commit()
+    event_id = (data.get("event_id") or "").strip()
+    name = (data.get("name") or "").strip()
+    table_no = str((data.get("table") or "")).strip()
 
-    return jsonify({"status": "ok"})
+    # Optional profile fields
+    gender_me = (data.get("gender_me") or "").strip() or None
+    gender_seek = (data.get("gender_seek") or "").strip() or None
+    status = (data.get("status") or "").strip() or None
+    purpose = (data.get("purpose") or "").strip() or None
+    zodiac = (data.get("zodiac") or "").strip() or None
+    drink = (data.get("drink") or "").strip() or None
+    music = (data.get("music") or "").strip() or None
 
-@app.route("/users")
-def users():
-    event_id = request.args.get("event_id") or "DEFAULT"
+    if not event_id or not name or not table_no:
+        return jsonify({"error": "missing_fields"}), 400
 
-    with get_conn() as conn:
-        with conn.cursor() as cur:
-            cur.execute(
-                """
-                SELECT name, table_number, gender, looking_for, interests_json
-                FROM users
-                WHERE event_id = %s
-                """,
-                (event_id,)
-            )
-            rows = cur.fetchall()
+    user_id = uuid.uuid4()
+    session_token = uuid.uuid4().hex + uuid.uuid4().hex  # long random-ish
 
-    out = []
-    for r in rows:
-        out.append({
-            "name": r["name"],
-            "table": r["table_number"],
-            "gender": r["gender"],
-            "looking_for": r["looking_for"],
-            "interests": json.loads(r["interests_json"])
+    conn = get_db()
+    try:
+        with conn, conn.cursor() as cur:
+            cur.execute("""
+              INSERT INTO users(
+                id, event_id, session_token, created_at,
+                name, table_no,
+                gender_me, gender_seek, status, purpose, zodiac, drink, music,
+                answers
+              )
+              VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+            """, (
+                str(user_id), event_id, session_token, now_utc(),
+                name, table_no,
+                gender_me, gender_seek, status, purpose, zodiac, drink, music,
+                None
+            ))
+
+        return jsonify({
+            "ok": True,
+            "session_token": session_token,
+            "user_id": str(user_id),
+            "event_id": event_id
         })
+    finally:
+        conn.close()
 
-    return jsonify(out)
+@app.get("/api/me")
+def me():
+    user, err, code = auth_user()
+    if err:
+        return err, code
 
-@app.route("/matches", methods=["POST"])
-def matches():
-    me = request.json
-    event_id = me.get("event_id") or "DEFAULT"
-
-    with get_conn() as conn:
-        with conn.cursor() as cur:
-            cur.execute(
-                """
-                SELECT name, table_number, gender, looking_for, interests_json
-                FROM users
-                WHERE event_id = %s
-                """,
-                (event_id,)
-            )
-            rows = cur.fetchall()
-
-    candidates = []
-
-    for r in rows:
-        other = {
-            "name": r["name"],
-            "table": r["table_number"],
-            "gender": r["gender"],
-            "looking_for": r["looking_for"],
-            "interests": json.loads(r["interests_json"])
-        }
-
-        if not is_compatible(me, other):
-            continue
-
-        candidates.append({
-            "name": other["name"],
-            "table": other["table"],
-            "gender": other["gender"],
-            "score": interest_score(me, other)
-        })
-
-    candidates.sort(key=lambda x: x["score"], reverse=True)
-
+    # Return safe subset
     return jsonify({
-        "status": "ok",
-        "matches": candidates[:5]
+        "ok": True,
+        "event_id": user["event_id"],
+        "name": user["name"],
+        "table": user["table_no"],
+        "profile": {
+            "gender_me": user["gender_me"],
+            "gender_seek": user["gender_seek"],
+            "status": user["status"],
+            "purpose": user["purpose"],
+            "zodiac": user["zodiac"],
+            "drink": user["drink"],
+            "music": user["music"],
+        },
+        "has_answers": user["answers"] is not None
     })
 
-@app.route("/reset", methods=["POST"])
-def reset():
-    data = request.json or {}
-    event_id = data.get("event_id") or "DEFAULT"
+@app.post("/api/answers")
+def save_answers():
+    user, err, code = auth_user()
+    if err:
+        return err, code
 
-    with get_conn() as conn:
-        with conn.cursor() as cur:
-            cur.execute(
-                "DELETE FROM users WHERE event_id = %s",
-                (event_id,)
-            )
-        conn.commit()
+    data = request.get_json(force=True, silent=True) or {}
+    answers = data.get("answers")
 
-    return jsonify({"status": "ok", "reset": event_id})
+    if not isinstance(answers, list) or len(answers) != 10:
+        return jsonify({"error": "answers_must_be_list_of_10"}), 400
+    if any((not isinstance(x, int) or x < 1 or x > 5) for x in answers):
+        return jsonify({"error": "answers_values_1_to_5"}), 400
 
-# ---------- STARTUP ----------
+    conn = get_db()
+    try:
+        with conn, conn.cursor() as cur:
+            cur.execute("""
+              UPDATE users
+              SET answers=%s
+              WHERE session_token=%s
+            """, (json.dumps(answers), user["session_token"]))
+        return jsonify({"ok": True})
+    finally:
+        conn.close()
 
-init_db()
+@app.get("/api/participants")
+def participants():
+    user, err, code = auth_user()
+    if err:
+        return err, code
+
+    event_id = user["event_id"]
+
+    conn = get_db()
+    try:
+        with conn, conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            cur.execute("""
+              SELECT
+                name, table_no,
+                gender_me, gender_seek, status, purpose, zodiac, drink, music,
+                answers
+              FROM users
+              WHERE event_id=%s AND session_token<>%s AND answers IS NOT NULL
+            """, (event_id, user["session_token"]))
+            rows = cur.fetchall()
+
+        # Normalize
+        out = []
+        for r in rows:
+            out.append({
+                "name": r["name"],
+                "table": r["table_no"],
+                "zodiac": r["zodiac"] or "",
+                "drink": r["drink"] or "",
+                "music": r["music"] or "",
+                "answers": r["answers"]
+            })
+        return jsonify({"ok": True, "event_id": event_id, "participants": out})
+    finally:
+        conn.close()
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    init_db()
+    port = int(os.environ.get("PORT", "8080"))
+    app.run(host="0.0.0.0", port=port)

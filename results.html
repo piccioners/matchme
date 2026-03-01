@@ -3,79 +3,272 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Match Me – Risultati</title>
+  <title>meety · Risultati</title>
   <link rel="stylesheet" href="style.css">
+
   <style>
-    .wrap{max-width:520px;margin:0 auto;padding:20px}
-    .match{background:#151515;padding:14px;border-radius:12px;margin-bottom:12px}
-    .top{display:flex;justify-content:space-between;align-items:center}
-    .score{font-weight:bold;color:#ff3b6b}
-    .meta{opacity:.8;font-size:.9em}
-    .reset{margin-top:30px;background:#444}
+    :root{
+      --bg1:#120018;--bg2:#0b0012;
+      --pink:#ff2f92;--violet:#7c3aed;
+      --panel: rgba(27,0,34,.35);
+      --stroke: rgba(255,47,146,.35);
+      --ink:#fff;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;height:100svh;overflow:hidden;
+      display:flex;align-items:center;justify-content:center;
+      color:var(--ink);
+      font-family:system-ui,-apple-system,BlinkMacSystemFont;
+      background:
+        radial-gradient(1200px 800px at 20% 10%, rgba(124,58,237,.22), transparent 55%),
+        radial-gradient(900px 700px at 80% 20%, rgba(255,47,146,.18), transparent 55%),
+        linear-gradient(180deg,var(--bg1),var(--bg2));
+      padding:20px;
+    }
+    .wrap{width:100%;max-width:420px}
+    .top{
+      display:flex;align-items:center;justify-content:space-between;
+      gap:12px;margin-bottom:14px
+    }
+    .logo-mini{
+      width:92px;max-width:44vw;
+      filter: drop-shadow(0 14px 34px rgba(255,47,146,.18));
+      cursor:pointer;
+    }
+    .pill{
+      font-size:12px;opacity:.75;padding:8px 10px;border-radius:999px;
+      background: rgba(27,0,34,.35);
+      border:1px solid rgba(255,255,255,.12);
+      white-space:nowrap;
+    }
+    .card{
+      background:var(--panel);
+      border:1px solid var(--stroke);
+      border-radius:18px;
+      padding:16px;
+      backdrop-filter: blur(10px);
+    }
+    h1{margin:0 0 6px 0;font-size:22px;font-weight:900}
+    .sub{margin:0 0 14px 0;opacity:.78;font-size:14px;line-height:1.35}
+
+    .list{display:flex;flex-direction:column;gap:10px;margin-top:10px}
+    .match{
+      background: rgba(27,0,34,.35);
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius:16px;
+      padding:14px;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .m-left{min-width:0}
+    .m-name{font-weight:950;font-size:15px;margin:0 0 4px 0}
+    .m-meta{opacity:.7;font-size:12px;margin:0}
+    .m-right{text-align:right;display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+    .pct{
+      font-weight:950;
+      font-size:16px;
+      padding:8px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,47,146,.35);
+      background: rgba(255,47,146,.10);
+      white-space:nowrap;
+    }
+    .hint{
+      font-size:12px;
+      opacity:.65;
+      margin-top:12px;
+      line-height:1.35;
+    }
+
+    .btn{
+      width:100%;
+      padding:16px;
+      border-radius:999px;
+      font-size:16px;
+      font-weight:900;
+      cursor:pointer;
+      user-select:none;
+      -webkit-tap-highlight-color:transparent;
+      margin-top:12px;
+      transition: transform .05s ease;
+    }
+    .btn:active{transform:scale(.98)}
+    .btn-primary{
+      border:none;color:#fff;
+      background: linear-gradient(135deg, var(--pink), rgba(124,58,237,.95));
+      box-shadow:0 18px 50px rgba(255,47,146,.18);
+    }
+    .btn-secondary{
+      background: rgba(27,0,34,.35);
+      border:1.5px solid rgba(255,47,146,.40);
+      color: rgba(255,255,255,.92);
+    }
+
+    .empty{
+      text-align:center;
+      padding:8px 6px;
+    }
+    .big{
+      font-size:18px;
+      font-weight:950;
+      margin:0 0 8px 0;
+    }
+    .tiny{
+      font-size:12px;
+      opacity:.55;
+      margin-top:10px;
+      text-align:center;
+    }
   </style>
 </head>
+
 <body>
+  <div class="wrap">
+    <div class="top">
+      <img src="logo.png" class="logo-mini" alt="meety" onclick="location.href='hub.html'">
+      <div class="pill" id="eventPill">Serata</div>
+    </div>
 
-<div class="wrap">
-  <h1>I tuoi match</h1>
-  <div id="list"></div>
+    <div class="card">
+      <h1>I tuoi match</h1>
+      <p class="sub" id="subtitle">Calcolati sulle risposte alle domande.</p>
 
-  <button class="reset" id="resetBtn" onclick="resetEvent()" style="display:none;">
-  Reset serata
-</button>
+      <div id="content"></div>
+
+      <button class="btn btn-secondary" onclick="location.href='hub.html'">Torna alla Home serata</button>
+      <button class="btn btn-primary" onclick="location.href='domande.html'">Rifai le domande</button>
+
+      <div class="tiny">Quando colleghiamo il backend, qui vedrai i match reali della serata.</div>
+    </div>
+  </div>
 
 <script>
-async function load(){
-  const me = {
-    event_id: localStorage.getItem("event_id"),
-    name: localStorage.getItem("name"),
-    table: localStorage.getItem("table"),
-    gender: localStorage.getItem("gender"),
-    looking_for: localStorage.getItem("like"),
-    interests: JSON.parse(localStorage.getItem("interests") || "{}")
-  };
-
-  if(!me.name || !me.table || !me.gender || !me.looking_for || !me.interests.musica){
-    document.getElementById("list").innerHTML =
-      "<p>Dati incompleti. Riparti dallo Step 1.</p>";
-    return;
+  // Guardrail: serve profilo + risposte
+  if(localStorage.getItem("profile_complete") !== "true"){
+    location.href = "step1.html";
   }
 
-  const res = await fetch(
-    "https://matchme-production-73a8.up.railway.app/matches",
-    {
-      method: "POST",
-      headers: {"Content-Type":"application/json"},
-      body: JSON.stringify(me)
+  // Event pill
+  const eventId = (localStorage.getItem("event_id") || "").trim();
+  document.getElementById("eventPill").textContent = eventId ? eventId.replaceAll("_"," ") : "Serata";
+
+  // Leggi risposte 10 domande
+  function readAnswers(){
+    const a = [];
+    for(let i=1;i<=10;i++){
+      const v = parseInt(localStorage.getItem("q"+i) || "0", 10);
+      if(!v) return null; // non completate
+      a.push(v);
     }
-  );
-
-  const data = await res.json();
-  const list = document.getElementById("list");
-  list.innerHTML = "";
-
-  if(!data.matches || data.matches.length === 0){
-    list.innerHTML = "<p>Nessun match trovato.</p>";
-    return;
+    return a;
   }
 
-  data.matches.forEach(m => {
-    const div = document.createElement("div");
-    div.className = "match";
-    div.innerHTML = `
-      <div class="matchTop">
-        <strong>${m.name}</strong>
-        <span>${m.score}%</span>
-      </div>
-      <div class="meta">Tavolo ${m.table}</div>
-    `;
-    list.appendChild(div);
+  const myAnswers = readAnswers();
+  if(!myAnswers){
+    // non finite -> torna alle domande
+    location.href = "domande.html";
+  }
+
+  // --------------------------------------------
+  // MATCHING: per ora "local demo"
+  // In futuro: sostituire questa parte con API backend che restituisce altri utenti + loro answers.
+  // --------------------------------------------
+
+  // Compatibilità: 1-5, differenza massima 4 per domanda
+  function compatibility(a, b){
+    const n = Math.min(a.length, b.length);
+    let sumDiff = 0;
+    for(let i=0;i<n;i++) sumDiff += Math.abs(a[i]-b[i]);
+    const maxDiff = 4 * n;
+    const score = 100 - (sumDiff / maxDiff) * 100;
+    return Math.max(0, Math.min(100, score));
+  }
+
+  // Dataset locale: array di utenti (placeholder).
+  // Se non esiste, non inventiamo match finti: mostriamo "in attesa".
+  // (In debug, puoi popolarlo manualmente più avanti.)
+  const others = (() => {
+    try{
+      const raw = localStorage.getItem("event_users");
+      if(!raw) return [];
+      const arr = JSON.parse(raw);
+      if(!Array.isArray(arr)) return [];
+      return arr;
+    }catch(e){
+      return [];
+    }
+  })();
+
+  // Filtra me stesso se presente
+  const myName = (localStorage.getItem("name") || "").trim();
+  const myTable = (localStorage.getItem("table") || "").trim();
+
+  const candidates = others.filter(u => {
+    if(!u || !u.answers || !Array.isArray(u.answers)) return false;
+    // evita matchare sé stesso (best-effort)
+    if(u.name === myName && String(u.table) === String(myTable)) return false;
+    return true;
   });
-}
 
-load();
+  // Calcola top
+  const ranked = candidates.map(u => ({
+    ...u,
+    score: compatibility(myAnswers, u.answers)
+  })).sort((x,y)=> y.score - x.score).slice(0, 5);
+
+  const content = document.getElementById("content");
+
+  if(ranked.length === 0){
+    content.innerHTML = `
+      <div class="empty">
+        <p class="big">Ancora niente match</p>
+        <p class="sub" style="margin:0;opacity:.75">
+          Appena ci sono abbastanza partecipanti e risposte, qui compariranno i tuoi match.
+        </p>
+        <p class="hint">
+          Se vuoi testare in locale (debug), possiamo aggiungere una modalità “demo” che genera profili finti.
+        </p>
+      </div>
+    `;
+  }else{
+    const list = document.createElement("div");
+    list.className = "list";
+
+    ranked.forEach(u => {
+      const pct = u.score.toFixed(2) + "%";
+      const div = document.createElement("div");
+      div.className = "match";
+      div.innerHTML = `
+        <div class="m-left">
+          <p class="m-name">${escapeHtml(u.name || "Sconosciuto")}</p>
+          <p class="m-meta">Tavolo ${escapeHtml(String(u.table || "—"))}</p>
+        </div>
+        <div class="m-right">
+          <div class="pct">${pct}</div>
+          <div class="m-meta">${escapeHtml(u.zodiac || "")}</div>
+        </div>
+      `;
+      list.appendChild(div);
+    });
+
+    content.appendChild(list);
+
+    const hint = document.createElement("div");
+    hint.className = "hint";
+    hint.textContent = "Suggerimento: apri il profilo e usa un dettaglio (drink/musica/segno) per rompere il ghiaccio.";
+    content.appendChild(hint);
+  }
+
+  function escapeHtml(str){
+    return String(str)
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
 </script>
-
-
 </body>
 </html>

@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>meety · Profilo (4/4)</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    :root{--bg1:#120018;--bg2:#0b0012;--pink:#ff2f92;--panel:rgba(27,0,34,.35);--stroke:rgba(255,47,146,.35);--ink:#fff}
+    *{box-sizing:border-box}
+    body{margin:0;height:100svh;overflow:hidden;display:flex;align-items:center;justify-content:center;color:var(--ink);
+      font-family:system-ui,-apple-system,BlinkMacSystemFont;
+      background: radial-gradient(1200px 800px at 20% 10%, rgba(124,58,237,.22), transparent 55%),
+                  radial-gradient(900px 700px at 80% 20%, rgba(255,47,146,.18), transparent 55%),
+                  linear-gradient(180deg,var(--bg1),var(--bg2));
+      padding:20px;}
+    .page{width:100%;max-width:420px;animation:var(--anim,none) 260ms cubic-bezier(.2,.8,.2,1) both;}
+    @keyframes inRight{from{transform:translateX(24px);opacity:0}to{transform:none;opacity:1}}
+    @keyframes inLeft{from{transform:translateX(-24px);opacity:0}to{transform:none;opacity:1}}
+    .top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+    .logo-mini{width:92px;max-width:44vw;filter:drop-shadow(0 14px 34px rgba(255,47,146,.18))}
+    .step-pill{font-size:12px;opacity:.75;padding:8px 10px;border-radius:999px;background:rgba(27,0,34,.35);border:1px solid rgba(255,255,255,.12)}
+    .card{background:var(--panel);border:1px solid var(--stroke);border-radius:18px;padding:16px;backdrop-filter:blur(10px)}
+    h1{margin:0 0 6px;font-size:22px;font-weight:900}
+    .sub{margin:0 0 14px;opacity:.78;font-size:14px;line-height:1.35}
+    label{display:block;font-size:13px;opacity:.85;margin:14px 0 6px}
+    select{
+      width:100%; padding:16px; border-radius:14px; border:1px solid rgba(255,255,255,.12);
+      background: rgba(27,0,34,.55); color:#fff; font-size:16px; outline:none;
+      -webkit-appearance:none; appearance:none;
+    }
+    .btn{width:100%;padding:16px;border-radius:999px;font-size:16px;font-weight:900;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;margin-top:12px}
+    .btn-primary{border:none;color:#fff;background:linear-gradient(135deg,var(--pink),rgba(124,58,237,.95));box-shadow:0 18px 50px rgba(255,47,146,.18)}
+    .btn-secondary{background:rgba(27,0,34,.35);border:1.5px solid rgba(255,47,146,.40);color:rgba(255,255,255,.92)}
+    .dots{display:flex;justify-content:center;gap:8px;margin-top:14px}
+    .dot{width:8px;height:8px;border-radius:999px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.10)}
+    .dot.active{background:rgba(255,47,146,.85);transform:scale(1.25)}
+    .tiny{margin-top:10px;font-size:12px;opacity:.55;text-align:center}
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="top">
+      <img src="logo.png" class="logo-mini" alt="meety">
+      <div class="step-pill">Step 4/4</div>
+    </div>
+
+    <div class="card">
+      <h1>Vibe</h1>
+      <p class="sub">Dettagli leggeri per rompere il ghiaccio.</p>
+
+      <label for="zodiac">Segno zodiacale *</label>
+      <select id="zodiac">
+        <option value="">Seleziona segno</option>
+        <option>Ariete</option><option>Toro</option><option>Gemelli</option><option>Cancro</option>
+        <option>Leone</option><option>Vergine</option><option>Bilancia</option><option>Scorpione</option>
+        <option>Sagittario</option><option>Capricorno</option><option>Acquario</option><option>Pesci</option>
+      </select>
+
+      <label for="drink">Drink vibe *</label>
+      <select id="drink">
+        <option value="">Seleziona</option>
+        <option>Spritz / Aperitivo</option>
+        <option>Gin Tonic</option>
+        <option>Birra</option>
+        <option>Vino</option>
+        <option>Cocktail dolce</option>
+        <option>Cocktail amaro</option>
+        <option>Analcolico</option>
+        <option>Mi va tutto</option>
+      </select>
+
+      <label for="music">Genere musicale *</label>
+      <select id="music">
+        <option value="">Seleziona</option>
+        <option>Pop</option>
+        <option>Rap / Trap</option>
+        <option>House</option>
+        <option>Techno / EDM</option>
+        <option>Reggaeton</option>
+        <option>Rock</option>
+        <option>Indie</option>
+        <option>Di tutto</option>
+      </select>
+
+      <button class="btn btn-secondary" onclick="back()">Indietro</button>
+      <button class="btn btn-primary" onclick="finish()">Finisci</button>
+
+      <div class="tiny">Dopo questo vai alla Home serata.</div>
+    </div>
+
+    <div class="dots">
+      <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot active"></div>
+    </div>
+  </div>
+
+<script>
+  const dir=sessionStorage.getItem("nav_dir");
+  if(dir==="prev") document.documentElement.style.setProperty("--anim","inLeft");
+  if(dir==="next") document.documentElement.style.setProperty("--anim","inRight");
+  sessionStorage.removeItem("nav_dir");
+
+  // guardrail: se step3 non completato, torna lì
+  if(!localStorage.getItem("status") || !localStorage.getItem("purpose")) location.href="step3.html";
+
+  // restore selects
+  const restore=(id,key)=>{ const v=localStorage.getItem(key); if(v) document.getElementById(id).value=v; };
+  restore("zodiac","zodiac");
+  restore("drink","drink");
+  restore("music","music");
+
+  function back(){
+    localStorage.setItem("profile_step","3");
+    sessionStorage.setItem("nav_dir","prev");
+    location.href="step3.html";
+  }
+
+  function finish(){
+    const zodiac=document.getElementById("zodiac").value;
+    const drink=document.getElementById("drink").value;
+    const music=document.getElementById("music").value;
+
+    if(!zodiac || !drink || !music){
+      alert("Completa tutti i campi");
+      return;
+    }
+
+    localStorage.setItem("zodiac",zodiac);
+    localStorage.setItem("drink",drink);
+    localStorage.setItem("music",music);
+
+    localStorage.setItem("profile_complete","true");
+    localStorage.setItem("profile_step","4");
+
+    sessionStorage.setItem("nav_dir","next");
+    location.href="hub.html";
+  }
+</script>
+</body>
+</html>

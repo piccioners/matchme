@@ -2,264 +2,119 @@
 <html lang="it">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>meety · Profilo (1/4)</title>
   <link rel="stylesheet" href="style.css">
 
   <style>
     :root{
-      --bg1:#120018;
-      --bg2:#0b0012;
-      --pink:#ff2f92;
-      --violet:#7c3aed;
-      --ink:#ffffff;
+      --bg1:#120018; --bg2:#0b0012;
+      --pink:#ff2f92; --violet:#7c3aed;
       --panel: rgba(27,0,34,.35);
       --stroke: rgba(255,47,146,.35);
+      --ink:#fff;
     }
-
+    *{box-sizing:border-box}
     body{
-      margin:0;
-      height:100svh;
-      overflow:hidden;
-      display:flex;
-      align-items:center;
-      justify-content:center;
+      margin:0; height:100svh; overflow:hidden;
+      display:flex; align-items:center; justify-content:center;
       color:var(--ink);
       font-family:system-ui,-apple-system,BlinkMacSystemFont;
       background: radial-gradient(1200px 800px at 20% 10%, rgba(124,58,237,.22), transparent 55%),
                   radial-gradient(900px 700px at 80% 20%, rgba(255,47,146,.18), transparent 55%),
                   linear-gradient(180deg, var(--bg1), var(--bg2));
+      padding:20px;
     }
-
-    body::before{
-      content:"";
-      position:fixed;
-      inset:-20%;
-      background:
-        radial-gradient(circle at 50% 50%, rgba(255,255,255,.06), transparent 45%),
-        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.18'/%3E%3C/svg%3E");
-      mix-blend-mode:overlay;
-      opacity:.18;
-      pointer-events:none;
-      transform:rotate(6deg);
-    }
-
-    .wrap{
-      width:100%;
-      max-width:420px;
-      padding:24px;
-      position:relative;
-      text-align:left;
-    }
-
-    .top{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      margin-bottom:16px;
-    }
-
-    .logo-mini{
-      width:92px;
-      filter: drop-shadow(0 14px 34px rgba(255,47,146,.18));
-    }
-
-    .step{
-      font-size:12px;
-      opacity:.7;
-      padding:8px 10px;
-      border-radius:999px;
-      background: rgba(27,0,34,.35);
-      border: 1px solid rgba(255,255,255,.12);
-      white-space:nowrap;
-    }
-
-    .card{
-      background: var(--panel);
-      border: 1px solid var(--stroke);
-      border-radius:18px;
-      padding:16px;
-      backdrop-filter: blur(10px);
-    }
-
-    h1{
-      margin: 0 0 6px 0;
-      font-size:22px;
-      font-weight:900;
-      letter-spacing:.2px;
-    }
-
-    .sub{
-      margin:0 0 14px 0;
-      opacity:.78;
-      font-size:14px;
-      line-height:1.35;
-    }
-
-    label{
-      display:block;
-      font-size:13px;
-      opacity:.85;
-      margin: 14px 0 6px 0;
-    }
-
-    input, select{
-      width:100%;
-      padding:16px;
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(27,0,34,.55);
-      color:#fff;
-      font-size:16px;
-      outline:none;
-      -webkit-appearance:none;
-      appearance:none;
-    }
-
-    input::placeholder{ opacity:.5; }
-
-    .note{
-      font-size:12px;
-      opacity:.55;
-      margin-top:8px;
-      line-height:1.3;
-    }
-
-    .btn{
-      width:100%;
-      padding:18px;
-      border-radius:999px;
-      font-size:18px;
-      font-weight:900;
-      cursor:pointer;
-      user-select:none;
-      -webkit-tap-highlight-color: transparent;
-      transition: transform .05s ease, box-shadow .15s ease, background .15s ease;
-      margin-top:16px;
-    }
-    .btn:active{ transform:scale(.97); }
-
-    .btn-primary{
-      border:none;
-      color:#fff;
-      background: linear-gradient(135deg, rgba(255,47,146,1), rgba(124,58,237,.95));
-      box-shadow: 0 18px 50px rgba(255,47,146,.18);
-    }
-
-    .tiny{
-      margin-top:12px;
-      font-size:12px;
-      opacity:.5;
-      text-align:center;
-    }
+    .page{width:100%; max-width:420px; animation: var(--anim, none) 260ms cubic-bezier(.2,.8,.2,1) both;}
+    @keyframes inRight{from{transform:translateX(24px);opacity:.0}to{transform:none;opacity:1}}
+    @keyframes inLeft {from{transform:translateX(-24px);opacity:.0}to{transform:none;opacity:1}}
+    .top{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:14px}
+    .logo-mini{width:92px; max-width:44vw; filter: drop-shadow(0 14px 34px rgba(255,47,146,.18));}
+    .step-pill{font-size:12px; opacity:.75; padding:8px 10px; border-radius:999px;
+      background: rgba(27,0,34,.35); border:1px solid rgba(255,255,255,.12)}
+    .card{background:var(--panel); border:1px solid var(--stroke); border-radius:18px; padding:16px; backdrop-filter: blur(10px);}
+    h1{margin:0 0 6px 0; font-size:22px; font-weight:900}
+    .sub{margin:0 0 14px 0; opacity:.78; font-size:14px; line-height:1.35}
+    label{display:block; font-size:13px; opacity:.85; margin:14px 0 6px}
+    input,select{width:100%; padding:16px; border-radius:14px; border:1px solid rgba(255,255,255,.12);
+      background: rgba(27,0,34,.55); color:#fff; font-size:16px; outline:none; -webkit-appearance:none; appearance:none;}
+    input::placeholder{opacity:.5}
+    .note{font-size:12px; opacity:.55; margin-top:8px}
+    .btn{width:100%; padding:16px; border-radius:999px; font-size:16px; font-weight:900;
+      cursor:pointer; user-select:none; -webkit-tap-highlight-color:transparent; margin-top:16px;}
+    .btn-primary{border:none; color:#fff; background: linear-gradient(135deg, var(--pink), rgba(124,58,237,.95));
+      box-shadow:0 18px 50px rgba(255,47,146,.18);}
+    .link{margin-top:10px; text-align:center; font-size:12px; opacity:.6; text-decoration:underline; cursor:pointer}
+    .dots{display:flex; justify-content:center; gap:8px; margin-top:14px}
+    .dot{width:8px; height:8px; border-radius:999px; background: rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.10)}
+    .dot.active{background: rgba(255,47,146,.85); transform: scale(1.25)}
   </style>
 </head>
 
 <body>
-
-  <div class="wrap">
+  <div class="page" id="page">
     <div class="top">
-      <img src="logo.png" alt="meety" class="logo-mini">
-      <div class="step">Step 1/4</div>
+      <img src="logo.png" class="logo-mini" alt="meety">
+      <div class="step-pill">Step 1/4</div>
     </div>
 
     <div class="card">
       <h1>Partiamo dalle basi</h1>
-      <p class="sub">Inserisci tavolo e nome. Poi completiamo il profilo in 3 step veloci.</p>
+      <p class="sub">Nome e tavolo. Poi il resto è veloce.</p>
 
       <label for="table">Il tuo tavolo *</label>
-      <select id="table">
-        <option value="">Seleziona tavolo</option>
-      </select>
+      <select id="table"><option value="">Seleziona tavolo</option></select>
 
       <label for="name">Il tuo nome *</label>
       <input id="name" placeholder="Come vuoi apparire">
 
       <div class="note">Nomi offensivi verranno eliminati.</div>
 
-      <button class="btn btn-primary" onclick="go()">Avanti</button>
-      <div class="tiny">Niente panico: potrai sempre rivedere il profilo.</div>
+      <button class="btn btn-primary" onclick="next()">Avanti</button>
+      <div class="link" onclick="location.href='index.html'">Torna alla home</div>
+    </div>
+
+    <div class="dots">
+      <div class="dot active"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
     </div>
   </div>
 
 <script>
-/* ========= CONFIG EVENTO ========= */
+  // animazione in base alla direzione
+  const dir = sessionStorage.getItem("nav_dir");
+  if(dir === "prev") document.documentElement.style.setProperty("--anim","inLeft");
+  if(dir === "next") document.documentElement.style.setProperty("--anim","inRight");
+  sessionStorage.removeItem("nav_dir");
 
-const TAVOLI = [
-  1,2,3,4,5,6,7,8,9,10,
-  20,21,22,23,
-  60,61,62,63,64,65
-];
+  // se già completo -> hub
+  if(localStorage.getItem("profile_complete")==="true"){ location.href="hub.html"; }
 
-// parole vietate COME PAROLE, non sottostringhe
-const BANNED = [
-  "cazzo",
-  "merda",
-  "dio",
-  "porco",
-  "puttana",
-  "stronzo"
-];
+  const TAVOLI=[1,2,3,4,5,6,7,8,9,10,20,21,22,23,60,61,62,63,64,65];
+  const BANNED=["cazzo","merda","dio","porco","puttana","stronzo"];
 
-/* ========= GUARDRAILS ========= */
+  const tableSelect=document.getElementById("table");
+  TAVOLI.forEach(t=>{ const o=document.createElement("option"); o.value=t; o.textContent="Tavolo "+t; tableSelect.appendChild(o); });
 
-// se profilo già completo, vai all'hub
-if(localStorage.getItem("profile_complete") === "true"){
-  window.location.href = "hub.html";
-}
+  if(localStorage.getItem("table")) tableSelect.value=localStorage.getItem("table");
+  if(localStorage.getItem("name")) document.getElementById("name").value=localStorage.getItem("name");
 
-// se l'utente era già a uno step successivo, riportalo lì
-const profileStep = parseInt(localStorage.getItem("profile_step") || "1", 10);
-if(profileStep > 1){
-  window.location.href = "step" + profileStep + ".html";
-}
+  function next(){
+    const name=document.getElementById("name").value.trim();
+    const table=document.getElementById("table").value;
+    if(!name||!table){ alert("Compila tutti i campi"); return; }
 
-/* ========= INIT ========= */
+    const words=name.toLowerCase().split(/\s+/);
+    for(const w of BANNED){ if(words.includes(w)){ alert("Scegli un nome diverso"); return; } }
 
-// popola tavoli
-const tableSelect = document.getElementById("table");
-TAVOLI.forEach(t => {
-  const opt = document.createElement("option");
-  opt.value = t;
-  opt.textContent = "Tavolo " + t;
-  tableSelect.appendChild(opt);
-});
+    localStorage.setItem("name",name);
+    localStorage.setItem("table",table);
 
-// ripristina dati
-if(localStorage.getItem("table")) tableSelect.value = localStorage.getItem("table");
-if(localStorage.getItem("name")) document.getElementById("name").value = localStorage.getItem("name");
+    localStorage.setItem("profile_started","true");
+    localStorage.setItem("profile_step","2");
 
-/* ========= LOGICA ========= */
-
-function go(){
-  const name = document.getElementById("name").value.trim();
-  const table = document.getElementById("table").value;
-
-  if(!name || !table){
-    alert("Compila tutti i campi");
-    return;
+    sessionStorage.setItem("nav_dir","next");
+    location.href="step2.html";
   }
-
-  // split parole (evita Claudio → dio)
-  const words = name.toLowerCase().split(/\s+/);
-
-  for(const w of BANNED){
-    if(words.includes(w)){
-      alert("Scegli un nome diverso");
-      return;
-    }
-  }
-
-  localStorage.setItem("name", name);
-  localStorage.setItem("table", table);
-
-  localStorage.setItem("profile_started", "true");
-  localStorage.setItem("profile_step", "2"); // prossimo step
-
-  window.location.href = "step2.html";
-}
 </script>
-
 </body>
 </html>

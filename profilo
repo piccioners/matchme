@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>meety · Il tuo profilo</title>
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    :root{
+      --bg1:#120018;--bg2:#0b0012;
+      --pink:#ff2f92;--violet:#7c3aed;
+      --panel: rgba(27,0,34,.35);
+      --stroke: rgba(255,47,146,.35);
+      --ink:#fff;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;height:100svh;overflow:hidden;
+      display:flex;align-items:center;justify-content:center;
+      color:var(--ink);
+      font-family:system-ui,-apple-system,BlinkMacSystemFont;
+      background: radial-gradient(1200px 800px at 20% 10%, rgba(124,58,237,.22), transparent 55%),
+                  radial-gradient(900px 700px at 80% 20%, rgba(255,47,146,.18), transparent 55%),
+                  linear-gradient(180deg,var(--bg1),var(--bg2));
+      padding:20px;
+    }
+    .wrap{width:100%;max-width:420px}
+    .top{
+      display:flex;align-items:center;justify-content:space-between;
+      gap:12px;margin-bottom:14px
+    }
+    .logo-mini{
+      width:92px;max-width:44vw;
+      filter: drop-shadow(0 14px 34px rgba(255,47,146,.18));
+      cursor:pointer;
+    }
+    .pill{
+      font-size:12px;opacity:.75;padding:8px 10px;border-radius:999px;
+      background: rgba(27,0,34,.35);
+      border:1px solid rgba(255,255,255,.12);
+      white-space:nowrap;
+    }
+    .card{
+      background:var(--panel);
+      border:1px solid var(--stroke);
+      border-radius:18px;
+      padding:16px;
+      backdrop-filter: blur(10px);
+    }
+    h1{margin:0 0 6px 0;font-size:22px;font-weight:900}
+    .sub{margin:0 0 14px 0;opacity:.78;font-size:14px;line-height:1.35}
+
+    .row{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      padding:12px 0;
+      border-top:1px solid rgba(255,255,255,.08);
+    }
+    .row:first-of-type{border-top:none;padding-top:2px}
+    .k{opacity:.65;font-size:13px;min-width:120px}
+    .v{font-weight:850;font-size:14px;text-align:right;line-height:1.25}
+
+    .btn{
+      width:100%;
+      padding:16px;
+      border-radius:999px;
+      font-size:16px;
+      font-weight:900;
+      cursor:pointer;
+      user-select:none;
+      -webkit-tap-highlight-color:transparent;
+      margin-top:12px;
+      transition: transform .05s ease;
+    }
+    .btn:active{transform:scale(.98)}
+    .btn-primary{
+      border:none;color:#fff;
+      background: linear-gradient(135deg, var(--pink), rgba(124,58,237,.95));
+      box-shadow:0 18px 50px rgba(255,47,146,.18);
+    }
+    .btn-secondary{
+      background: rgba(27,0,34,.35);
+      border:1.5px solid rgba(255,47,146,.40);
+      color: rgba(255,255,255,.92);
+    }
+    .danger{
+      margin-top:10px;
+      text-align:center;
+      font-size:12px;
+      opacity:.55;
+      text-decoration:underline;
+      cursor:pointer;
+    }
+    .tiny{
+      margin-top:10px;
+      text-align:center;
+      font-size:12px;
+      opacity:.45;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="top">
+      <img src="logo.png" alt="meety" class="logo-mini" onclick="location.href='hub.html'">
+      <div class="pill" id="eventPill">Serata</div>
+    </div>
+
+    <div class="card">
+      <h1>Il tuo profilo</h1>
+      <p class="sub">Queste info servono a dare contesto ai match.</p>
+
+      <div class="row">
+        <div class="k">Nome</div>
+        <div class="v" id="vName">—</div>
+      </div>
+      <div class="row">
+        <div class="k">Tavolo</div>
+        <div class="v" id="vTable">—</div>
+      </div>
+      <div class="row">
+        <div class="k">Io sono</div>
+        <div class="v" id="vMe">—</div>
+      </div>
+      <div class="row">
+        <div class="k">Cerco</div>
+        <div class="v" id="vSeek">—</div>
+      </div>
+      <div class="row">
+        <div class="k">Stato</div>
+        <div class="v" id="vStatus">—</div>
+      </div>
+      <div class="row">
+        <div class="k">Sono qui per</div>
+        <div class="v" id="vPurpose">—</div>
+      </div>
+      <div class="row">
+        <div class="k">Segno</div>
+        <div class="v" id="vZodiac">—</div>
+      </div>
+      <div class="row">
+        <div class="k">Drink</div>
+        <div class="v" id="vDrink">—</div>
+      </div>
+      <div class="row">
+        <div class="k">Musica</div>
+        <div class="v" id="vMusic">—</div>
+      </div>
+
+      <button class="btn btn-primary" onclick="editProfile()">Modifica profilo</button>
+      <button class="btn btn-secondary" onclick="location.href='hub.html'">Torna alla Home serata</button>
+
+      <div class="danger" onclick="resetProfile()">Reset profilo (solo se necessario)</div>
+      <div class="tiny">Se hai cambiato telefono, devi rifare il profilo su quel telefono.</div>
+    </div>
+  </div>
+
+<script>
+  // Guardrail: profilo non completo -> torna a step1
+  if(localStorage.getItem("profile_complete") !== "true"){
+    location.href = "step1.html";
+  }
+
+  const get = (k) => (localStorage.getItem(k) || "").trim() || "—";
+
+  // Event pill
+  const eventId = (localStorage.getItem("event_id") || "").trim();
+  document.getElementById("eventPill").textContent = eventId ? eventId.replaceAll("_"," ") : "Serata";
+
+  // Values
+  document.getElementById("vName").textContent   = get("name");
+  document.getElementById("vTable").textContent  = get("table") === "—" ? "—" : ("Tavolo " + get("table"));
+  document.getElementById("vMe").textContent     = get("gender_me");
+  document.getElementById("vSeek").textContent   = get("gender_seek");
+  document.getElementById("vStatus").textContent = get("status");
+  document.getElementById("vPurpose").textContent= get("purpose");
+  document.getElementById("vZodiac").textContent = get("zodiac");
+  document.getElementById("vDrink").textContent  = get("drink");
+  document.getElementById("vMusic").textContent  = get("music");
+
+  function editProfile(){
+    // porta allo step più “avanti” raggiunto, ma minimo 1
+    const s = parseInt(localStorage.getItem("profile_step") || "1", 10);
+    const step = (isNaN(s) || s < 1) ? 1 : (s > 4 ? 4 : s);
+    sessionStorage.setItem("nav_dir","prev");
+    location.href = "step" + step + ".html";
+  }
+
+  function resetProfile(){
+    const ok = confirm("Vuoi davvero resettare il profilo su questo telefono?");
+    if(!ok) return;
+
+    const keepEvent = localStorage.getItem("event_id");
+    localStorage.clear();
+    if(keepEvent) localStorage.setItem("event_id", keepEvent);
+
+    location.href = "index.html";
+  }
+</script>
+</body>
+</html>

@@ -9,6 +9,7 @@ import psycopg2
 import psycopg2.extras
 
 APP_NAME = "meety-api"
+TABLE_NAME = "meety_users"
 
 def now_utc():
     return datetime.now(timezone.utc)
@@ -23,8 +24,8 @@ def init_db():
     conn = get_db()
     try:
         with conn, conn.cursor() as cur:
-            cur.execute("""
-            CREATE TABLE IF NOT EXISTS users (
+            cur.execute(f"""
+            CREATE TABLE IF NOT EXISTS {TABLE_NAME} (
               id UUID PRIMARY KEY,
               event_id TEXT NOT NULL,
               session_token TEXT UNIQUE NOT NULL,
@@ -44,8 +45,8 @@ def init_db():
               answers JSONB
             );
             """)
-            cur.execute("CREATE INDEX IF NOT EXISTS idx_users_event_id ON users(event_id);")
-            cur.execute("CREATE INDEX IF NOT EXISTS idx_users_session_token ON users(session_token);")
+            cur.execute(f"CREATE INDEX IF NOT EXISTS idx_{TABLE_NAME}_event_id ON {TABLE_NAME}(event_id);")
+            cur.execute(f"CREATE INDEX IF NOT EXISTS idx_{TABLE_NAME}_session_token ON {TABLE_NAME}(session_token);")
     finally:
         conn.close()
 
@@ -64,7 +65,7 @@ def auth_user():
     conn = get_db()
     try:
         with conn, conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-            cur.execute("SELECT * FROM users WHERE session_token=%s", (token,))
+            cur.execute(f"SELECT * FROM {TABLE_NAME} WHERE session_token=%s", (token,))
             row = cur.fetchone()
             if not row:
                 return None, jsonify({"error": "invalid_token"}), 401
@@ -98,8 +99,8 @@ def register():
     conn = get_db()
     try:
         with conn, conn.cursor() as cur:
-            cur.execute("""
-              INSERT INTO users(
+            cur.execute(f"""
+              INSERT INTO {TABLE_NAME}(
                 id, event_id, session_token, created_at,
                 name, table_no,
                 gender_me, gender_seek, status, purpose, zodiac, drink, music,
@@ -128,7 +129,6 @@ def me():
     if err:
         return err, code
 
-    # Return safe subset
     return jsonify({
         "ok": True,
         "event_id": user["event_id"],
@@ -163,8 +163,8 @@ def save_answers():
     conn = get_db()
     try:
         with conn, conn.cursor() as cur:
-            cur.execute("""
-              UPDATE users
+            cur.execute(f"""
+              UPDATE {TABLE_NAME}
               SET answers=%s
               WHERE session_token=%s
             """, (json.dumps(answers), user["session_token"]))
@@ -183,17 +183,16 @@ def participants():
     conn = get_db()
     try:
         with conn, conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-            cur.execute("""
+            cur.execute(f"""
               SELECT
                 name, table_no,
                 gender_me, gender_seek, status, purpose, zodiac, drink, music,
                 answers
-              FROM users
+              FROM {TABLE_NAME}
               WHERE event_id=%s AND session_token<>%s AND answers IS NOT NULL
             """, (event_id, user["session_token"]))
             rows = cur.fetchall()
 
-        # Normalize
         out = []
         for r in rows:
             out.append({

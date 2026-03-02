@@ -57,6 +57,10 @@ CORS(app, resources={r"/api/*": {"origins": "*"}})
 def health():
     return jsonify({"ok": True, "name": APP_NAME})
 
+@app.get("/")
+def root():
+    return "ok", 200
+
 def auth_user():
     token = request.headers.get("Authorization", "").replace("Bearer ", "").strip()
     if not token:

@@ -1,2 +1,5 @@
+[phases.setup]
+nixPkgs = ["postgresql"]
+
 [variables]
 NIXPACKS_PYTHON_VERSION = "3.12.7"

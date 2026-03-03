@@ -133,6 +133,7 @@
       user-select:none;
       -webkit-tap-highlight-color: transparent;
       transition: transform .05s ease, box-shadow .15s ease, background .15s ease;
+      margin-bottom:12px;
     }
     .btn:active{ transform:scale(.97); }
 
@@ -141,7 +142,6 @@
       color:#fff;
       background: linear-gradient(135deg, rgba(255,47,146,1), rgba(124,58,237,.95));
       box-shadow: 0 18px 50px rgba(255,47,146,.18);
-      margin-bottom:12px;
     }
 
     .btn-secondary{
@@ -149,13 +149,20 @@
       border: 1.5px solid rgba(255,47,146,.45);
       color: rgba(255,255,255,.92);
       backdrop-filter: blur(8px);
-      margin-bottom:12px;
     }
 
     .btn-ghost{
       background: transparent;
       border: 1px solid rgba(255,255,255,.14);
       color: rgba(255,255,255,.82);
+    }
+
+    .btn-debug{
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.18);
+      color: rgba(255,255,255,.85);
+      font-size:14px;
+      padding:14px;
     }
 
     .tiny{
@@ -171,14 +178,6 @@
       text-decoration:underline;
       cursor:pointer;
     }
-
-    /* debug token (temporaneo) */
-    .debug{
-      margin-top:8px;
-      font-size:11px;
-      opacity:.62;
-      word-break:break-all;
-    }
   </style>
 </head>
 
@@ -193,7 +192,6 @@
         <div>
           <p class="name" id="helloName">Il tuo profilo</p>
           <p class="meta" id="helloMeta">Serata in corso</p>
-          <p class="debug" id="debugToken"></p>
         </div>
         <div class="pill" id="tablePill">Tavolo —</div>
       </div>
@@ -214,18 +212,22 @@
       Come funziona
     </button>
 
+    <button class="btn btn-debug" onclick="debugMe()">
+      Debug: /api/me (solo per test)
+    </button>
+
     <div class="tiny">meety è pensato per essere usato durante l’evento.</div>
     <div class="danger" onclick="resetProfile()">Reset profilo (solo se necessario)</div>
   </div>
 
   <script>
-    // Guardrail: se non hai completato il profilo, non puoi stare qui
+    const API_BASE = "https://matchme-production-73a8.up.railway.app";
+
     const profileComplete = localStorage.getItem("profile_complete");
     if(profileComplete !== "true"){
       window.location.href = "step1.html";
     }
 
-    // UI: mostra nome e tavolo se disponibili
     const name = (localStorage.getItem("name") || "").trim();
     const table = (localStorage.getItem("table") || "").trim();
     const eventId = (localStorage.getItem("event_id") || "").trim();
@@ -238,19 +240,42 @@
     if(table) tablePill.textContent = "Tavolo " + table;
     if(eventId) helloMeta.textContent = eventId.replaceAll("_"," ");
 
-    // DEBUG: verifica token salvato (temporaneo)
-    const token = (localStorage.getItem("session_token") || "").trim();
-    const debugEl = document.getElementById("debugToken");
-    debugEl.textContent = token
-      ? ("TOKEN OK: " + token.slice(0, 24) + "...")
-      : "TOKEN MANCANTE";
+    async function debugMe(){
+      const token = (localStorage.getItem("session_token") || "").trim();
+      if(!token){
+        alert("session_token mancante. Rifai Step4 (Finisci) e riprova.");
+        return;
+      }
 
-    // Reset: utile se qualcuno ha incasinato il telefono
+      try{
+        const res = await fetch(API_BASE + "/api/me", {
+          headers: { "Authorization": "Bearer " + token }
+        });
+
+        const data = await res.json().catch(() => null);
+
+        if(!res.ok || !data || !data.ok){
+          alert("Errore /api/me. Status: " + res.status);
+          return;
+        }
+
+        alert(
+          "OK /api/me\n" +
+          "Nome: " + data.name + "\n" +
+          "Tavolo: " + data.table + "\n" +
+          "Event: " + data.event_id + "\n" +
+          "has_answers: " + data.has_answers
+        );
+
+      }catch(e){
+        alert("Errore connessione.");
+      }
+    }
+
     function resetProfile(){
       const ok = confirm("Vuoi davvero resettare il profilo su questo telefono?");
       if(!ok) return;
 
-      // tieni l'event_id, butta via il resto
       const keepEvent = localStorage.getItem("event_id");
       localStorage.clear();
       if(keepEvent) localStorage.setItem("event_id", keepEvent);

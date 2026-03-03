@@ -171,6 +171,14 @@
       text-decoration:underline;
       cursor:pointer;
     }
+
+    /* debug token (temporaneo) */
+    .debug{
+      margin-top:8px;
+      font-size:11px;
+      opacity:.62;
+      word-break:break-all;
+    }
   </style>
 </head>
 
@@ -185,6 +193,7 @@
         <div>
           <p class="name" id="helloName">Il tuo profilo</p>
           <p class="meta" id="helloMeta">Serata in corso</p>
+          <p class="debug" id="debugToken"></p>
         </div>
         <div class="pill" id="tablePill">Tavolo —</div>
       </div>
@@ -228,6 +237,13 @@
     if(name) helloName.textContent = "Ciao, " + name;
     if(table) tablePill.textContent = "Tavolo " + table;
     if(eventId) helloMeta.textContent = eventId.replaceAll("_"," ");
+
+    // DEBUG: verifica token salvato (temporaneo)
+    const token = (localStorage.getItem("session_token") || "").trim();
+    const debugEl = document.getElementById("debugToken");
+    debugEl.textContent = token
+      ? ("TOKEN OK: " + token.slice(0, 24) + "...")
+      : "TOKEN MANCANTE";
 
     // Reset: utile se qualcuno ha incasinato il telefono
     function resetProfile(){

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>meety · Entra nella serata</title>
+  <title>meety</title>
   <link rel="stylesheet" href="style.css">
 
   <style>
@@ -50,16 +50,18 @@
       position:relative;
     }
 
+    /* ===== LOGO AREA ===== */
     .logo-shell{
       position:relative;
-      width: min(260px, 82vw);
-      margin: 0 auto 18px auto;
-      padding: 18px 0 10px 0;
+      width: min(320px, 90vw);   /* 🔧 aumenta/diminuisci qui la larghezza area logo */
+      margin: 0 auto 50px auto;  /* 🔧 aumenta/diminuisci qui lo spazio sotto il logo */
+      padding: 10px 0;
     }
+
     .logo-shell::before{
       content:"";
       position:absolute;
-      inset:-40px -40px -30px -40px;
+      inset:-50px -50px -40px -50px;
       background:
         radial-gradient(closest-side at 50% 52%,
           rgba(255,47,146,.45),
@@ -67,21 +69,7 @@
           rgba(18,0,24,0) 72%);
       filter: blur(6px);
       opacity:.95;
-      transform: translateZ(0);
       animation: aura 3.2s ease-in-out infinite;
-      pointer-events:none;
-    }
-    .logo-shell::after{
-      content:"";
-      position:absolute;
-      inset:-10px -30px -5px -30px;
-      background:
-        radial-gradient(closest-side at 50% 50%,
-          rgba(255,47,146,.18),
-          rgba(124,58,237,.10) 45%,
-          transparent 70%);
-      filter: blur(10px);
-      opacity:.9;
       pointer-events:none;
     }
 
@@ -91,8 +79,8 @@
     }
 
     .logo-img{
-      width: 220px;
-      max-width: 80%;
+      width: 280px;          /* 🔧 QUI cambi la grandezza reale del logo */
+      max-width: 100%;
       display:block;
       margin: 0 auto;
       position:relative;
@@ -100,12 +88,7 @@
       filter: drop-shadow(0 18px 40px rgba(255,47,146,.20));
     }
 
-    .title{
-      margin: 10px 0 22px 0;
-      font-size: 28px;
-      font-weight: 800;
-      letter-spacing: .2px;
-    }
+    /* ===== BOTTONI ===== */
 
     .btn{
       width:100%;
@@ -126,10 +109,7 @@
       color:#fff;
       background: linear-gradient(135deg, rgba(255,47,146,1), rgba(124,58,237,.95));
       box-shadow: 0 18px 50px rgba(255,47,146,.18);
-      margin-bottom:14px;
-    }
-    .btn-primary:hover{
-      box-shadow: 0 22px 60px rgba(255,47,146,.24);
+      margin-bottom:22px;   /* 🔧 QUI aumenti/diminuisci lo spazio tra i due bottoni */
     }
 
     .btn-outline{
@@ -141,12 +121,8 @@
   </style>
 
   <script>
-    // ID serata (cambialo SOLO a inizio evento)
     localStorage.setItem("event_id", "GAETA_2026_06_15");
 
-    // Redirect realistico (coerente col progetto):
-    // - se profilo completo -> hub
-    // - altrimenti se c'è profile_step -> stepX
     (function(){
       const complete = localStorage.getItem("profile_complete");
       if(complete === "true"){
@@ -157,7 +133,6 @@
       const s = parseInt(localStorage.getItem("profile_step") || "0", 10);
       if(!isNaN(s) && s >= 1 && s <= 4){
         window.location.href = "step" + s + ".html";
-        return;
       }
     })();
   </script>
@@ -168,8 +143,6 @@
     <div class="logo-shell">
       <img src="logo.png" alt="meety" class="logo-img">
     </div>
-
-    <h1 class="title">Entra nella serata</h1>
 
     <button class="btn btn-primary" onclick="location.href='step1.html'">
       Nuovo Utente

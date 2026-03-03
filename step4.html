@@ -31,6 +31,7 @@
     }
     .btn{width:100%;padding:16px;border-radius:999px;font-size:16px;font-weight:900;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;margin-top:12px}
     .btn-primary{border:none;color:#fff;background:linear-gradient(135deg,var(--pink),rgba(124,58,237,.95));box-shadow:0 18px 50px rgba(255,47,146,.18)}
+    .btn-primary[disabled]{opacity:.6;cursor:not-allowed}
     .btn-secondary{background:rgba(27,0,34,.35);border:1.5px solid rgba(255,47,146,.40);color:rgba(255,255,255,.92)}
     .dots{display:flex;justify-content:center;gap:8px;margin-top:14px}
     .dot{width:8px;height:8px;border-radius:999px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.10)}
@@ -84,9 +85,9 @@
       </select>
 
       <button class="btn btn-secondary" onclick="back()">Indietro</button>
-      <button class="btn btn-primary" onclick="finish()">Finisci</button>
+      <button class="btn btn-primary" id="finishBtn" onclick="finish()">Finisci</button>
 
-      <div class="tiny">Dopo questo vai alla Home serata.</div>
+      <div class="tiny">Ora registriamo il profilo sul server e vai alla Home serata.</div>
     </div>
 
     <div class="dots">
@@ -95,6 +96,8 @@
   </div>
 
 <script>
+  const API_BASE = "https://matchme-production-73a8.up.railway.app";
+
   const dir=sessionStorage.getItem("nav_dir");
   if(dir==="prev") document.documentElement.style.setProperty("--anim","inLeft");
   if(dir==="next") document.documentElement.style.setProperty("--anim","inRight");
@@ -116,46 +119,62 @@
   }
 
   async function finish(){
-    const zodiac=document.getElementById("zodiac").value;
-    const drink=document.getElementById("drink").value;
-    const music=document.getElementById("music").value;
-
-    if(!zodiac || !drink || !music){
-      alert("Completa tutti i campi");
-      return;
-    }
-
-    localStorage.setItem("zodiac",zodiac);
-    localStorage.setItem("drink",drink);
-    localStorage.setItem("music",music);
-
-    const payload = {
-      event_id: localStorage.getItem("event_id") || "GAETA_2026_06_15",
-      name: localStorage.getItem("name"),
-      table: localStorage.getItem("table"),
-      gender_me: localStorage.getItem("gender_me"),
-      gender_seek: localStorage.getItem("gender_seek"),
-      status: localStorage.getItem("status"),
-      purpose: localStorage.getItem("purpose"),
-      zodiac,
-      drink,
-      music
-    };
+    const btn = document.getElementById("finishBtn");
+    btn.disabled = true;
 
     try{
-      const res = await fetch("https://matchme-production-73a8.up.railway.app/api/register", {
+      const zodiac=document.getElementById("zodiac").value;
+      const drink=document.getElementById("drink").value;
+      const music=document.getElementById("music").value;
+
+      if(!zodiac || !drink || !music){
+        alert("Completa tutti i campi");
+        btn.disabled = false;
+        return;
+      }
+
+      // salva localmente
+      localStorage.setItem("zodiac",zodiac);
+      localStorage.setItem("drink",drink);
+      localStorage.setItem("music",music);
+
+      // raccogli tutto il profilo per backend
+      const payload = {
+        event_id: (localStorage.getItem("event_id") || "").trim(),
+        name: (localStorage.getItem("name") || "").trim(),
+        table: (localStorage.getItem("table") || "").trim(),
+        gender_me: (localStorage.getItem("gender_me") || "").trim(),
+        gender_seek: (localStorage.getItem("gender_seek") || "").trim(),
+        status: (localStorage.getItem("status") || "").trim(),
+        purpose: (localStorage.getItem("purpose") || "").trim(),
+        zodiac: zodiac,
+        drink: drink,
+        music: music
+      };
+
+      // controlli minimi
+      if(!payload.event_id || !payload.name || !payload.table){
+        alert("Dati mancanti. Torna allo Step 1 e rifai il profilo.");
+        btn.disabled = false;
+        return;
+      }
+
+      // chiamata register
+      const res = await fetch(API_BASE + "/api/register", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {"Content-Type":"application/json"},
         body: JSON.stringify(payload)
       });
 
       const data = await res.json().catch(() => null);
 
       if(!res.ok || !data || !data.ok || !data.session_token){
-        alert("Errore registrazione");
+        alert("Errore registrazione server. Riprova.");
+        btn.disabled = false;
         return;
       }
 
+      // salva token e completa profilo SOLO dopo successo server
       localStorage.setItem("session_token", data.session_token);
       localStorage.setItem("profile_complete","true");
       localStorage.setItem("profile_step","4");
@@ -164,7 +183,8 @@
       location.href="hub.html";
 
     }catch(e){
-      alert("Errore connessione server");
+      alert("Errore connessione. Controlla internet e riprova.");
+      btn.disabled = false;
     }
   }
 </script>

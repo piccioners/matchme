@@ -116,7 +116,6 @@ def register():
     name = (data.get("name") or "").strip()
     table_no = str((data.get("table") or "")).strip()
 
-    # Optional profile fields
     gender_me = (data.get("gender_me") or "").strip() or None
     gender_seek = (data.get("gender_seek") or "").strip() or None
     status = (data.get("status") or "").strip() or None
@@ -129,7 +128,7 @@ def register():
         return jsonify({"error": "missing_fields"}), 400
 
     user_id = uuid.uuid4()
-    session_token = uuid.uuid4().hex + uuid.uuid4().hex  # long random-ish
+    session_token = uuid.uuid4().hex + uuid.uuid4().hex
 
     conn = get_db()
     try:
@@ -221,7 +220,8 @@ def participants():
             cur.execute(f"""
               SELECT
                 name, table_no,
-                gender_me, gender_seek, status, purpose, zodiac, drink, music,
+                gender_me, gender_seek,
+                status, purpose, zodiac, drink, music,
                 answers
               FROM {TABLE_NAME}
               WHERE event_id=%s AND session_token<>%s AND answers IS NOT NULL
@@ -233,6 +233,8 @@ def participants():
             out.append({
                 "name": r["name"],
                 "table": r["table_no"],
+                "gender_me": r["gender_me"] or "",
+                "gender_seek": r["gender_seek"] or "",
                 "zodiac": r["zodiac"] or "",
                 "drink": r["drink"] or "",
                 "music": r["music"] or "",

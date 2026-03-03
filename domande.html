@@ -155,10 +155,18 @@ h1{margin:0 0 10px 0;font-size:20px;font-weight:900}
 </div>
 
 <script>
+const API_BASE = "https://matchme-production-73a8.up.railway.app";
 
-// Guardrail: profilo non completo -> hub
+// Guardrail: serve profilo completo
 if(localStorage.getItem("profile_complete") !== "true"){
-  location.href = "hub.html";
+  location.href = "step1.html";
+}
+
+// Guardrail: serve token (se no non possiamo salvare risposte)
+const sessionToken = (localStorage.getItem("session_token") || "").trim();
+if(!sessionToken){
+  alert("Token mancante. Rifai il profilo.");
+  location.href = "step1.html";
 }
 
 const QUESTIONS = [
@@ -181,9 +189,9 @@ const scale = document.getElementById("scale");
 const stepCounter = document.getElementById("stepCounter");
 const progressDots = document.getElementById("progressDots");
 
-QUESTIONS.forEach((_,i)=>{
-  const d=document.createElement("div");
-  d.className="small-dot";
+QUESTIONS.forEach(() => {
+  const d = document.createElement("div");
+  d.className = "small-dot";
   progressDots.appendChild(d);
 });
 
@@ -191,23 +199,63 @@ function render(){
   qText.textContent = QUESTIONS[current-1];
   stepCounter.textContent = current + "/10";
 
-  scale.innerHTML="";
+  scale.innerHTML = "";
   for(let i=1;i<=5;i++){
-    const dot=document.createElement("div");
-    dot.className="dot";
-    if(parseInt(localStorage.getItem("q"+current))===i){
+    const dot = document.createElement("div");
+    dot.className = "dot";
+    if(parseInt(localStorage.getItem("q"+current), 10) === i){
       dot.classList.add("active");
     }
-    dot.onclick=()=>{
-      localStorage.setItem("q"+current,i);
+    dot.onclick = () => {
+      localStorage.setItem("q"+current, String(i));
       render();
     };
     scale.appendChild(dot);
   }
 
   document.querySelectorAll(".small-dot").forEach((d,i)=>{
-    d.classList.toggle("active", i===current-1);
+    d.classList.toggle("active", i === current-1);
   });
+}
+
+function readAnswers(){
+  const a = [];
+  for(let i=1;i<=10;i++){
+    const v = parseInt(localStorage.getItem("q"+i) || "0", 10);
+    if(!v) return null;
+    a.push(v);
+  }
+  return a;
+}
+
+async function submitAnswers(){
+  const answers = readAnswers();
+  if(!answers){
+    alert("Completa tutte le domande");
+    return;
+  }
+
+  try{
+    const res = await fetch(API_BASE + "/api/answers", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + sessionToken
+      },
+      body: JSON.stringify({ answers })
+    });
+
+    const data = await res.json().catch(() => null);
+
+    if(!res.ok || !data || !data.ok){
+      alert("Errore salvataggio risposte");
+      return;
+    }
+
+    location.href = "results.html";
+  }catch(e){
+    alert("Errore connessione server");
+  }
 }
 
 function next(){
@@ -215,23 +263,24 @@ function next(){
     alert("Seleziona una risposta");
     return;
   }
-  if(current<10){
+  if(current < 10){
     current++;
     render();
   }else{
-    location.href="results.html";
+    submitAnswers();
   }
 }
 
 function prev(){
-  if(current>1){
+  if(current > 1){
     current--;
     render();
+  }else{
+    location.href = "hub.html";
   }
 }
 
 render();
-
 </script>
 </body>
 </html>

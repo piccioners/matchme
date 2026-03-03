@@ -41,6 +41,7 @@ body{
 .logo-mini{
   width:92px;max-width:44vw;
   filter: drop-shadow(0 14px 34px rgba(255,47,146,.18));
+  cursor:pointer;
 }
 .step-pill{
   font-size:12px;opacity:.75;padding:8px 10px;border-radius:999px;
@@ -106,6 +107,7 @@ h1{margin:0 0 10px 0;font-size:20px;font-weight:900}
   background:linear-gradient(135deg,var(--pink),rgba(124,58,237,.95));
   box-shadow:0 18px 50px rgba(255,47,146,.18);
 }
+.btn-primary[disabled]{opacity:.6;cursor:not-allowed}
 .btn-secondary{
   background:rgba(27,0,34,.35);
   border:1.5px solid rgba(255,47,146,.40);
@@ -132,7 +134,7 @@ h1{margin:0 0 10px 0;font-size:20px;font-weight:900}
 <body>
 <div class="page">
   <div class="top">
-    <img src="logo.png" class="logo-mini">
+    <img src="logo.png" class="logo-mini" onclick="location.href='hub.html'">
     <div class="step-pill" id="stepCounter">1/10</div>
   </div>
 
@@ -148,7 +150,7 @@ h1{margin:0 0 10px 0;font-size:20px;font-weight:900}
     </div>
 
     <button class="btn btn-secondary" onclick="prev()">Indietro</button>
-    <button class="btn btn-primary" onclick="next()">Avanti</button>
+    <button class="btn btn-primary" id="nextBtn" onclick="next()">Avanti</button>
   </div>
 
   <div class="dots" id="progressDots"></div>
@@ -157,15 +159,12 @@ h1{margin:0 0 10px 0;font-size:20px;font-weight:900}
 <script>
 const API_BASE = "https://matchme-production-73a8.up.railway.app";
 
-// Guardrail: serve profilo completo
+// Guardrail: profilo completo + token, altrimenti non puoi salvare niente
 if(localStorage.getItem("profile_complete") !== "true"){
   location.href = "step1.html";
 }
-
-// Guardrail: serve token (se no non possiamo salvare risposte)
 const sessionToken = (localStorage.getItem("session_token") || "").trim();
 if(!sessionToken){
-  alert("Token mancante. Rifai il profilo.");
   location.href = "step1.html";
 }
 
@@ -188,10 +187,11 @@ const qText = document.getElementById("questionText");
 const scale = document.getElementById("scale");
 const stepCounter = document.getElementById("stepCounter");
 const progressDots = document.getElementById("progressDots");
+const nextBtn = document.getElementById("nextBtn");
 
 QUESTIONS.forEach(() => {
-  const d = document.createElement("div");
-  d.className = "small-dot";
+  const d=document.createElement("div");
+  d.className="small-dot";
   progressDots.appendChild(d);
 });
 
@@ -199,26 +199,28 @@ function render(){
   qText.textContent = QUESTIONS[current-1];
   stepCounter.textContent = current + "/10";
 
-  scale.innerHTML = "";
+  scale.innerHTML="";
   for(let i=1;i<=5;i++){
-    const dot = document.createElement("div");
-    dot.className = "dot";
-    if(parseInt(localStorage.getItem("q"+current), 10) === i){
+    const dot=document.createElement("div");
+    dot.className="dot";
+    if(parseInt(localStorage.getItem("q"+current))===i){
       dot.classList.add("active");
     }
-    dot.onclick = () => {
-      localStorage.setItem("q"+current, String(i));
+    dot.onclick=()=>{
+      localStorage.setItem("q"+current,i);
       render();
     };
     scale.appendChild(dot);
   }
 
   document.querySelectorAll(".small-dot").forEach((d,i)=>{
-    d.classList.toggle("active", i === current-1);
+    d.classList.toggle("active", i===current-1);
   });
+
+  nextBtn.textContent = (current === 10) ? "Finisci" : "Avanti";
 }
 
-function readAnswers(){
+function readAnswers10(){
   const a = [];
   for(let i=1;i<=10;i++){
     const v = parseInt(localStorage.getItem("q"+i) || "0", 10);
@@ -229,11 +231,13 @@ function readAnswers(){
 }
 
 async function submitAnswers(){
-  const answers = readAnswers();
+  const answers = readAnswers10();
   if(!answers){
     alert("Completa tutte le domande");
     return;
   }
+
+  nextBtn.disabled = true;
 
   try{
     const res = await fetch(API_BASE + "/api/answers", {
@@ -248,13 +252,16 @@ async function submitAnswers(){
     const data = await res.json().catch(() => null);
 
     if(!res.ok || !data || !data.ok){
-      alert("Errore salvataggio risposte");
+      alert("Errore nel salvataggio delle risposte. Riprova.");
+      nextBtn.disabled = false;
       return;
     }
 
-    location.href = "results.html";
+    location.href="results.html";
+
   }catch(e){
-    alert("Errore connessione server");
+    alert("Errore connessione. Controlla internet e riprova.");
+    nextBtn.disabled = false;
   }
 }
 
@@ -272,11 +279,9 @@ function next(){
 }
 
 function prev(){
-  if(current > 1){
+  if(current>1){
     current--;
     render();
-  }else{
-    location.href = "hub.html";
   }
 }
 

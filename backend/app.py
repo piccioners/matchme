@@ -54,6 +54,10 @@ def init_db():
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "*"}})
 
+# IMPORTANT: con gunicorn __main__ non gira.
+# Quindi inizializziamo il DB all'avvio del processo web.
+init_db()
+
 @app.get("/api/health")
 def health():
     return jsonify({"ok": True, "name": APP_NAME})
@@ -126,7 +130,6 @@ def admin_seed_demo():
 
     if not event_id:
         return jsonify({"error": "missing_event_id"}), 400
-
     if count < 1:
         return jsonify({"error": "count_too_small"}), 400
     if count > 50:
@@ -149,11 +152,10 @@ def admin_seed_demo():
     tables_pool = ["1","2","3","4","5","6","7","8","9","10","20","21","22","23","60","61","62","63","64","65"]
 
     created = 0
-
     conn = get_db()
     try:
         with conn, conn.cursor() as cur:
-            for i in range(count):
+            for _ in range(count):
                 user_id = uuid.uuid4()
                 session_token = uuid.uuid4().hex + uuid.uuid4().hex
 
@@ -237,6 +239,65 @@ def register():
             "user_id": str(user_id),
             "event_id": event_id
         })
+    finally:
+        conn.close()
+
+@app.post("/api/profile")
+def update_profile():
+    """
+    Update profilo del record corrente (NO nuove righe).
+    Richiede Authorization: Bearer session_token
+    """
+    user, err, code = auth_user()
+    if err:
+        return err, code
+
+    data = request.get_json(force=True, silent=True) or {}
+
+    # consentiamo update anche di name/table (utile se uno ha sbagliato)
+    name = (data.get("name") or "").strip() or user["name"]
+    table_no = str((data.get("table") or "")).strip() or user["table_no"]
+
+    gender_me = (data.get("gender_me") or "").strip() or None
+    gender_seek = (data.get("gender_seek") or "").strip() or None
+    status = (data.get("status") or "").strip() or None
+    purpose = (data.get("purpose") or "").strip() or None
+    zodiac = (data.get("zodiac") or "").strip() or None
+    drink = (data.get("drink") or "").strip() or None
+    music = (data.get("music") or "").strip() or None
+
+    if not name or not table_no:
+        return jsonify({"error": "missing_fields"}), 400
+
+    conn = get_db()
+    try:
+        with conn, conn.cursor() as cur:
+            cur.execute(f"""
+              UPDATE {TABLE_NAME}
+              SET
+                name=%s,
+                table_no=%s,
+                gender_me=%s,
+                gender_seek=%s,
+                status=%s,
+                purpose=%s,
+                zodiac=%s,
+                drink=%s,
+                music=%s
+              WHERE session_token=%s
+            """, (
+                name,
+                table_no,
+                gender_me,
+                gender_seek,
+                status,
+                purpose,
+                zodiac,
+                drink,
+                music,
+                user["session_token"]
+            ))
+        return jsonify({"ok": True})
     finally:
         conn.close()
 
@@ -326,8 +387,3 @@ def participants():
         return jsonify({"ok": True, "event_id": event_id, "participants": out})
     finally:
         conn.close()
-
-if __name__ == "__main__":
-    init_db()
-    port = int(os.environ.get("PORT", "8080"))
-    app.run(host="0.0.0.0", port=port)

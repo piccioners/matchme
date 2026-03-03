@@ -75,6 +75,13 @@
       background: rgba(255,47,146,.10);
       white-space:nowrap;
     }
+    .hint{
+      font-size:12px;
+      opacity:.65;
+      margin-top:12px;
+      line-height:1.35;
+    }
+
     .btn{
       width:100%;
       padding:16px;
@@ -90,6 +97,16 @@
       border:1.5px solid rgba(255,47,146,.40);
       color:#fff;
     }
+
+    .empty{
+      text-align:center;
+      padding:8px 6px;
+    }
+    .big{
+      font-size:18px;
+      font-weight:950;
+      margin:0 0 8px 0;
+    }
   </style>
 </head>
 
@@ -102,7 +119,7 @@
 
     <div class="card">
       <h1>I tuoi match</h1>
-      <p class="sub">Calcolati sulle risposte alle domande.</p>
+      <p class="sub">Mostriamo solo match reciproci (vi cercate entrambi).</p>
 
       <div id="content"></div>
 
@@ -111,82 +128,167 @@
   </div>
 
 <script>
-const API_BASE = "https://matchme-production-73a8.up.railway.app";
+  const API_BASE = "https://matchme-production-73a8.up.railway.app";
 
-if(localStorage.getItem("profile_complete") !== "true"){
-  location.href = "step1.html";
-}
-
-const sessionToken = localStorage.getItem("session_token");
-if(!sessionToken){
-  location.href = "step1.html";
-}
-
-const eventId = localStorage.getItem("event_id") || "";
-document.getElementById("eventPill").textContent = eventId.replaceAll("_"," ");
-
-function readAnswers(){
-  const a=[];
-  for(let i=1;i<=10;i++){
-    const v=parseInt(localStorage.getItem("q"+i)||"0",10);
-    if(!v) return null;
-    a.push(v);
+  // Guardrail
+  if(localStorage.getItem("profile_complete") !== "true"){
+    location.href = "step1.html";
   }
-  return a;
-}
 
-const myAnswers = readAnswers();
-const mySeek = localStorage.getItem("gender_seek") || "";
-const myGender = localStorage.getItem("gender_me") || "";
+  const sessionToken = (localStorage.getItem("session_token") || "").trim();
+  if(!sessionToken){
+    location.href = "step1.html";
+  }
 
-function compatibility(a,b){
-  let sum=0;
-  for(let i=0;i<a.length;i++) sum+=Math.abs(a[i]-b[i]);
-  return 100-(sum/(4*a.length))*100;
-}
+  // Event pill
+  const eventId = (localStorage.getItem("event_id") || "").trim();
+  document.getElementById("eventPill").textContent = eventId ? eventId.replaceAll("_"," ") : "Serata";
 
-async function load(){
-  const res = await fetch(API_BASE+"/api/participants",{
-    headers:{Authorization:"Bearer "+sessionToken}
-  });
-  const data = await res.json();
-  const participants = data.participants || [];
-
-  const filtered = participants.filter(p=>{
-    if(!p.answers) return false;
-
-    // filtro per preferenza sesso
-    if(mySeek && mySeek !== "Tutti" && mySeek !== "Indifferente"){
-      if(p.gender_me !== mySeek) return false;
+  // Risposte
+  function readAnswers(){
+    const a = [];
+    for(let i=1;i<=10;i++){
+      const v = parseInt(localStorage.getItem("q"+i) || "0", 10);
+      if(!v) return null;
+      a.push(v);
     }
-
-    return true;
-  });
-
-  const ranked = filtered.map(p=>({
-    ...p,
-    score: compatibility(myAnswers,p.answers)
-  })).sort((a,b)=>b.score-a.score);
-
-  const content = document.getElementById("content");
-
-  if(ranked.length===0){
-    content.innerHTML="<p>Nessun match compatibile al momento.</p>";
-    return;
+    return a;
   }
 
-  content.innerHTML = ranked.slice(0,5).map(p=>`
-    <div class="match">
-      <div>
-        <div class="m-name">${p.name}</div>
-        <div class="m-meta">Tavolo ${p.table}</div>
-      </div>
-      <div class="pct">${p.score.toFixed(1)}%</div>
-    </div>
-  `).join("");
-}
+  const myAnswers = readAnswers();
+  if(!myAnswers){
+    location.href = "domande.html";
+  }
 
-load();
+  const mySeek = (localStorage.getItem("gender_seek") || "").trim();
+  const myGender = (localStorage.getItem("gender_me") || "").trim();
+
+  function compatibility(a, b){
+    const n = Math.min(a.length, b.length);
+    let sumDiff = 0;
+    for(let i=0;i<n;i++) sumDiff += Math.abs(a[i]-b[i]);
+    const maxDiff = 4 * n;
+    const score = 100 - (sumDiff / maxDiff) * 100;
+    return Math.max(0, Math.min(100, score));
+  }
+
+  function escapeHtml(str){
+    return String(str)
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  function acceptsAnyone(seek){
+    const s = (seek || "").trim();
+    return (s === "" || s === "Tutti" || s === "Indifferente" || s === "Preferisco non dirlo");
+  }
+
+  function isCompatibleByGender(mySeekValue, otherGenderMe){
+    // io cerco X -> l'altro deve "essere X", salvo che io sia in modalità non filtrante
+    if(acceptsAnyone(mySeekValue)) return true;
+    return (otherGenderMe || "").trim() === mySeekValue.trim();
+  }
+
+  function isReciprocal(otherSeek, myGenderValue){
+    // l'altro cerca X -> io devo "essere X", salvo che l'altro sia non filtrante
+    if(acceptsAnyone(otherSeek)) return true;
+    return (myGenderValue || "").trim() === (otherSeek || "").trim();
+  }
+
+  async function load(){
+    const content = document.getElementById("content");
+
+    try{
+      const res = await fetch(API_BASE + "/api/participants", {
+        method: "GET",
+        headers: { "Authorization": "Bearer " + sessionToken }
+      });
+
+      const data = await res.json().catch(() => null);
+      if(!res.ok || !data || !data.ok || !Array.isArray(data.participants)){
+        content.innerHTML = `
+          <div class="empty">
+            <p class="big">Errore caricamento match</p>
+            <p class="sub" style="margin:0;opacity:.75">Riprova tra poco.</p>
+          </div>
+        `;
+        return;
+      }
+
+      const participants = data.participants;
+
+      // filtro: io cerco loro + loro cercano me
+      const filtered = participants.filter(p => {
+        if(!p || !Array.isArray(p.answers)) return false;
+
+        // 1) loro devono essere nel mio target
+        if(!isCompatibleByGender(mySeek, p.gender_me)) return false;
+
+        // 2) reciprocità: io devo essere nel loro target
+        if(!isReciprocal(p.gender_seek, myGender)) return false;
+
+        return true;
+      });
+
+      const ranked = filtered.map(p => ({
+        ...p,
+        score: compatibility(myAnswers, p.answers)
+      })).sort((a,b)=> b.score - a.score).slice(0, 5);
+
+      if(ranked.length === 0){
+        content.innerHTML = `
+          <div class="empty">
+            <p class="big">Nessun match reciproco</p>
+            <p class="sub" style="margin:0;opacity:.75">
+              Serve che ci siano altre persone compatibili e che vi cerchiate entrambi.
+            </p>
+          </div>
+        `;
+        return;
+      }
+
+      const list = document.createElement("div");
+      list.className = "list";
+
+      ranked.forEach(p => {
+        const pct = (typeof p.score === "number" ? p.score : 0).toFixed(1) + "%";
+        const div = document.createElement("div");
+        div.className = "match";
+        div.innerHTML = `
+          <div class="m-left">
+            <p class="m-name">${escapeHtml(p.name || "Sconosciuto")}</p>
+            <p class="m-meta">Tavolo ${escapeHtml(String(p.table || "—"))}</p>
+          </div>
+          <div class="m-right">
+            <div class="pct">${pct}</div>
+            <div class="m-meta">${escapeHtml(p.zodiac || "")}</div>
+          </div>
+        `;
+        list.appendChild(div);
+      });
+
+      content.innerHTML = "";
+      content.appendChild(list);
+
+      const hint = document.createElement("div");
+      hint.className = "hint";
+      hint.textContent = "Suggerimento: se compare, è reciproco. Quindi puoi andare sereno a parlarci.";
+      content.appendChild(hint);
+
+    }catch(e){
+      content.innerHTML = `
+        <div class="empty">
+          <p class="big">Errore connessione</p>
+          <p class="sub" style="margin:0;opacity:.75">Riprova tra poco.</p>
+        </div>
+      `;
+    }
+  }
+
+  load();
 </script>
 </body>
 </html>

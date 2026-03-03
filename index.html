@@ -29,7 +29,6 @@
                   linear-gradient(180deg, var(--bg1), var(--bg2));
     }
 
-    /* grana ultra leggera per dare “vita” */
     body::before{
       content:"";
       position:fixed;
@@ -51,7 +50,6 @@
       position:relative;
     }
 
-    /* “raggiera” che parte dal logo */
     .logo-shell{
       position:relative;
       width: min(260px, 82vw);
@@ -99,22 +97,14 @@
       margin: 0 auto;
       position:relative;
       z-index:1;
-      /* glow leggero sul logo */
       filter: drop-shadow(0 18px 40px rgba(255,47,146,.20));
     }
 
     .title{
-      margin: 8px 0 10px 0;
+      margin: 10px 0 22px 0;
       font-size: 28px;
       font-weight: 800;
       letter-spacing: .2px;
-    }
-
-    .subtitle{
-      margin: 0 0 34px 0;
-      opacity: .78;
-      font-size: 16px;
-      line-height: 1.35;
     }
 
     .btn{
@@ -148,27 +138,28 @@
       color: rgba(255,255,255,.92);
       backdrop-filter: blur(8px);
     }
-
-    .tiny{
-      margin-top:18px;
-      font-size:12px;
-      opacity:.5;
-    }
   </style>
 
   <script>
     // ID serata (cambialo SOLO a inizio evento)
     localStorage.setItem("event_id", "GAETA_2026_06_15");
 
-    // Se l'utente è già nel flusso, non deve rivedere "Nuovo utente"
-    const currentStep = localStorage.getItem("step");
-    if(currentStep){
-      if(currentStep === "results"){
-        window.location.href = "results.html";
-      } else if(currentStep !== "0"){
-        window.location.href = "step" + currentStep + ".html";
+    // Redirect realistico (coerente col progetto):
+    // - se profilo completo -> hub
+    // - altrimenti se c'è profile_step -> stepX
+    (function(){
+      const complete = localStorage.getItem("profile_complete");
+      if(complete === "true"){
+        window.location.href = "hub.html";
+        return;
       }
-    }
+
+      const s = parseInt(localStorage.getItem("profile_step") || "0", 10);
+      if(!isNaN(s) && s >= 1 && s <= 4){
+        window.location.href = "step" + s + ".html";
+        return;
+      }
+    })();
   </script>
 </head>
 
@@ -179,21 +170,14 @@
     </div>
 
     <h1 class="title">Entra nella serata</h1>
-    <p class="subtitle">
-      Crea il tuo profilo e scopri con chi combaci di più.
-    </p>
 
     <button class="btn btn-primary" onclick="location.href='step1.html'">
-      Nuovo utente
+      Nuovo Utente
     </button>
 
     <button class="btn btn-outline" onclick="location.href='come-si-gioca.html'">
-      Come funziona
+      Come funziona?
     </button>
-
-    <div class="tiny">
-      meety è pensato per essere usato durante l’evento.
-    </div>
   </div>
 </body>
 </html>

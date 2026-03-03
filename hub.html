@@ -133,7 +133,6 @@
       user-select:none;
       -webkit-tap-highlight-color: transparent;
       transition: transform .05s ease, box-shadow .15s ease, background .15s ease;
-      margin-bottom:12px;
     }
     .btn:active{ transform:scale(.97); }
 
@@ -142,6 +141,7 @@
       color:#fff;
       background: linear-gradient(135deg, rgba(255,47,146,1), rgba(124,58,237,.95));
       box-shadow: 0 18px 50px rgba(255,47,146,.18);
+      margin-bottom:12px;
     }
 
     .btn-secondary{
@@ -149,20 +149,13 @@
       border: 1.5px solid rgba(255,47,146,.45);
       color: rgba(255,255,255,.92);
       backdrop-filter: blur(8px);
+      margin-bottom:12px;
     }
 
     .btn-ghost{
       background: transparent;
       border: 1px solid rgba(255,255,255,.14);
       color: rgba(255,255,255,.82);
-    }
-
-    .btn-debug{
-      background: rgba(255,255,255,.06);
-      border: 1px solid rgba(255,255,255,.18);
-      color: rgba(255,255,255,.85);
-      font-size:14px;
-      padding:14px;
     }
 
     .tiny{
@@ -178,6 +171,14 @@
       text-decoration:underline;
       cursor:pointer;
     }
+
+    .loading{
+      margin-top:10px;
+      font-size:12px;
+      opacity:.65;
+      text-align:center;
+      display:none;
+    }
   </style>
 </head>
 
@@ -190,11 +191,12 @@
     <div class="card">
       <div class="who">
         <div>
-          <p class="name" id="helloName">Il tuo profilo</p>
-          <p class="meta" id="helloMeta">Serata in corso</p>
+          <p class="name" id="helloName">Caricamento…</p>
+          <p class="meta" id="helloMeta">Verifica profilo</p>
         </div>
         <div class="pill" id="tablePill">Tavolo —</div>
       </div>
+      <div class="loading" id="loading">Sto parlando col server… (che di solito dorme)</div>
     </div>
 
     <p class="hello">Cosa vuoi fare adesso?</p>
@@ -208,12 +210,8 @@
       Il tuo profilo
     </button>
 
-    <button class="btn btn-ghost" onclick="location.href='come-si-gioca.html'">
+    <button class="btn btn-ghost" onclick="alert('Arriva alla fine. Ora usalo.')">
       Come funziona
-    </button>
-
-    <button class="btn btn-debug" onclick="debugMe()">
-      Debug: /api/me (solo per test)
     </button>
 
     <div class="tiny">meety è pensato per essere usato durante l’evento.</div>
@@ -223,52 +221,84 @@
   <script>
     const API_BASE = "https://matchme-production-73a8.up.railway.app";
 
-    const profileComplete = localStorage.getItem("profile_complete");
-    if(profileComplete !== "true"){
-      window.location.href = "step1.html";
-    }
-
-    const name = (localStorage.getItem("name") || "").trim();
-    const table = (localStorage.getItem("table") || "").trim();
-    const eventId = (localStorage.getItem("event_id") || "").trim();
-
     const helloName = document.getElementById("helloName");
     const helloMeta = document.getElementById("helloMeta");
     const tablePill = document.getElementById("tablePill");
+    const loading = document.getElementById("loading");
 
-    if(name) helloName.textContent = "Ciao, " + name;
-    if(table) tablePill.textContent = "Tavolo " + table;
-    if(eventId) helloMeta.textContent = eventId.replaceAll("_"," ");
+    function softResetKeepEvent(){
+      const keepEvent = localStorage.getItem("event_id");
+      localStorage.clear();
+      if(keepEvent) localStorage.setItem("event_id", keepEvent);
+    }
 
-    async function debugMe(){
+    async function verifyAndRender(){
       const token = (localStorage.getItem("session_token") || "").trim();
       if(!token){
-        alert("session_token mancante. Rifai Step4 (Finisci) e riprova.");
+        // niente token = niente identità
+        location.href = "step1.html";
         return;
       }
 
+      loading.style.display = "block";
+
       try{
         const res = await fetch(API_BASE + "/api/me", {
+          method: "GET",
           headers: { "Authorization": "Bearer " + token }
         });
 
         const data = await res.json().catch(() => null);
 
         if(!res.ok || !data || !data.ok){
-          alert("Errore /api/me. Status: " + res.status);
+          // token invalido o backend non capisce -> riparti pulito
+          softResetKeepEvent();
+          location.href = "step1.html";
           return;
         }
 
-        alert(
-          "OK /api/me\n" +
-          "Nome: " + data.name + "\n" +
-          "Tavolo: " + data.table + "\n" +
-          "Event: " + data.event_id + "\n" +
-          "has_answers: " + data.has_answers
-        );
+        // Sincronizza UI dal server (non dal localStorage)
+        const name = (data.name || "").trim();
+        const table = String(data.table || "").trim();
+        const eventId = (data.event_id || "").trim();
+
+        if(name) helloName.textContent = "Ciao, " + name;
+        else helloName.textContent = "Il tuo profilo";
+
+        if(table) tablePill.textContent = "Tavolo " + table;
+        else tablePill.textContent = "Tavolo —";
+
+        if(eventId) helloMeta.textContent = eventId.replaceAll("_"," ");
+        else helloMeta.textContent = "Serata in corso";
+
+        // Marca profilo completo localmente (così le altre pagine non impazziscono)
+        localStorage.setItem("profile_complete", "true");
+
+        // Optional: se vuoi, tieni aggiornati anche questi campi
+        if(name) localStorage.setItem("name", name);
+        if(table) localStorage.setItem("table", table);
+        if(eventId) localStorage.setItem("event_id", eventId);
+
+        loading.style.display = "none";
 
       }catch(e){
-        alert("Errore connessione.");
+        // Se non c'è rete, NON distruggiamo tutto: mostriamo fallback locale.
+        loading.style.display = "none";
+
+        const name = (localStorage.getItem("name") || "").trim();
+        const table = (localStorage.getItem("table") || "").trim();
+        const eventId = (localStorage.getItem("event_id") || "").trim();
+
+        if(name) helloName.textContent = "Ciao, " + name;
+        else helloName.textContent = "Il tuo profilo";
+
+        if(table) tablePill.textContent = "Tavolo " + table;
+        else tablePill.textContent = "Tavolo —";
+
+        if(eventId) helloMeta.textContent = eventId.replaceAll("_"," ");
+        else helloMeta.textContent = "Offline";
+
+        // Non redirect, perché magari sei in locale senza rete. Però lo vedi.
       }
     }
 
@@ -282,6 +312,8 @@
 
       window.location.href = "index.html";
     }
+
+    verifyAndRender();
   </script>
 </body>
 </html>

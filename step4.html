@@ -87,7 +87,7 @@
       <button class="btn btn-secondary" onclick="back()">Indietro</button>
       <button class="btn btn-primary" id="finishBtn" onclick="finish()">Finisci</button>
 
-      <div class="tiny">Ora registriamo il profilo sul server e vai alla Home serata.</div>
+      <div class="tiny">Ora salviamo sul server e vai alla Home serata.</div>
     </div>
 
     <div class="dots">
@@ -103,10 +103,8 @@
   if(dir==="next") document.documentElement.style.setProperty("--anim","inRight");
   sessionStorage.removeItem("nav_dir");
 
-  // guardrail: se step3 non completato, torna lì
   if(!localStorage.getItem("status") || !localStorage.getItem("purpose")) location.href="step3.html";
 
-  // restore selects
   const restore=(id,key)=>{ const v=localStorage.getItem(key); if(v) document.getElementById(id).value=v; };
   restore("zodiac","zodiac");
   restore("drink","drink");
@@ -116,6 +114,21 @@
     localStorage.setItem("profile_step","3");
     sessionStorage.setItem("nav_dir","prev");
     location.href="step3.html";
+  }
+
+  function buildPayload(zodiac, drink, music){
+    return {
+      event_id: (localStorage.getItem("event_id") || "").trim(),
+      name: (localStorage.getItem("name") || "").trim(),
+      table: (localStorage.getItem("table") || "").trim(),
+      gender_me: (localStorage.getItem("gender_me") || "").trim(),
+      gender_seek: (localStorage.getItem("gender_seek") || "").trim(),
+      status: (localStorage.getItem("status") || "").trim(),
+      purpose: (localStorage.getItem("purpose") || "").trim(),
+      zodiac: zodiac,
+      drink: drink,
+      music: music
+    };
   }
 
   async function finish(){
@@ -133,33 +146,47 @@
         return;
       }
 
-      // salva localmente
       localStorage.setItem("zodiac",zodiac);
       localStorage.setItem("drink",drink);
       localStorage.setItem("music",music);
 
-      // raccogli tutto il profilo per backend
-      const payload = {
-        event_id: (localStorage.getItem("event_id") || "").trim(),
-        name: (localStorage.getItem("name") || "").trim(),
-        table: (localStorage.getItem("table") || "").trim(),
-        gender_me: (localStorage.getItem("gender_me") || "").trim(),
-        gender_seek: (localStorage.getItem("gender_seek") || "").trim(),
-        status: (localStorage.getItem("status") || "").trim(),
-        purpose: (localStorage.getItem("purpose") || "").trim(),
-        zodiac: zodiac,
-        drink: drink,
-        music: music
-      };
+      const payload = buildPayload(zodiac, drink, music);
 
-      // controlli minimi
       if(!payload.event_id || !payload.name || !payload.table){
         alert("Dati mancanti. Torna allo Step 1 e rifai il profilo.");
         btn.disabled = false;
         return;
       }
 
-      // chiamata register
+      const existingToken = (localStorage.getItem("session_token") || "").trim();
+
+      // SE HO TOKEN: UPDATE PROFILO
+      if(existingToken){
+        const res = await fetch(API_BASE + "/api/profile", {
+          method: "POST",
+          headers: {
+            "Content-Type":"application/json",
+            "Authorization":"Bearer " + existingToken
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json().catch(() => null);
+
+        if(!res.ok || !data || !data.ok){
+          alert("Errore update profilo. Riprova.");
+          btn.disabled = false;
+          return;
+        }
+
+        localStorage.setItem("profile_complete","true");
+        localStorage.setItem("profile_step","4");
+        sessionStorage.setItem("nav_dir","next");
+        location.href="hub.html";
+        return;
+      }
+
+      // ALTRIMENTI: REGISTER
       const res = await fetch(API_BASE + "/api/register", {
         method: "POST",
         headers: {"Content-Type":"application/json"},
@@ -174,7 +201,6 @@
         return;
       }
 
-      // salva token e completa profilo SOLO dopo successo server
       localStorage.setItem("session_token", data.session_token);
       localStorage.setItem("profile_complete","true");
       localStorage.setItem("profile_step","4");

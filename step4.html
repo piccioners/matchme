@@ -115,7 +115,7 @@
     location.href="step3.html";
   }
 
-  function finish(){
+  async function finish(){
     const zodiac=document.getElementById("zodiac").value;
     const drink=document.getElementById("drink").value;
     const music=document.getElementById("music").value;
@@ -129,11 +129,43 @@
     localStorage.setItem("drink",drink);
     localStorage.setItem("music",music);
 
-    localStorage.setItem("profile_complete","true");
-    localStorage.setItem("profile_step","4");
+    const payload = {
+      event_id: localStorage.getItem("event_id") || "GAETA_2026_06_15",
+      name: localStorage.getItem("name"),
+      table: localStorage.getItem("table"),
+      gender_me: localStorage.getItem("gender_me"),
+      gender_seek: localStorage.getItem("gender_seek"),
+      status: localStorage.getItem("status"),
+      purpose: localStorage.getItem("purpose"),
+      zodiac,
+      drink,
+      music
+    };
 
-    sessionStorage.setItem("nav_dir","next");
-    location.href="hub.html";
+    try{
+      const res = await fetch("https://matchme-production-73a8.up.railway.app/api/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json().catch(() => null);
+
+      if(!res.ok || !data || !data.ok || !data.session_token){
+        alert("Errore registrazione");
+        return;
+      }
+
+      localStorage.setItem("session_token", data.session_token);
+      localStorage.setItem("profile_complete","true");
+      localStorage.setItem("profile_step","4");
+
+      sessionStorage.setItem("nav_dir","next");
+      location.href="hub.html";
+
+    }catch(e){
+      alert("Errore connessione server");
+    }
   }
 </script>
 </body>

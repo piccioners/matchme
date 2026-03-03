@@ -140,13 +140,20 @@
       <button class="btn btn-secondary" onclick="location.href='hub.html'">Torna alla Home serata</button>
       <button class="btn btn-primary" onclick="location.href='domande.html'">Rifai le domande</button>
 
-      <div class="tiny">Quando colleghiamo il backend, qui vedrai i match reali della serata.</div>
+      <div class="tiny">Qui vedrai i match reali della serata.</div>
     </div>
   </div>
 
 <script>
-  // Guardrail: serve profilo + risposte
+  const API_BASE = "https://matchme-production-73a8.up.railway.app";
+
+  // Guardrail: serve profilo + token
   if(localStorage.getItem("profile_complete") !== "true"){
+    location.href = "step1.html";
+  }
+  const sessionToken = (localStorage.getItem("session_token") || "").trim();
+  if(!sessionToken){
+    alert("Token mancante. Rifai il profilo.");
     location.href = "step1.html";
   }
 
@@ -159,7 +166,7 @@
     const a = [];
     for(let i=1;i<=10;i++){
       const v = parseInt(localStorage.getItem("q"+i) || "0", 10);
-      if(!v) return null; // non completate
+      if(!v) return null;
       a.push(v);
     }
     return a;
@@ -167,14 +174,8 @@
 
   const myAnswers = readAnswers();
   if(!myAnswers){
-    // non finite -> torna alle domande
     location.href = "domande.html";
   }
-
-  // --------------------------------------------
-  // MATCHING: per ora "local demo"
-  // In futuro: sostituire questa parte con API backend che restituisce altri utenti + loro answers.
-  // --------------------------------------------
 
   // Compatibilità: 1-5, differenza massima 4 per domanda
   function compatibility(a, b){
@@ -186,58 +187,81 @@
     return Math.max(0, Math.min(100, score));
   }
 
-  // Dataset locale: array di utenti (placeholder).
-  // Se non esiste, non inventiamo match finti: mostriamo "in attesa".
-  // (In debug, puoi popolarlo manualmente più avanti.)
-  const others = (() => {
+  function escapeHtml(str){
+    return String(str)
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  async function loadParticipants(){
     try{
-      const raw = localStorage.getItem("event_users");
-      if(!raw) return [];
-      const arr = JSON.parse(raw);
-      if(!Array.isArray(arr)) return [];
-      return arr;
+      const res = await fetch(API_BASE + "/api/participants", {
+        method: "GET",
+        headers: {
+          "Authorization": "Bearer " + sessionToken
+        }
+      });
+
+      const data = await res.json().catch(() => null);
+
+      if(!res.ok || !data || !data.ok || !Array.isArray(data.participants)){
+        showError("Errore caricamento partecipanti");
+        return;
+      }
+
+      renderMatches(data.participants);
     }catch(e){
-      return [];
+      showError("Errore connessione server");
     }
-  })();
+  }
 
-  // Filtra me stesso se presente
-  const myName = (localStorage.getItem("name") || "").trim();
-  const myTable = (localStorage.getItem("table") || "").trim();
-
-  const candidates = others.filter(u => {
-    if(!u || !u.answers || !Array.isArray(u.answers)) return false;
-    // evita matchare sé stesso (best-effort)
-    if(u.name === myName && String(u.table) === String(myTable)) return false;
-    return true;
-  });
-
-  // Calcola top
-  const ranked = candidates.map(u => ({
-    ...u,
-    score: compatibility(myAnswers, u.answers)
-  })).sort((x,y)=> y.score - x.score).slice(0, 5);
-
-  const content = document.getElementById("content");
-
-  if(ranked.length === 0){
+  function showError(msg){
+    const content = document.getElementById("content");
     content.innerHTML = `
       <div class="empty">
-        <p class="big">Ancora niente match</p>
-        <p class="sub" style="margin:0;opacity:.75">
-          Appena ci sono abbastanza partecipanti e risposte, qui compariranno i tuoi match.
-        </p>
-        <p class="hint">
-          Se vuoi testare in locale (debug), possiamo aggiungere una modalità “demo” che genera profili finti.
-        </p>
+        <p class="big">${escapeHtml(msg)}</p>
+        <p class="sub" style="margin:0;opacity:.75">Riprova tra poco.</p>
       </div>
     `;
-  }else{
+  }
+
+  function renderMatches(participants){
+    const content = document.getElementById("content");
+
+    const myName = (localStorage.getItem("name") || "").trim();
+    const myTable = (localStorage.getItem("table") || "").trim();
+
+    const candidates = participants.filter(u => {
+      if(!u || !u.answers || !Array.isArray(u.answers)) return false;
+      if(u.name === myName && String(u.table) === String(myTable)) return false;
+      return true;
+    });
+
+    const ranked = candidates.map(u => ({
+      ...u,
+      score: compatibility(myAnswers, u.answers)
+    })).sort((x,y)=> y.score - x.score).slice(0, 5);
+
+    if(ranked.length === 0){
+      content.innerHTML = `
+        <div class="empty">
+          <p class="big">Ancora niente match</p>
+          <p class="sub" style="margin:0;opacity:.75">
+            Appena ci sono abbastanza partecipanti e risposte, qui compariranno i tuoi match.
+          </p>
+        </div>
+      `;
+      return;
+    }
+
     const list = document.createElement("div");
     list.className = "list";
 
     ranked.forEach(u => {
-      const pct = u.score.toFixed(2) + "%";
+      const pct = (typeof u.score === "number" ? u.score : 0).toFixed(2) + "%";
       const div = document.createElement("div");
       div.className = "match";
       div.innerHTML = `
@@ -253,22 +277,16 @@
       list.appendChild(div);
     });
 
+    content.innerHTML = "";
     content.appendChild(list);
 
     const hint = document.createElement("div");
     hint.className = "hint";
-    hint.textContent = "Suggerimento: apri il profilo e usa un dettaglio (drink/musica/segno) per rompere il ghiaccio.";
+    hint.textContent = "Suggerimento: usa un dettaglio (drink/musica/segno) per rompere il ghiaccio.";
     content.appendChild(hint);
   }
 
-  function escapeHtml(str){
-    return String(str)
-      .replaceAll("&","&amp;")
-      .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;")
-      .replaceAll('"',"&quot;")
-      .replaceAll("'","&#039;");
-  }
+  loadParticipants();
 </script>
 </body>
 </html>

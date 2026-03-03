@@ -75,13 +75,6 @@
       background: rgba(255,47,146,.10);
       white-space:nowrap;
     }
-    .hint{
-      font-size:12px;
-      opacity:.65;
-      margin-top:12px;
-      line-height:1.35;
-    }
-
     .btn{
       width:100%;
       padding:16px;
@@ -90,36 +83,12 @@
       font-weight:900;
       cursor:pointer;
       user-select:none;
-      -webkit-tap-highlight-color:transparent;
       margin-top:12px;
-      transition: transform .05s ease;
-    }
-    .btn:active{transform:scale(.98)}
-    .btn-primary{
-      border:none;color:#fff;
-      background: linear-gradient(135deg, var(--pink), rgba(124,58,237,.95));
-      box-shadow:0 18px 50px rgba(255,47,146,.18);
     }
     .btn-secondary{
       background: rgba(27,0,34,.35);
       border:1.5px solid rgba(255,47,146,.40);
-      color: rgba(255,255,255,.92);
-    }
-
-    .empty{
-      text-align:center;
-      padding:8px 6px;
-    }
-    .big{
-      font-size:18px;
-      font-weight:950;
-      margin:0 0 8px 0;
-    }
-    .tiny{
-      font-size:12px;
-      opacity:.55;
-      margin-top:10px;
-      text-align:center;
+      color:#fff;
     }
   </style>
 </head>
@@ -127,166 +96,97 @@
 <body>
   <div class="wrap">
     <div class="top">
-      <img src="logo.png" class="logo-mini" alt="meety" onclick="location.href='hub.html'">
+      <img src="logo.png" class="logo-mini" onclick="location.href='hub.html'">
       <div class="pill" id="eventPill">Serata</div>
     </div>
 
     <div class="card">
       <h1>I tuoi match</h1>
-      <p class="sub" id="subtitle">Calcolati sulle risposte alle domande.</p>
+      <p class="sub">Calcolati sulle risposte alle domande.</p>
 
       <div id="content"></div>
 
       <button class="btn btn-secondary" onclick="location.href='hub.html'">Torna alla Home serata</button>
-      <button class="btn btn-primary" onclick="location.href='domande.html'">Rifai le domande</button>
-
-      <div class="tiny">Qui vedrai i match reali della serata.</div>
     </div>
   </div>
 
 <script>
-  const API_BASE = "https://matchme-production-73a8.up.railway.app";
+const API_BASE = "https://matchme-production-73a8.up.railway.app";
 
-  // Guardrail: serve profilo + token
-  if(localStorage.getItem("profile_complete") !== "true"){
-    location.href = "step1.html";
+if(localStorage.getItem("profile_complete") !== "true"){
+  location.href = "step1.html";
+}
+
+const sessionToken = localStorage.getItem("session_token");
+if(!sessionToken){
+  location.href = "step1.html";
+}
+
+const eventId = localStorage.getItem("event_id") || "";
+document.getElementById("eventPill").textContent = eventId.replaceAll("_"," ");
+
+function readAnswers(){
+  const a=[];
+  for(let i=1;i<=10;i++){
+    const v=parseInt(localStorage.getItem("q"+i)||"0",10);
+    if(!v) return null;
+    a.push(v);
   }
-  const sessionToken = (localStorage.getItem("session_token") || "").trim();
-  if(!sessionToken){
-    alert("Token mancante. Rifai il profilo.");
-    location.href = "step1.html";
-  }
+  return a;
+}
 
-  // Event pill
-  const eventId = (localStorage.getItem("event_id") || "").trim();
-  document.getElementById("eventPill").textContent = eventId ? eventId.replaceAll("_"," ") : "Serata";
+const myAnswers = readAnswers();
+const mySeek = localStorage.getItem("gender_seek") || "";
+const myGender = localStorage.getItem("gender_me") || "";
 
-  // Leggi risposte 10 domande
-  function readAnswers(){
-    const a = [];
-    for(let i=1;i<=10;i++){
-      const v = parseInt(localStorage.getItem("q"+i) || "0", 10);
-      if(!v) return null;
-      a.push(v);
+function compatibility(a,b){
+  let sum=0;
+  for(let i=0;i<a.length;i++) sum+=Math.abs(a[i]-b[i]);
+  return 100-(sum/(4*a.length))*100;
+}
+
+async function load(){
+  const res = await fetch(API_BASE+"/api/participants",{
+    headers:{Authorization:"Bearer "+sessionToken}
+  });
+  const data = await res.json();
+  const participants = data.participants || [];
+
+  const filtered = participants.filter(p=>{
+    if(!p.answers) return false;
+
+    // filtro per preferenza sesso
+    if(mySeek && mySeek !== "Tutti" && mySeek !== "Indifferente"){
+      if(p.gender_me !== mySeek) return false;
     }
-    return a;
+
+    return true;
+  });
+
+  const ranked = filtered.map(p=>({
+    ...p,
+    score: compatibility(myAnswers,p.answers)
+  })).sort((a,b)=>b.score-a.score);
+
+  const content = document.getElementById("content");
+
+  if(ranked.length===0){
+    content.innerHTML="<p>Nessun match compatibile al momento.</p>";
+    return;
   }
 
-  const myAnswers = readAnswers();
-  if(!myAnswers){
-    location.href = "domande.html";
-  }
-
-  // Compatibilità: 1-5, differenza massima 4 per domanda
-  function compatibility(a, b){
-    const n = Math.min(a.length, b.length);
-    let sumDiff = 0;
-    for(let i=0;i<n;i++) sumDiff += Math.abs(a[i]-b[i]);
-    const maxDiff = 4 * n;
-    const score = 100 - (sumDiff / maxDiff) * 100;
-    return Math.max(0, Math.min(100, score));
-  }
-
-  function escapeHtml(str){
-    return String(str)
-      .replaceAll("&","&amp;")
-      .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;")
-      .replaceAll('"',"&quot;")
-      .replaceAll("'","&#039;");
-  }
-
-  async function loadParticipants(){
-    try{
-      const res = await fetch(API_BASE + "/api/participants", {
-        method: "GET",
-        headers: {
-          "Authorization": "Bearer " + sessionToken
-        }
-      });
-
-      const data = await res.json().catch(() => null);
-
-      if(!res.ok || !data || !data.ok || !Array.isArray(data.participants)){
-        showError("Errore caricamento partecipanti");
-        return;
-      }
-
-      renderMatches(data.participants);
-    }catch(e){
-      showError("Errore connessione server");
-    }
-  }
-
-  function showError(msg){
-    const content = document.getElementById("content");
-    content.innerHTML = `
-      <div class="empty">
-        <p class="big">${escapeHtml(msg)}</p>
-        <p class="sub" style="margin:0;opacity:.75">Riprova tra poco.</p>
+  content.innerHTML = ranked.slice(0,5).map(p=>`
+    <div class="match">
+      <div>
+        <div class="m-name">${p.name}</div>
+        <div class="m-meta">Tavolo ${p.table}</div>
       </div>
-    `;
-  }
+      <div class="pct">${p.score.toFixed(1)}%</div>
+    </div>
+  `).join("");
+}
 
-  function renderMatches(participants){
-    const content = document.getElementById("content");
-
-    const myName = (localStorage.getItem("name") || "").trim();
-    const myTable = (localStorage.getItem("table") || "").trim();
-
-    const candidates = participants.filter(u => {
-      if(!u || !u.answers || !Array.isArray(u.answers)) return false;
-      if(u.name === myName && String(u.table) === String(myTable)) return false;
-      return true;
-    });
-
-    const ranked = candidates.map(u => ({
-      ...u,
-      score: compatibility(myAnswers, u.answers)
-    })).sort((x,y)=> y.score - x.score).slice(0, 5);
-
-    if(ranked.length === 0){
-      content.innerHTML = `
-        <div class="empty">
-          <p class="big">Ancora niente match</p>
-          <p class="sub" style="margin:0;opacity:.75">
-            Appena ci sono abbastanza partecipanti e risposte, qui compariranno i tuoi match.
-          </p>
-        </div>
-      `;
-      return;
-    }
-
-    const list = document.createElement("div");
-    list.className = "list";
-
-    ranked.forEach(u => {
-      const pct = (typeof u.score === "number" ? u.score : 0).toFixed(2) + "%";
-      const div = document.createElement("div");
-      div.className = "match";
-      div.innerHTML = `
-        <div class="m-left">
-          <p class="m-name">${escapeHtml(u.name || "Sconosciuto")}</p>
-          <p class="m-meta">Tavolo ${escapeHtml(String(u.table || "—"))}</p>
-        </div>
-        <div class="m-right">
-          <div class="pct">${pct}</div>
-          <div class="m-meta">${escapeHtml(u.zodiac || "")}</div>
-        </div>
-      `;
-      list.appendChild(div);
-    });
-
-    content.innerHTML = "";
-    content.appendChild(list);
-
-    const hint = document.createElement("div");
-    hint.className = "hint";
-    hint.textContent = "Suggerimento: usa un dettaglio (drink/musica/segno) per rompere il ghiaccio.";
-    content.appendChild(hint);
-  }
-
-  loadParticipants();
+load();
 </script>
 </body>
 </html>

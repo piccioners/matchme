@@ -1,6 +1,7 @@
 import os
 import uuid
 import json
+import random
 from datetime import datetime, timezone
 
 from flask import Flask, request, jsonify
@@ -105,6 +106,88 @@ def admin_clear_event():
             cur.execute(f"DELETE FROM {TABLE_NAME} WHERE event_id=%s", (event_id,))
             deleted = cur.rowcount
         return jsonify({"ok": True, "event_id": event_id, "deleted": deleted})
+    finally:
+        conn.close()
+
+@app.post("/api/admin/seed_demo")
+def admin_seed_demo():
+    ok, err, code = require_admin()
+    if not ok:
+        return err, code
+
+    data = request.get_json(force=True, silent=True) or {}
+    event_id = (data.get("event_id") or "").strip()
+    count = data.get("count", 10)
+
+    try:
+        count = int(count)
+    except Exception:
+        count = 10
+
+    if not event_id:
+        return jsonify({"error": "missing_event_id"}), 400
+
+    if count < 1:
+        return jsonify({"error": "count_too_small"}), 400
+    if count > 50:
+        return jsonify({"error": "count_too_large"}), 400
+
+    names_pool = [
+        "Anna","Giulia","Martina","Sara","Elena","Chiara","Francesca","Valeria",
+        "Luca","Marco","Matteo","Andrea","Davide","Gabriele","Simone","Federico",
+        "Alex","Sam","Nico","Vale"
+    ]
+    zodiacs = ["Ariete","Toro","Gemelli","Cancro","Leone","Vergine","Bilancia","Scorpione","Sagittario","Capricorno","Acquario","Pesci"]
+    drinks = ["Spritz / Aperitivo","Gin Tonic","Birra","Vino","Cocktail dolce","Cocktail amaro","Analcolico","Mi va tutto"]
+    musics = ["Pop","Rap / Trap","House","Techno / EDM","Reggaeton","Rock","Indie","Di tutto"]
+    statuses = ["Single","Impegnato/a","Complicato","Preferisco non dirlo"]
+    purposes = ["Flirt","Conoscere gente","Divertirmi","Vediamo che succede"]
+
+    gender_me_options = ["Uomo","Donna","Altro","Preferisco non dirlo"]
+    gender_seek_options = ["Uomo","Donna","Tutti","Indifferente"]
+
+    tables_pool = ["1","2","3","4","5","6","7","8","9","10","20","21","22","23","60","61","62","63","64","65"]
+
+    created = 0
+
+    conn = get_db()
+    try:
+        with conn, conn.cursor() as cur:
+            for i in range(count):
+                user_id = uuid.uuid4()
+                session_token = uuid.uuid4().hex + uuid.uuid4().hex
+
+                name = random.choice(names_pool) + "Demo" + str(random.randint(1, 999))
+                table_no = random.choice(tables_pool)
+
+                gender_me = random.choice(gender_me_options)
+                gender_seek = random.choice(gender_seek_options)
+
+                status = random.choice(statuses)
+                purpose = random.choice(purposes)
+                zodiac = random.choice(zodiacs)
+                drink = random.choice(drinks)
+                music = random.choice(musics)
+
+                answers = [random.randint(1, 5) for _ in range(10)]
+
+                cur.execute(f"""
+                  INSERT INTO {TABLE_NAME}(
+                    id, event_id, session_token, created_at,
+                    name, table_no,
+                    gender_me, gender_seek, status, purpose, zodiac, drink, music,
+                    answers
+                  )
+                  VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                """, (
+                    str(user_id), event_id, session_token, now_utc(),
+                    name, table_no,
+                    gender_me, gender_seek, status, purpose, zodiac, drink, music,
+                    json.dumps(answers)
+                ))
+                created += 1
+
+        return jsonify({"ok": True, "event_id": event_id, "created": created})
     finally:
         conn.close()
 

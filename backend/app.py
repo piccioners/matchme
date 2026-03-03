@@ -77,6 +77,37 @@ def auth_user():
     finally:
         conn.close()
 
+def require_admin():
+    expected = (os.environ.get("ADMIN_KEY") or "").strip()
+    if not expected:
+        return False, jsonify({"error": "admin_not_configured"}), 500
+
+    got = (request.headers.get("X-Admin-Key") or "").strip()
+    if not got or got != expected:
+        return False, jsonify({"error": "forbidden"}), 403
+
+    return True, None, None
+
+@app.post("/api/admin/clear_event")
+def admin_clear_event():
+    ok, err, code = require_admin()
+    if not ok:
+        return err, code
+
+    data = request.get_json(force=True, silent=True) or {}
+    event_id = (data.get("event_id") or "").strip()
+    if not event_id:
+        return jsonify({"error": "missing_event_id"}), 400
+
+    conn = get_db()
+    try:
+        with conn, conn.cursor() as cur:
+            cur.execute(f"DELETE FROM {TABLE_NAME} WHERE event_id=%s", (event_id,))
+            deleted = cur.rowcount
+        return jsonify({"ok": True, "event_id": event_id, "deleted": deleted})
+    finally:
+        conn.close()
+
 @app.post("/api/register")
 def register():
     data = request.get_json(force=True, silent=True) or {}

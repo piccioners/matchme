@@ -89,7 +89,6 @@
     }
 
     /* ===== BOTTONI ===== */
-
     .btn{
       width:100%;
       padding:18px;
@@ -121,9 +120,17 @@
   </style>
 
   <script>
+    // ID serata (cambialo SOLO a inizio evento)
     localStorage.setItem("event_id", "GAETA_2026_06_15");
 
     (function(){
+      // ✅ Se arrivi qui da "Torna alla home", NON fare redirect automatici
+      const forceHome = sessionStorage.getItem("force_home");
+      if(forceHome === "1"){
+        sessionStorage.removeItem("force_home");
+        return;
+      }
+
       const complete = localStorage.getItem("profile_complete");
       if(complete === "true"){
         window.location.href = "hub.html";

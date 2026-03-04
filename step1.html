@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>meety · Profilo (1/4)</title>
+  <title>meety · Profilo</title>
   <link rel="stylesheet" href="style.css">
 
   <style>
@@ -82,51 +82,45 @@
       border-radius:18px;
       padding:16px;
       backdrop-filter: blur(10px);
-      min-height: 420px;                 /* uguale negli step */
+      min-height: 420px;
       max-height: calc(100svh - 120px);
       overflow:hidden;
     }
 
     .field{margin-top:14px}
 
-    .label-row{
-      display:flex;
-      align-items:flex-end;
-      justify-content:space-between;
-      gap:10px;
-      margin-bottom:4px;
-    }
-
+    /* ✅ LABEL GRANDI */
     .label{
-      font-size:14px;                    /* più proporzionato */
-      font-weight:900;
+      font-size:18px;
+      font-weight:950;
       letter-spacing:.2px;
       margin:0;
-      opacity:.92;
+      opacity:.96;
     }
-
     .req{
-      color: var(--pink);                /* semplice, rosa, vicino alla label */
-      font-weight:900;
+      color: var(--pink);
+      font-weight:950;
       margin-left:6px;
     }
 
+    /* ✅ HELP PICCOLO */
     .help{
-      margin:0 0 6px 0;
+      margin:6px 0 8px 0;
       font-size:12px;
       opacity:.68;
       line-height:1.25;
     }
 
+    /* ✅ INPUT/SELECT PIÙ COMPACT (più piccoli della label) */
     input,select{
       width:100%;
-      padding:18px;
-      border-radius:16px;
+      padding:13px 14px;          /* 🔧 più piccolo */
+      border-radius:14px;
       border:1px solid rgba(255,255,255,.12);
       background: rgba(27,0,34,.55);
       color:#fff;
-      font-size:17px;                    /* leggermente meno enorme */
-      font-weight:850;
+      font-size:15px;             /* 🔧 più piccolo */
+      font-weight:800;
       outline:none;
       -webkit-appearance:none;
       appearance:none;
@@ -134,7 +128,7 @@
     input::placeholder{opacity:.45;font-weight:750}
 
     .note{
-      margin-top:4px;                    /* più vicino */
+      margin-top:4px;
       font-size:12px;
       opacity:.58;
       line-height:1.25;
@@ -184,34 +178,28 @@
 <body>
   <div class="page" id="page">
     <div class="top">
-      <img src="logo.png" class="logo-mini" alt="meety" onclick="location.href='index.html'">
+      <img src="logo.png" class="logo-mini" alt="meety" onclick="goHome()">
       <div class="step-pill">1/4</div>
     </div>
 
     <div class="card">
       <div class="field">
-        <div class="label-row">
-          <div class="label">Il tuo tavolo<span class="req">*</span></div>
-        </div>
-        <p class="help">Il numero del tavolo in cui ti trovi.</p>
+        <div class="label">Il tuo tavolo<span class="req">*</span></div>
+        <div class="help">Il numero del tavolo in cui ti trovi.</div>
         <select id="table">
           <option value="">Seleziona tavolo</option>
         </select>
       </div>
 
       <div class="field">
-        <div class="label-row">
-          <div class="label">Il tuo nome<span class="req">*</span></div>
-        </div>
-        <p class="help">Il nome che verrà mostrato nei match.</p>
+        <div class="label">Il tuo nome<span class="req">*</span></div>
+        <div class="help">Il nome che verrà mostrato nei match.</div>
         <input id="name" placeholder="Es. Marco">
-        <div class="note">
-          Niente insulti o nomi offensivi: verranno rimossi.
-        </div>
+        <div class="note">Niente insulti o nomi offensivi: verranno rimossi.</div>
       </div>
 
       <button class="btn" onclick="next()">Avanti</button>
-      <div class="link" onclick="location.href='index.html'">Torna alla home</div>
+      <div class="link" onclick="goHome()">Torna alla home</div>
     </div>
 
     <div class="dots">
@@ -227,19 +215,14 @@
 
   if(localStorage.getItem("profile_complete")==="true"){ location.href="hub.html"; }
 
-  // === TUOI TAVOLI (li mantengo) ===
+  // ✅ TUOI TAVOLI (li mantengo)
   const TAVOLI=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50];
 
-  // blacklist: parole “vere”
   const BANNED_WORDS = [
     "cazzo","merda","dio","porco","puttana","stronzo",
     "troia","bastardo","negro","frocio"
   ];
-
-  // join-check ristretto (solo quelle più “comuni” nei trucchetti)
-  const BANNED_JOIN = [
-    "cazzo","merda","puttana","stronzo","troia","bastardo"
-  ];
+  const BANNED_JOIN = ["cazzo","merda","puttana","stronzo","troia","bastardo"];
 
   const tableSelect=document.getElementById("table");
   TAVOLI.forEach(t=>{
@@ -254,21 +237,10 @@
 
   function normalizeName(raw){
     let s = String(raw || "").trim().toLowerCase();
-
-    // rimuovi accenti (strónzo -> stronzo)
-    try{
-      s = s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    }catch(e){}
-
-    // tieni solo lettere/numeri/spazi
+    try{ s = s.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); }catch(e){}
     s = s.replace(/[^a-z0-9 ]+/g, " ");
-
-    // collassa spazi
     s = s.replace(/\s+/g, " ").trim();
-
-    // comprimi lettere ripetute (aaa -> a)
     s = s.replace(/([a-z])\1{2,}/g, "$1");
-
     return s;
   }
 
@@ -276,51 +248,38 @@
     const n = normalizeName(name);
     const words = n.split(" ").filter(Boolean);
 
-    // parole vietate (forte ma giusto)
     for(const w of BANNED_WORDS){
       if(words.includes(w)) return true;
     }
 
-    // join-check: solo se abbastanza lungo (evita falsi positivi tipo Claudio)
     const joined = words.join("");
     if(joined.length >= 6){
       for(const w of BANNED_JOIN){
         if(joined.includes(w)) return true;
       }
     }
-
     return false;
+  }
+
+  // ✅ HOME “VERA”: evita rimbalzi su index
+  function goHome(){
+    sessionStorage.setItem("force_home", "1");
+    location.href = "index.html";
   }
 
   function next(){
     const name=document.getElementById("name").value.trim();
     const table=document.getElementById("table").value;
 
-    if(!name || !table){
-      alert("Compila tutti i campi");
-      return;
-    }
+    if(!name || !table){ alert("Compila tutti i campi"); return; }
 
     const prettyName = name.replace(/\s+/g, " ").trim();
-
-    // limiti pratici
-    if(prettyName.length < 2){
-      alert("Inserisci un nome più lungo");
-      return;
-    }
-    if(prettyName.length > 24){
-      alert("Nome troppo lungo");
-      return;
-    }
-
-    if(isBanned(prettyName)){
-      alert("Scegli un nome diverso");
-      return;
-    }
+    if(prettyName.length < 2){ alert("Inserisci un nome più lungo"); return; }
+    if(prettyName.length > 24){ alert("Nome troppo lungo"); return; }
+    if(isBanned(prettyName)){ alert("Scegli un nome diverso"); return; }
 
     localStorage.setItem("name", prettyName);
     localStorage.setItem("table", table);
-
     localStorage.setItem("profile_started","true");
     localStorage.setItem("profile_step","2");
 

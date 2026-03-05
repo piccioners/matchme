@@ -5,30 +5,52 @@
   --stroke: rgba(255,47,146,.35);
   --ink:#fff;
 
-  /* 🔧 “rettangolo” uguale per tutti: altezza card */
-  --card-h: 90svh;          /* alza/abbassa qui: 70-76svh di solito è perfetto */
-  --page-pad: 18px;         /* padding esterno */
-  --top-gap: 12px;          /* spazio tra header e card */
+  /* ✅ Rettangolo “uguale” ma intelligente:
+     - stesso valore per tutti gli step
+     - si adatta un minimo ai telefoni strani
+     - se NON basta, scrolla la pagina (mai la card) */
+  --card-h: clamp(520px, 72svh, 660px);
+
+  --page-pad: 18px;   /* padding esterno */
+  --top-gap: 12px;    /* spazio tra header e card */
+  --dots-gap: 12px;   /* spazio tra card e dots */
 }
 
-*{box-sizing:border-box}
+*{ box-sizing:border-box; }
+
+html, body{
+  height: 100%;
+}
 
 body{
   margin:0;
-  height:100svh;
-  overflow:hidden; /* default: niente scroll */
+
+  /* ✅ REGOLA CHIAVE: la pagina può scrollare SEMPRE (se serve) */
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  /* Layout */
   display:flex;
-  align-items:center;
   justify-content:center;
+  align-items:flex-start;
+
   color:var(--ink);
   font-family:system-ui,-apple-system,BlinkMacSystemFont;
+
   background:
     radial-gradient(1200px 800px at 20% 10%, rgba(124,58,237,.22), transparent 55%),
     radial-gradient(900px 700px at 80% 20%, rgba(255,47,146,.18), transparent 55%),
     linear-gradient(180deg, var(--bg1), var(--bg2));
-  padding:var(--page-pad);
+
+  /* Safe-area friendly */
+  padding:
+    calc(var(--page-pad) + env(safe-area-inset-top, 0px))
+    calc(var(--page-pad) + env(safe-area-inset-right, 0px))
+    calc(var(--page-pad) + env(safe-area-inset-bottom, 0px))
+    calc(var(--page-pad) + env(safe-area-inset-left, 0px));
 }
 
+/* grana/overlay */
 body::before{
   content:"";
   position:fixed;
@@ -42,16 +64,16 @@ body::before{
   transform:rotate(6deg);
 }
 
-/* Page + animazioni */
+/* ========= PAGE + ANIM ========= */
 .page{
   width:100%;
   max-width:420px;
   animation: var(--anim, none) 260ms cubic-bezier(.2,.8,.2,1) both;
 }
-@keyframes inRight{from{transform:translateX(24px);opacity:0}to{transform:none;opacity:1}}
-@keyframes inLeft {from{transform:translateX(-24px);opacity:0}to{transform:none;opacity:1}}
+@keyframes inRight{ from{ transform:translateX(24px); opacity:0 } to{ transform:none; opacity:1 } }
+@keyframes inLeft { from{ transform:translateX(-24px); opacity:0 } to{ transform:none; opacity:1 } }
 
-/* Header (logo + step) */
+/* ========= HEADER (logo + step) ========= */
 .top{
   display:flex;
   align-items:center;
@@ -75,7 +97,7 @@ body::before{
   white-space:nowrap;
 }
 
-/* ✅ LA CARD: rettangolo identico */
+/* ========= CARD (rettangolo identico) ========= */
 .card{
   background:var(--panel);
   border:1px solid var(--stroke);
@@ -84,17 +106,19 @@ body::before{
   backdrop-filter: blur(10px);
 
   height: var(--card-h);
+
   display:flex;
   flex-direction:column;
 
-  overflow:hidden; /* niente scroll interno */
+  /* ✅ niente scroll nella card */
+  overflow:hidden;
 }
 
-/* Contenuto della card: distribuzione coerente */
-.section{margin-top:10px}
-.section + .section{margin-top:16px}
+/* Sezioni dentro card */
+.section{ margin-top:10px; }
+.section + .section{ margin-top:16px; }
 
-/* Etichette */
+/* ========= TEXT / LABEL ========= */
 .label{
   margin:0 0 10px 0;
   font-size:18px;
@@ -110,24 +134,53 @@ body::before{
   font-size:18px;
   line-height:1;
 }
+.help{
+  margin:6px 0 8px 0;
+  font-size:12px;
+  opacity:.68;
+  line-height:1.25;
+}
+.note{
+  margin-top:6px;
+  font-size:12px;
+  opacity:.58;
+  line-height:1.25;
+}
 
-/* Stack / grid */
+/* ========= INPUT / SELECT (serve per step1 e step4) ========= */
+input, select{
+  width:100%;
+  padding:13px 14px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.12);
+  background: rgba(27,0,34,.55);
+  color:#fff;
+  font-size:15px;
+  font-weight:800;
+  outline:none;
+  -webkit-appearance:none;
+  appearance:none;
+}
+input::placeholder{ opacity:.45; font-weight:750; }
+
+.field{ margin-top:14px; }
+
+/* ========= STACK / GRID ========= */
 .stack{
   display:flex;
   flex-direction:column;
   gap:10px;
 }
-
 .grid2{
   display:grid;
   grid-template-columns:1fr 1fr;
   gap:10px;
 }
 @media(max-width:360px){
-  .grid2{grid-template-columns:1fr;}
+  .grid2{ grid-template-columns:1fr; }
 }
 
-/* Pill */
+/* ========= PILL ========= */
 .pill{
   padding:14px 14px;
   border-radius:16px;
@@ -150,16 +203,16 @@ body::before{
 
   min-height:56px;
 }
-.pill:active{transform:scale(.99)}
+.pill:active{ transform:scale(.99); }
 .pill.active{
   border-color: rgba(255,47,146,.75);
   background: rgba(255,47,146,.14);
   box-shadow: 0 12px 30px rgba(255,47,146,.12);
 }
 
-/* Bottoni (sempre in fondo alla card) */
+/* ========= BUTTONS (sempre in fondo alla card) ========= */
 .btn-row{
-  margin-top:auto;          /* spinge i bottoni in basso: layout stabile */
+  margin-top:auto;   /* spinge i bottoni in basso */
   display:flex;
   justify-content:space-between;
   gap:12px;
@@ -177,7 +230,7 @@ body::before{
   transition: transform .05s ease;
   white-space:nowrap;
 }
-.btn:active{transform:scale(.99)}
+.btn:active{ transform:scale(.99); }
 .btn-secondary{
   background: rgba(27,0,34,.35);
   border: 1.5px solid rgba(255,47,146,.45);
@@ -190,27 +243,44 @@ body::before{
   box-shadow:0 18px 50px rgba(255,47,146,.18);
 }
 
-/* Dots */
+/* Link tipo “Torna alla home” */
+.link{
+  margin-top:10px;
+  text-align:center;
+  font-size:12px;
+  opacity:.65;
+  text-decoration:underline;
+  cursor:pointer;
+}
+
+/* ========= DOTS ========= */
 .dots{
   display:flex;
   justify-content:center;
   gap:8px;
-  margin-top:12px;
+  margin-top:var(--dots-gap);
 }
 .dot{
-  width:8px;height:8px;border-radius:999px;
+  width:8px;
+  height:8px;
+  border-radius:999px;
   background: rgba(255,255,255,.18);
-  border:1px solid rgba(255,255,255,.10)
+  border:1px solid rgba(255,255,255,.10);
 }
-.dot.active{background: rgba(255,47,146,.85); transform: scale(1.25)}
+.dot.active{
+  background: rgba(255,47,146,.85);
+  transform: scale(1.25);
+}
 
-
-/* ✅ TELEFONI BASSI: comprimi tutto per evitare scroll */
-@media (max-height: 720px){
+/* ========= COMPATTAZIONE (quando lo schermo è basso) =========
+   Non “attiva scroll”: lo scroll è già sempre possibile.
+   Qui comprimiamo solo dimensioni/spazi per farci stare più roba. */
+@media (max-height: 780px){
   :root{
-    --card-h: 74svh;     /* un filo più alta perché l’header occupa meno percezione */
+    --card-h: clamp(500px, 74svh, 640px);
     --page-pad: 14px;
     --top-gap: 10px;
+    --dots-gap: 10px;
   }
   .card{ padding:14px; border-radius:16px; }
   .label{ font-size:17px; margin-bottom:8px; }
@@ -223,12 +293,10 @@ body::before{
   .btn{ padding:13px 10px; font-size:14px; }
 }
 
-/* ✅ TELEFONI DAVVERO PICCOLI: se non basta, scrolla la pagina (non la card) */
-@media (max-height: 620px){
-  body{
-    overflow:auto;                 /* scroll esterno */
-    align-items:flex-start;        /* parte dall’alto */
-    padding-top:14px;
-    padding-bottom:18px;
+@media (max-height: 680px){
+  :root{
+    --card-h: clamp(470px, 78svh, 600px);
   }
+  input,select{ padding:12px 12px; font-size:14px; }
+  .help,.note{ font-size:11px; }
 }

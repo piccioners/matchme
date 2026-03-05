@@ -5,31 +5,57 @@
   --stroke: rgba(255,47,146,.35);
   --ink:#fff;
 
-  /* ✅ Rettangolo “uguale” ma intelligente:
-     - stesso valore per tutti gli step
-     - si adatta un minimo ai telefoni strani
-     - se NON basta, scrolla la pagina (mai la card) */
-  --card-h: clamp(520px, 72svh, 660px);
+  /* Padding pagina */
+  --page-pad: 18px;
 
-  --page-pad: 18px;   /* padding esterno */
-  --top-gap: 12px;    /* spazio tra header e card */
-  --dots-gap: 12px;   /* spazio tra card e dots */
+  /* Spazi verticali fissi del layout */
+  --top-gap: 12px;     /* spazio tra header e card */
+  --dots-gap: 12px;    /* spazio tra card e dots */
+
+  /* Altezza “stimata” header e dots per calcolare la card in modo stabile */
+  --header-h: 54px;
+  --dots-h: 20px;
+
+  /* ✅ Card calcolata: usa quasi tutto lo schermo.
+     È SEMPRE uguale tra gli step perché la formula è la stessa. */
+  --card-h: calc(
+    100svh
+    - (var(--page-pad) * 2)
+    - var(--header-h)
+    - var(--top-gap)
+    - var(--dots-h)
+    - var(--dots-gap)
+  );
+
+  /* Clamp finale per evitare risultati assurdi */
+  --card-h-clamped: clamp(460px, var(--card-h), 720px);
+
+  /* Spazi interni responsivi */
+  --card-pad: clamp(12px, 2.2svh, 16px);
+  --section-gap: clamp(10px, 2svh, 16px);
+
+  /* Pill responsive (questa è la parte che salva step2) */
+  --pill-font: clamp(14px, 2.0svh, 16px);
+  --pill-pad-y: clamp(10px, 1.8svh, 14px);
+  --pill-pad-x: clamp(10px, 2.2svh, 14px);
+  --pill-min-h: clamp(46px, 6.8svh, 56px);
+
+  /* Bottoni responsive */
+  --btn-font: clamp(14px, 2.0svh, 15px);
+  --btn-pad-y: clamp(12px, 2.0svh, 14px);
 }
 
 *{ box-sizing:border-box; }
 
-html, body{
-  height: 100%;
-}
+html, body{ height:100%; }
 
 body{
   margin:0;
 
-  /* ✅ REGOLA CHIAVE: la pagina può scrollare SEMPRE (se serve) */
-  overflow-y: auto;
-  overflow-x: hidden;
+  /* ✅ la pagina può scrollare sempre se serve */
+  overflow-y:auto;
+  overflow-x:hidden;
 
-  /* Layout */
   display:flex;
   justify-content:center;
   align-items:flex-start;
@@ -42,7 +68,6 @@ body{
     radial-gradient(900px 700px at 80% 20%, rgba(255,47,146,.18), transparent 55%),
     linear-gradient(180deg, var(--bg1), var(--bg2));
 
-  /* Safe-area friendly */
   padding:
     calc(var(--page-pad) + env(safe-area-inset-top, 0px))
     calc(var(--page-pad) + env(safe-area-inset-right, 0px))
@@ -50,7 +75,6 @@ body{
     calc(var(--page-pad) + env(safe-area-inset-left, 0px));
 }
 
-/* grana/overlay */
 body::before{
   content:"";
   position:fixed;
@@ -70,23 +94,27 @@ body::before{
   max-width:420px;
   animation: var(--anim, none) 260ms cubic-bezier(.2,.8,.2,1) both;
 }
+
 @keyframes inRight{ from{ transform:translateX(24px); opacity:0 } to{ transform:none; opacity:1 } }
 @keyframes inLeft { from{ transform:translateX(-24px); opacity:0 } to{ transform:none; opacity:1 } }
 
-/* ========= HEADER (logo + step) ========= */
+/* ========= HEADER ========= */
 .top{
+  min-height: var(--header-h);
   display:flex;
   align-items:center;
   justify-content:space-between;
   gap:12px;
   margin-bottom:var(--top-gap);
 }
+
 .logo-mini{
   width:92px;
   max-width:44vw;
   filter: drop-shadow(0 14px 34px rgba(255,47,146,.18));
   cursor:pointer;
 }
+
 .step-pill{
   font-size:12px;
   opacity:.78;
@@ -97,28 +125,28 @@ body::before{
   white-space:nowrap;
 }
 
-/* ========= CARD (rettangolo identico) ========= */
+/* ========= CARD ========= */
 .card{
   background:var(--panel);
   border:1px solid var(--stroke);
   border-radius:18px;
-  padding:16px;
+  padding:var(--card-pad);
   backdrop-filter: blur(10px);
 
-  height: var(--card-h);
+  height: var(--card-h-clamped);
 
   display:flex;
   flex-direction:column;
 
-  /* ✅ niente scroll nella card */
+  /* niente scroll interno */
   overflow:hidden;
 }
 
-/* Sezioni dentro card */
-.section{ margin-top:10px; }
-.section + .section{ margin-top:16px; }
+/* ========= SEZIONI ========= */
+.section{ margin-top: 0; }
+.section + .section{ margin-top: var(--section-gap); }
 
-/* ========= TEXT / LABEL ========= */
+/* ========= TESTI ========= */
 .label{
   margin:0 0 10px 0;
   font-size:18px;
@@ -128,18 +156,21 @@ body::before{
   align-items:baseline;
   gap:8px;
 }
+
 .req{
   color:var(--pink);
   font-weight:950;
   font-size:18px;
   line-height:1;
 }
+
 .help{
   margin:6px 0 8px 0;
   font-size:12px;
   opacity:.68;
   line-height:1.25;
 }
+
 .note{
   margin-top:6px;
   font-size:12px;
@@ -147,7 +178,7 @@ body::before{
   line-height:1.25;
 }
 
-/* ========= INPUT / SELECT (serve per step1 e step4) ========= */
+/* ========= INPUT / SELECT ========= */
 input, select{
   width:100%;
   padding:13px 14px;
@@ -163,14 +194,13 @@ input, select{
 }
 input::placeholder{ opacity:.45; font-weight:750; }
 
-.field{ margin-top:14px; }
-
 /* ========= STACK / GRID ========= */
 .stack{
   display:flex;
   flex-direction:column;
   gap:10px;
 }
+
 .grid2{
   display:grid;
   grid-template-columns:1fr 1fr;
@@ -180,19 +210,22 @@ input::placeholder{ opacity:.45; font-weight:750; }
   .grid2{ grid-template-columns:1fr; }
 }
 
-/* ========= PILL ========= */
+/* ========= PILL (RESPONSIVE) ========= */
 .pill{
-  padding:14px 14px;
+  padding: var(--pill-pad-y) var(--pill-pad-x);
   border-radius:16px;
   border:1px solid rgba(255,255,255,.12);
   background: rgba(27,0,34,.45);
   color: rgba(255,255,255,.92);
-  font-size:16px;
+
+  font-size: var(--pill-font);
   font-weight:900;
   text-align:center;
+
   cursor:pointer;
   user-select:none;
   -webkit-tap-highlight-color:transparent;
+
   transition: transform .06s ease, box-shadow .15s ease, background .15s ease, border-color .15s ease;
   white-space:normal;
   line-height:1.15;
@@ -201,28 +234,30 @@ input::placeholder{ opacity:.45; font-weight:750; }
   align-items:center;
   justify-content:center;
 
-  min-height:56px;
+  min-height: var(--pill-min-h);
 }
 .pill:active{ transform:scale(.99); }
+
 .pill.active{
   border-color: rgba(255,47,146,.75);
   background: rgba(255,47,146,.14);
   box-shadow: 0 12px 30px rgba(255,47,146,.12);
 }
 
-/* ========= BUTTONS (sempre in fondo alla card) ========= */
+/* ========= BUTTONS ========= */
 .btn-row{
-  margin-top:auto;   /* spinge i bottoni in basso */
+  margin-top:auto;
   display:flex;
   justify-content:space-between;
   gap:12px;
   padding-top:16px;
 }
+
 .btn{
   flex:1;
-  padding:14px 12px;
+  padding: var(--btn-pad-y) 12px;
   border-radius:999px;
-  font-size:15px;
+  font-size: var(--btn-font);
   font-weight:950;
   cursor:pointer;
   user-select:none;
@@ -231,11 +266,13 @@ input::placeholder{ opacity:.45; font-weight:750; }
   white-space:nowrap;
 }
 .btn:active{ transform:scale(.99); }
+
 .btn-secondary{
   background: rgba(27,0,34,.35);
   border: 1.5px solid rgba(255,47,146,.45);
   color: rgba(255,255,255,.92);
 }
+
 .btn-primary{
   border:none;
   color:#fff;
@@ -243,7 +280,7 @@ input::placeholder{ opacity:.45; font-weight:750; }
   box-shadow:0 18px 50px rgba(255,47,146,.18);
 }
 
-/* Link tipo “Torna alla home” */
+/* ========= LINK ========= */
 .link{
   margin-top:10px;
   text-align:center;
@@ -255,11 +292,13 @@ input::placeholder{ opacity:.45; font-weight:750; }
 
 /* ========= DOTS ========= */
 .dots{
+  min-height: var(--dots-h);
   display:flex;
   justify-content:center;
   gap:8px;
   margin-top:var(--dots-gap);
 }
+
 .dot{
   width:8px;
   height:8px;
@@ -270,33 +309,4 @@ input::placeholder{ opacity:.45; font-weight:750; }
 .dot.active{
   background: rgba(255,47,146,.85);
   transform: scale(1.25);
-}
-
-/* ========= COMPATTAZIONE (quando lo schermo è basso) =========
-   Non “attiva scroll”: lo scroll è già sempre possibile.
-   Qui comprimiamo solo dimensioni/spazi per farci stare più roba. */
-@media (max-height: 780px){
-  :root{
-    --card-h: clamp(500px, 74svh, 640px);
-    --page-pad: 14px;
-    --top-gap: 10px;
-    --dots-gap: 10px;
-  }
-  .card{ padding:14px; border-radius:16px; }
-  .label{ font-size:17px; margin-bottom:8px; }
-  .req{ font-size:17px; }
-  .section + .section{ margin-top:12px; }
-  .stack{ gap:8px; }
-  .grid2{ gap:8px; }
-  .pill{ min-height:52px; padding:12px 12px; font-size:15px; }
-  .btn-row{ padding-top:12px; }
-  .btn{ padding:13px 10px; font-size:14px; }
-}
-
-@media (max-height: 680px){
-  :root{
-    --card-h: clamp(470px, 78svh, 600px);
-  }
-  input,select{ padding:12px 12px; font-size:14px; }
-  .help,.note{ font-size:11px; }
 }

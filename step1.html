@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>meety · Profilo</title>
 
-  <!-- UI unificata -->
   <link rel="stylesheet" href="ui.css">
 </head>
 
@@ -17,26 +16,30 @@
     </div>
 
     <div class="card">
-      <div class="section">
-        <div class="label">Il tuo tavolo<span class="req">*</span></div>
-        <div class="help">Il numero del tavolo in cui ti trovi.</div>
-        <select id="table">
-          <option value="">Seleziona tavolo</option>
-        </select>
-      </div>
+      <div class="stack">
+        <div class="section">
+          <div class="label">Il tuo tavolo<span class="req">*</span></div>
+          <div class="help">Il numero del tavolo in cui ti trovi.</div>
+          <select id="table">
+            <option value="">Seleziona tavolo</option>
+          </select>
+        </div>
 
-      <div class="section">
-        <div class="label">Il tuo nome<span class="req">*</span></div>
-        <div class="help">Il nome che verrà mostrato nei match.</div>
-        <input id="name" placeholder="Es. Marco">
-        <div class="note">Niente insulti o nomi offensivi: verranno rimossi.</div>
+        <!-- Spacer “pulito” per usare lo spazio vuoto e dare simmetria -->
+        <div style="height:16px;"></div>
+
+        <div class="section">
+          <div class="label">Il tuo nome<span class="req">*</span></div>
+          <div class="help">Il nome che verrà mostrato nei match.</div>
+          <input id="name" placeholder="Es. Marco">
+          <div class="note">Niente insulti o nomi offensivi: verranno rimossi.</div>
+        </div>
       </div>
 
       <div class="btn-row">
+        <button class="btn btn-secondary" onclick="goHome()">Torna alla home</button>
         <button class="btn btn-primary" onclick="next()">Avanti</button>
       </div>
-
-      <div class="link" onclick="goHome()">Torna alla home</div>
     </div>
 
     <div class="dots">

@@ -8,12 +8,24 @@
   <link rel="stylesheet" href="ui.css">
 
   <style>
-    /* Componenti specifici del quiz (non esistono in ui.css) */
+    .quiz-card{
+      padding:16px;
+      height:auto;
+      min-height:320px;
+    }
+
+    .question-wrap{
+      min-height:72px;
+      display:flex;
+      align-items:flex-start;
+    }
+
     .question{
       font-size:16px;
       line-height:1.4;
       font-weight:650;
       opacity:.96;
+      margin:0;
     }
 
     .scale{
@@ -21,7 +33,7 @@
       justify-content:space-between;
       align-items:center;
       gap:10px;
-      margin-top:14px;
+      margin-top:18px;
     }
 
     .scale-dot{
@@ -33,6 +45,7 @@
       transition: transform .12s ease, background .12s ease, border-color .12s ease;
       flex:0 0 auto;
     }
+
     .scale-dot.active{
       background:var(--pink);
       border-color:var(--pink);
@@ -61,9 +74,34 @@
       background:rgba(255,255,255,.20);
       transition: transform .12s ease, background .12s ease;
     }
+
     .progress-dot.active{
       background:var(--pink);
       transform:scale(1.4);
+    }
+
+    @media (max-height: 700px){
+      .quiz-card{
+        min-height:300px;
+        padding:14px;
+      }
+
+      .question-wrap{
+        min-height:64px;
+      }
+
+      .question{
+        font-size:15px;
+      }
+
+      .scale{
+        margin-top:14px;
+      }
+
+      .scale-dot{
+        width:16px;
+        height:16px;
+      }
     }
   </style>
 </head>
@@ -75,9 +113,11 @@
       <div class="step-pill" id="stepCounter">1/10</div>
     </div>
 
-    <div class="card">
+    <div class="card quiz-card">
       <div class="section">
-        <div class="question" id="questionText"></div>
+        <div class="question-wrap">
+          <p class="question" id="questionText"></p>
+        </div>
 
         <div class="scale" id="scale"></div>
 
@@ -103,6 +143,7 @@ const API_BASE = "https://matchme-production-73a8.up.railway.app";
 if(localStorage.getItem("profile_complete") !== "true"){
   location.href = "step1.html";
 }
+
 const sessionToken = (localStorage.getItem("session_token") || "").trim();
 if(!sessionToken){
   location.href = "step1.html";
@@ -141,25 +182,29 @@ QUESTIONS.forEach(() => {
 });
 
 function render(){
-  qText.textContent = QUESTIONS[current-1];
+  qText.textContent = QUESTIONS[current - 1];
   stepCounter.textContent = current + "/10";
 
   scale.innerHTML = "";
-  for(let i=1;i<=5;i++){
+
+  for(let i = 1; i <= 5; i++){
     const dot = document.createElement("div");
     dot.className = "scale-dot";
-    if(parseInt(localStorage.getItem("q"+current)) === i){
+
+    if(parseInt(localStorage.getItem("q" + current)) === i){
       dot.classList.add("active");
     }
+
     dot.onclick = () => {
-      localStorage.setItem("q"+current, i);
+      localStorage.setItem("q" + current, i);
       render();
     };
+
     scale.appendChild(dot);
   }
 
-  document.querySelectorAll(".progress-dot").forEach((d,i)=>{
-    d.classList.toggle("active", i === current-1);
+  document.querySelectorAll(".progress-dot").forEach((d, i) => {
+    d.classList.toggle("active", i === current - 1);
   });
 
   nextBtn.textContent = (current === 10) ? "Finisci" : "Avanti";
@@ -167,8 +212,8 @@ function render(){
 
 function readAnswers10(){
   const a = [];
-  for(let i=1;i<=10;i++){
-    const v = parseInt(localStorage.getItem("q"+i) || "0", 10);
+  for(let i = 1; i <= 10; i++){
+    const v = parseInt(localStorage.getItem("q" + i) || "0", 10);
     if(!v) return null;
     a.push(v);
   }
@@ -211,10 +256,11 @@ async function submitAnswers(){
 }
 
 function next(){
-  if(!localStorage.getItem("q"+current)){
+  if(!localStorage.getItem("q" + current)){
     alert("Seleziona una risposta");
     return;
   }
+
   if(current < 10){
     current++;
     render();

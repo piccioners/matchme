@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>meety · Profilo (3/4)</title>
+  <title>meety · Profilo</title>
   <link rel="stylesheet" href="style.css">
 
   <style>
@@ -13,13 +13,7 @@
       --panel: rgba(27,0,34,.35);
       --stroke: rgba(255,47,146,.35);
       --ink:#fff;
-
-      /* 🔧 micro-tuning senza impazzire */
-      --cardMin: 560px;          /* altezza “percepita” della card (uniformità fra step) */
-      --pillMinH: 84px;          /* altezza bottoni opzioni */
-      --actionH: 60px;           /* altezza pulsanti Indietro/Avanti */
     }
-
     *{box-sizing:border-box}
 
     body{
@@ -34,7 +28,7 @@
       background:
         radial-gradient(1200px 800px at 20% 10%, rgba(124,58,237,.22), transparent 55%),
         radial-gradient(900px 700px at 80% 20%, rgba(255,47,146,.18), transparent 55%),
-        linear-gradient(180deg,var(--bg1),var(--bg2));
+        linear-gradient(180deg, var(--bg1), var(--bg2));
       padding:18px;
     }
 
@@ -54,10 +48,10 @@
     .page{
       width:100%;
       max-width:420px;
-      animation:var(--anim,none) 260ms cubic-bezier(.2,.8,.2,1) both;
+      animation: var(--anim, none) 260ms cubic-bezier(.2,.8,.2,1) both;
     }
     @keyframes inRight{from{transform:translateX(24px);opacity:0}to{transform:none;opacity:1}}
-    @keyframes inLeft{from{transform:translateX(-24px);opacity:0}to{transform:none;opacity:1}}
+    @keyframes inLeft {from{transform:translateX(-24px);opacity:0}to{transform:none;opacity:1}}
 
     .top{
       display:flex;
@@ -69,7 +63,7 @@
     .logo-mini{
       width:92px;
       max-width:44vw;
-      filter:drop-shadow(0 14px 34px rgba(255,47,146,.18));
+      filter: drop-shadow(0 14px 34px rgba(255,47,146,.18));
       cursor:pointer;
     }
     .step-pill{
@@ -77,7 +71,7 @@
       opacity:.78;
       padding:8px 10px;
       border-radius:999px;
-      background:rgba(27,0,34,.35);
+      background: rgba(27,0,34,.35);
       border:1px solid rgba(255,255,255,.12);
       white-space:nowrap;
     }
@@ -86,96 +80,81 @@
       background:var(--panel);
       border:1px solid var(--stroke);
       border-radius:18px;
-      padding:18px;
-      backdrop-filter:blur(10px);
+      padding:16px;
+      backdrop-filter: blur(10px);
 
-      /* uniformità tra step: stessa “massa” visiva */
-      min-height: var(--cardMin);
-      max-height: calc(100svh - 120px);
+      /* Niente scroll nel riquadro: deve starci tutto */
       overflow:hidden;
-
-      display:flex;
-      flex-direction:column;
-      gap:16px;
     }
 
-    .section{
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-    }
+    .section{margin-top:10px}
+    .section + .section{margin-top:16px}
 
-    .title-row{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:12px;
-    }
-
-    .title{
-      margin:0;
-      font-size:28px;      /* come step2 */
+    .label{
+      margin:0 0 10px 0;
+      font-size:18px;
       font-weight:950;
       letter-spacing:.2px;
-      line-height:1.05;
+      display:flex;
+      align-items:baseline;
+      gap:8px;
     }
-
     .req{
-      font-size:34px;      /* asterisco “semplice rosa” */
-      font-weight:900;
-      color: var(--pink);
+      color:var(--pink);
+      font-weight:950;
+      font-size:18px; /* attaccato e sobrio */
       line-height:1;
-      margin-top:2px;
-      flex:0 0 auto;
     }
 
+    /* Step3: griglia 2x2 (ma stile step2) */
     .grid{
       display:grid;
       grid-template-columns:1fr 1fr;
-      gap:12px;
+      gap:10px;
     }
 
     .pill{
-      min-height: var(--pillMinH);
-      border-radius:18px;
+      padding:14px 14px;                /* stesso di step2 */
+      border-radius:16px;
       border:1px solid rgba(255,255,255,.12);
-      background:rgba(27,0,34,.45);
-      color:rgba(255,255,255,.92);
-
-      display:flex;
-      align-items:center;
-      justify-content:center;
-
-      padding:16px 14px;
-      font-size:18px;
+      background: rgba(27,0,34,.45);
+      color: rgba(255,255,255,.92);
+      font-size:16px;                    /* stesso di step2 */
       font-weight:900;
       text-align:center;
       cursor:pointer;
       user-select:none;
       -webkit-tap-highlight-color:transparent;
+      transition: transform .06s ease, box-shadow .15s ease, background .15s ease, border-color .15s ease;
 
+      /* uniforma la dimensione dei bottoni */
+      min-height: 68px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      line-height:1.15;
       white-space:normal;
       word-break:break-word;
-      line-height:1.12;
     }
-
+    .pill:active{transform:scale(.99)}
     .pill.active{
-      border-color:rgba(255,47,146,.75);
-      background:rgba(255,47,146,.14);
-      box-shadow:0 12px 30px rgba(255,47,146,.12);
+      border-color: rgba(255,47,146,.75);
+      background: rgba(255,47,146,.14);
+      box-shadow: 0 12px 30px rgba(255,47,146,.12);
     }
 
-    .actions{
-      margin-top:auto; /* spinge i bottoni in basso come step2 */
+    /* Bottoni affiancati, più stretti (identici a step2) */
+    .btn-row{
       display:flex;
-      gap:14px;
+      justify-content:space-between;
+      gap:12px;
+      margin-top:18px;
     }
-
     .btn{
       flex:1;
-      height: var(--actionH);
+      padding:14px 12px;
       border-radius:999px;
-      font-size:18px;
+      font-size:15px;
       font-weight:950;
       cursor:pointer;
       user-select:none;
@@ -183,20 +162,18 @@
       transition: transform .05s ease;
       white-space:nowrap;
     }
-    .btn:active{transform:scale(.98)}
+    .btn:active{transform:scale(.99)}
 
     .btn-secondary{
       background: rgba(27,0,34,.35);
       border: 1.5px solid rgba(255,47,146,.45);
       color: rgba(255,255,255,.92);
-      backdrop-filter: blur(8px);
     }
-
     .btn-primary{
       border:none;
       color:#fff;
-      background: linear-gradient(135deg, rgba(255,47,146,1), rgba(124,58,237,.95));
-      box-shadow: 0 18px 50px rgba(255,47,146,.18);
+      background: linear-gradient(135deg, var(--pink), rgba(124,58,237,.95));
+      box-shadow:0 18px 50px rgba(255,47,146,.18);
     }
 
     .dots{
@@ -207,17 +184,14 @@
     }
     .dot{
       width:8px;height:8px;border-radius:999px;
-      background:rgba(255,255,255,.18);
-      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.18);
+      border:1px solid rgba(255,255,255,.10)
     }
-    .dot.active{background:rgba(255,47,146,.85);transform:scale(1.25)}
+    .dot.active{background: rgba(255,47,146,.85); transform: scale(1.25)}
 
     @media(max-width:360px){
-      :root{ --pillMinH: 78px; --cardMin: 540px; }
-      .title{font-size:26px}
-      .req{font-size:30px}
-      .pill{font-size:17px}
-      .actions{gap:12px}
+      .grid{grid-template-columns:1fr}
+      .pill{min-height:60px}
     }
   </style>
 </head>
@@ -230,38 +204,32 @@
     </div>
 
     <div class="card">
-      <div class="section">
-        <div class="title-row">
-          <h2 class="title">Il tuo stato sentimentale</h2>
-          <div class="req">*</div>
-        </div>
 
+      <div class="section">
+        <p class="label">Stato <span class="req">*</span></p>
         <div class="grid" id="status">
           <div class="pill" data-v="Single">Single</div>
-          <div class="pill" data-v="Mi sto frequentando">Mi sto frequentando</div>
-          <div class="pill" data-v="In una relazione">In una relazione</div>
-          <div class="pill" data-v="Situazione complicata">Situazione complicata</div>
+          <div class="pill" data-v="Impegnato/a">Impegnato/a</div>
+          <div class="pill" data-v="Complicato">Complicato</div>
+          <div class="pill" data-v="Preferisco non dirlo">Preferisco non dirlo</div>
         </div>
       </div>
 
       <div class="section">
-        <div class="title-row">
-          <h2 class="title">Sei qui per...</h2>
-          <div class="req">*</div>
-        </div>
-
+        <p class="label">Sei qui per <span class="req">*</span></p>
         <div class="grid" id="purpose">
+          <div class="pill" data-v="Flirt">Flirt</div>
           <div class="pill" data-v="Conoscere gente">Conoscere gente</div>
           <div class="pill" data-v="Divertirmi">Divertirmi</div>
-          <div class="pill" data-v="Trovare moglie">Trovare moglie</div>
-          <div class="pill" data-v="Vedere che succede">Vedere che succede</div>
+          <div class="pill" data-v="Vediamo che succede">Vediamo che succede</div>
         </div>
       </div>
 
-      <div class="actions">
+      <div class="btn-row">
         <button class="btn btn-secondary" onclick="back()">Indietro</button>
         <button class="btn btn-primary" onclick="next()">Avanti</button>
       </div>
+
     </div>
 
     <div class="dots">
@@ -270,10 +238,9 @@
   </div>
 
 <script>
-  // animazione in base alla direzione
-  const dir = sessionStorage.getItem("nav_dir");
-  if(dir === "prev") document.documentElement.style.setProperty("--anim","inLeft");
-  if(dir === "next") document.documentElement.style.setProperty("--anim","inRight");
+  const dir=sessionStorage.getItem("nav_dir");
+  if(dir==="prev") document.documentElement.style.setProperty("--anim","inLeft");
+  if(dir==="next") document.documentElement.style.setProperty("--anim","inRight");
   sessionStorage.removeItem("nav_dir");
 
   // guardrail: se step2 non completato, torna lì
@@ -282,20 +249,20 @@
   }
 
   function pick(containerId, key){
-    const box = document.getElementById(containerId);
+    const box=document.getElementById(containerId);
 
-    box.querySelectorAll(".pill").forEach(p => {
-      p.addEventListener("click", () => {
-        box.querySelectorAll(".pill").forEach(x => x.classList.remove("active"));
+    box.querySelectorAll(".pill").forEach(p=>{
+      p.addEventListener("click",()=>{
+        box.querySelectorAll(".pill").forEach(x=>x.classList.remove("active"));
         p.classList.add("active");
         localStorage.setItem(key, p.dataset.v);
       });
     });
 
-    const saved = localStorage.getItem(key);
+    const saved=localStorage.getItem(key);
     if(saved){
-      box.querySelectorAll(".pill").forEach(p => {
-        p.classList.toggle("active", p.dataset.v === saved);
+      box.querySelectorAll(".pill").forEach(p=>{
+        p.classList.toggle("active", p.dataset.v===saved);
       });
     }
   }

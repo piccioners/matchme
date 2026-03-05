@@ -4,6 +4,11 @@
   --panel: rgba(27,0,34,.35);
   --stroke: rgba(255,47,146,.35);
   --ink:#fff;
+
+  /* 🔧 “rettangolo” uguale per tutti: altezza card */
+  --card-h: 72svh;          /* alza/abbassa qui: 70-76svh di solito è perfetto */
+  --page-pad: 18px;         /* padding esterno */
+  --top-gap: 12px;          /* spazio tra header e card */
 }
 
 *{box-sizing:border-box}
@@ -11,7 +16,7 @@
 body{
   margin:0;
   height:100svh;
-  overflow:hidden;
+  overflow:hidden; /* default: niente scroll */
   display:flex;
   align-items:center;
   justify-content:center;
@@ -21,7 +26,7 @@ body{
     radial-gradient(1200px 800px at 20% 10%, rgba(124,58,237,.22), transparent 55%),
     radial-gradient(900px 700px at 80% 20%, rgba(255,47,146,.18), transparent 55%),
     linear-gradient(180deg, var(--bg1), var(--bg2));
-  padding:18px;
+  padding:var(--page-pad);
 }
 
 body::before{
@@ -52,7 +57,7 @@ body::before{
   align-items:center;
   justify-content:space-between;
   gap:12px;
-  margin-bottom:12px;
+  margin-bottom:var(--top-gap);
 }
 .logo-mini{
   width:92px;
@@ -70,21 +75,26 @@ body::before{
   white-space:nowrap;
 }
 
-/* Card */
+/* ✅ LA CARD: rettangolo identico */
 .card{
   background:var(--panel);
   border:1px solid var(--stroke);
   border-radius:18px;
   padding:16px;
   backdrop-filter: blur(10px);
+
+  height: var(--card-h);
+  display:flex;
+  flex-direction:column;
+
   overflow:hidden; /* niente scroll interno */
 }
 
-/* Sezioni */
+/* Contenuto della card: distribuzione coerente */
 .section{margin-top:10px}
 .section + .section{margin-top:16px}
 
-/* Label + asterisco */
+/* Etichette */
 .label{
   margin:0 0 10px 0;
   font-size:18px;
@@ -101,14 +111,13 @@ body::before{
   line-height:1;
 }
 
-/* Stack (colonna) stile step2 */
+/* Stack / grid */
 .stack{
   display:flex;
   flex-direction:column;
   gap:10px;
 }
 
-/* Grid 2 colonne (per step con 4 opzioni), ma con look identico */
 .grid2{
   display:grid;
   grid-template-columns:1fr 1fr;
@@ -118,7 +127,7 @@ body::before{
   .grid2{grid-template-columns:1fr;}
 }
 
-/* Pill: identico step2 */
+/* Pill */
 .pill{
   padding:14px 14px;
   border-radius:16px;
@@ -134,10 +143,12 @@ body::before{
   transition: transform .06s ease, box-shadow .15s ease, background .15s ease, border-color .15s ease;
   white-space:normal;
   line-height:1.15;
+
   display:flex;
   align-items:center;
   justify-content:center;
-  min-height:56px; /* rende tutte le pill uguali anche con testi più lunghi */
+
+  min-height:56px;
 }
 .pill:active{transform:scale(.99)}
 .pill.active{
@@ -146,12 +157,13 @@ body::before{
   box-shadow: 0 12px 30px rgba(255,47,146,.12);
 }
 
-/* Bottoni: affiancati e coerenti */
+/* Bottoni (sempre in fondo alla card) */
 .btn-row{
+  margin-top:auto;          /* spinge i bottoni in basso: layout stabile */
   display:flex;
   justify-content:space-between;
   gap:12px;
-  margin-top:18px;
+  padding-top:16px;
 }
 .btn{
   flex:1;
@@ -178,7 +190,7 @@ body::before{
   box-shadow:0 18px 50px rgba(255,47,146,.18);
 }
 
-/* Progress dots */
+/* Dots */
 .dots{
   display:flex;
   justify-content:center;
@@ -191,3 +203,32 @@ body::before{
   border:1px solid rgba(255,255,255,.10)
 }
 .dot.active{background: rgba(255,47,146,.85); transform: scale(1.25)}
+
+
+/* ✅ TELEFONI BASSI: comprimi tutto per evitare scroll */
+@media (max-height: 720px){
+  :root{
+    --card-h: 74svh;     /* un filo più alta perché l’header occupa meno percezione */
+    --page-pad: 14px;
+    --top-gap: 10px;
+  }
+  .card{ padding:14px; border-radius:16px; }
+  .label{ font-size:17px; margin-bottom:8px; }
+  .req{ font-size:17px; }
+  .section + .section{ margin-top:12px; }
+  .stack{ gap:8px; }
+  .grid2{ gap:8px; }
+  .pill{ min-height:52px; padding:12px 12px; font-size:15px; }
+  .btn-row{ padding-top:12px; }
+  .btn{ padding:13px 10px; font-size:14px; }
+}
+
+/* ✅ TELEFONI DAVVERO PICCOLI: se non basta, scrolla la pagina (non la card) */
+@media (max-height: 620px){
+  body{
+    overflow:auto;                 /* scroll esterno */
+    align-items:flex-start;        /* parte dall’alto */
+    padding-top:14px;
+    padding-bottom:18px;
+  }
+}

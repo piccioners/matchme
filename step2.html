@@ -76,43 +76,42 @@
       white-space:nowrap;
     }
 
-    /* Card stabile (coerente con step1) */
+    /* Card: altezza coerente tra step (poi la replichiamo su step3/4) */
     .card{
       background:var(--panel);
       border:1px solid var(--stroke);
       border-radius:18px;
       padding:16px;
       backdrop-filter: blur(10px);
-      min-height: 420px;
-      max-height: calc(100svh - 120px);
-      overflow:hidden;
-      display:flex;
-      flex-direction:column;
+
+      min-height: 560px;                /* 👈 questa è la “dimensione target” */
+      max-height: calc(100svh - 120px); /* evita che sfori */
+      overflow:auto;                    /* se un telefono è mini, scrolla dentro la card */
+      -webkit-overflow-scrolling: touch;
     }
 
-    .field{margin-top:14px}
+    .section{margin-top:10px}
     .label-row{
       display:flex;
       align-items:baseline;
       justify-content:space-between;
       gap:10px;
-      margin-bottom:6px;
+      margin:0 0 6px 0;
     }
     .label{
-      font-size:16px;
-      font-weight:900;
+      font-size:20px;
+      font-weight:950;
       letter-spacing:.2px;
       margin:0;
     }
-    /* asterisco semplice rosa */
     .req{
-      font-size:18px;
-      font-weight:950;
       color: var(--pink);
+      font-weight:950;
+      font-size:22px;
       line-height:1;
     }
     .help{
-      margin:0 0 10px 0;
+      margin:0 0 12px 0;
       font-size:12px;
       opacity:.72;
       line-height:1.3;
@@ -121,17 +120,20 @@
     .grid{
       display:grid;
       grid-template-columns: 1fr 1fr;
-      gap:10px;
+      gap:12px;
+      margin-top:8px;
     }
-    @media(max-width:360px){ .grid{grid-template-columns:1fr} }
+    @media(max-width:360px){
+      .grid{grid-template-columns: 1fr;}
+    }
 
     .pill{
-      padding:16px 12px;
-      border-radius:16px;
+      padding:18px 14px;
+      border-radius:18px;
       border:1px solid rgba(255,255,255,.12);
       background: rgba(27,0,34,.45);
       color: rgba(255,255,255,.92);
-      font-size:15px;
+      font-size:18px;
       font-weight:900;
       text-align:center;
       cursor:pointer;
@@ -140,42 +142,48 @@
       white-space:normal;
       word-break:break-word;
       line-height:1.15;
-      transition: transform .05s ease, box-shadow .15s ease, background .15s ease, border-color .15s ease;
+      transition: transform .06s ease, box-shadow .15s ease, background .15s ease, border-color .15s ease;
     }
-    .pill:active{ transform: scale(.99); }
-
+    .pill:active{transform:scale(.99)}
     .pill.active{
       border-color: rgba(255,47,146,.75);
       background: rgba(255,47,146,.14);
       box-shadow: 0 12px 30px rgba(255,47,146,.12);
     }
 
-    .spacer{flex:1} /* spinge i bottoni in basso per coerenza */
-
     .btn{
       width:100%;
       padding:16px;
       border-radius:999px;
       font-size:16px;
-      font-weight:900;
+      font-weight:950;
       cursor:pointer;
       user-select:none;
       -webkit-tap-highlight-color:transparent;
       margin-top:12px;
       transition: transform .05s ease;
     }
-    .btn:active{ transform:scale(.99); }
+    .btn:active{transform:scale(.99)}
 
     .btn-primary{
       border:none;
       color:#fff;
       background: linear-gradient(135deg, var(--pink), rgba(124,58,237,.95));
       box-shadow:0 18px 50px rgba(255,47,146,.18);
+      margin-top:18px;
     }
+
     .btn-secondary{
       background: rgba(27,0,34,.35);
-      border:1.5px solid rgba(255,47,146,.40);
+      border: 1.5px solid rgba(255,47,146,.45);
       color: rgba(255,255,255,.92);
+    }
+
+    .btn-ghost{
+      background: transparent;
+      border: 1px solid rgba(255,255,255,.16);
+      color: rgba(255,255,255,.82);
+      margin-top:10px;
     }
 
     .dots{
@@ -201,12 +209,13 @@
     </div>
 
     <div class="card">
-      <div class="field">
+      <div class="section">
         <div class="label-row">
-          <div class="label">Io sono</div>
-          <div class="req">*</div>
+          <p class="label">Io sono</p>
+          <span class="req">*</span>
         </div>
         <p class="help">Serve solo per filtrare i match durante la serata.</p>
+
         <div class="grid" id="me">
           <div class="pill" data-v="Uomo">Uomo</div>
           <div class="pill" data-v="Donna">Donna</div>
@@ -215,12 +224,13 @@
         </div>
       </div>
 
-      <div class="field">
+      <div class="section" style="margin-top:18px">
         <div class="label-row">
-          <div class="label">Cerco</div>
-          <div class="req">*</div>
+          <p class="label">Cerco</p>
+          <span class="req">*</span>
         </div>
         <p class="help">Chi vuoi vedere nei risultati.</p>
+
         <div class="grid" id="seek">
           <div class="pill" data-v="Uomo">Uomo</div>
           <div class="pill" data-v="Donna">Donna</div>
@@ -229,10 +239,10 @@
         </div>
       </div>
 
-      <div class="spacer"></div>
-
-      <button class="btn btn-secondary" onclick="back()">Indietro</button>
+      <!-- Ordine “anti misclick”: prima avanti, poi indietro -->
       <button class="btn btn-primary" onclick="next()">Avanti</button>
+      <button class="btn btn-secondary" onclick="back()">Indietro</button>
+      <button class="btn btn-ghost" onclick="location.href='index.html'">Torna alla home</button>
     </div>
 
     <div class="dots">
@@ -251,18 +261,23 @@
 
   function pick(containerId, key){
     const box=document.getElementById(containerId);
+
     box.querySelectorAll(".pill").forEach(p=>{
       p.addEventListener("click",()=>{
         box.querySelectorAll(".pill").forEach(x=>x.classList.remove("active"));
         p.classList.add("active");
-        localStorage.setItem(key,p.dataset.v);
+        localStorage.setItem(key, p.dataset.v);
       });
     });
+
     const saved=localStorage.getItem(key);
     if(saved){
-      box.querySelectorAll(".pill").forEach(p=>p.classList.toggle("active", p.dataset.v===saved));
+      box.querySelectorAll(".pill").forEach(p=>{
+        p.classList.toggle("active", p.dataset.v===saved);
+      });
     }
   }
+
   pick("me","gender_me");
   pick("seek","gender_seek");
 

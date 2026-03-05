@@ -5,21 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>meety · Profilo</title>
 
-  <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="ui.css">
 </head>
 
 <body>
   <div class="page">
     <div class="top">
-      <img src="logo.png" class="logo-mini" alt="meety" onclick="location.href='index.html'">
+      <img src="logo.png" class="logo-mini" alt="meety" onclick="goHome()">
       <div class="step-pill">2/4</div>
     </div>
 
     <div class="card">
-
       <div class="section">
-        <p class="label">Come ti definisci? <span class="req">*</span></p>
+        <div class="label">Come ti definisci?<span class="req">*</span></div>
         <div class="stack" id="me">
           <div class="pill" data-v="Uomo">Uomo</div>
           <div class="pill" data-v="Donna">Donna</div>
@@ -28,7 +26,7 @@
       </div>
 
       <div class="section">
-        <p class="label">Cosa stai cercando? <span class="req">*</span></p>
+        <div class="label">Cosa stai cercando?<span class="req">*</span></div>
         <div class="stack" id="seek">
           <div class="pill" data-v="Uomo">Uomo</div>
           <div class="pill" data-v="Donna">Donna</div>
@@ -40,7 +38,6 @@
         <button class="btn btn-secondary" onclick="back()">Indietro</button>
         <button class="btn btn-primary" onclick="next()">Avanti</button>
       </div>
-
     </div>
 
     <div class="dots">
@@ -49,29 +46,35 @@
   </div>
 
 <script>
-  const dir=sessionStorage.getItem("nav_dir");
-  if(dir==="prev") document.documentElement.style.setProperty("--anim","inLeft");
-  if(dir==="next") document.documentElement.style.setProperty("--anim","inRight");
+  const dir = sessionStorage.getItem("nav_dir");
+  if(dir === "prev") document.documentElement.style.setProperty("--anim","inLeft");
+  if(dir === "next") document.documentElement.style.setProperty("--anim","inRight");
   sessionStorage.removeItem("nav_dir");
 
   // guardrail: se step1 non completato, torna lì
   if(!localStorage.getItem("name") || !localStorage.getItem("table")) location.href="step1.html";
 
+  // ✅ HOME “VERA”: evita rimbalzi su index
+  function goHome(){
+    sessionStorage.setItem("force_home", "1");
+    location.href = "index.html";
+  }
+
   function pick(containerId, key){
-    const box=document.getElementById(containerId);
+    const box = document.getElementById(containerId);
 
     box.querySelectorAll(".pill").forEach(p=>{
-      p.addEventListener("click",()=>{
-        box.querySelectorAll(".pill").forEach(x=>x.classList.remove("active"));
+      p.addEventListener("click", ()=>{
+        box.querySelectorAll(".pill").forEach(x => x.classList.remove("active"));
         p.classList.add("active");
         localStorage.setItem(key, p.dataset.v);
       });
     });
 
-    const saved=localStorage.getItem(key);
+    const saved = localStorage.getItem(key);
     if(saved){
       box.querySelectorAll(".pill").forEach(p=>{
-        p.classList.toggle("active", p.dataset.v===saved);
+        p.classList.toggle("active", p.dataset.v === saved);
       });
     }
   }

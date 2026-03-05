@@ -1,160 +1,100 @@
 <!doctype html>
 <html lang="it">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>meety · Domande</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>meety · Domande</title>
 
-<style>
-:root{
-  --bg1:#120018;--bg2:#0b0012;
-  --pink:#ff2f92;--violet:#7c3aed;
-  --panel:rgba(27,0,34,.35);
-  --stroke:rgba(255,47,146,.35);
-  --ink:#fff;
-}
-*{box-sizing:border-box}
-body{
-  margin:0;height:100svh;overflow:hidden;
-  display:flex;align-items:center;justify-content:center;
-  color:var(--ink);
-  font-family:system-ui,-apple-system,BlinkMacSystemFont;
-  background:
-    radial-gradient(1200px 800px at 20% 10%, rgba(124,58,237,.22), transparent 55%),
-    radial-gradient(900px 700px at 80% 20%, rgba(255,47,146,.18), transparent 55%),
-    linear-gradient(180deg,var(--bg1),var(--bg2));
-  padding:20px;
-}
+  <link rel="stylesheet" href="ui.css">
 
-.page{
-  width:100%;max-width:420px;
-  animation:var(--anim,none) 260ms cubic-bezier(.2,.8,.2,1) both;
-}
-@keyframes inRight{from{transform:translateX(24px);opacity:0}to{transform:none;opacity:1}}
-@keyframes inLeft{from{transform:translateX(-24px);opacity:0}to{transform:none;opacity:1}}
+  <style>
+    /* Componenti specifici del quiz (non esistono in ui.css) */
+    .question{
+      font-size:16px;
+      line-height:1.4;
+      font-weight:650;
+      opacity:.96;
+    }
 
-.top{
-  display:flex;align-items:center;justify-content:space-between;
-  gap:12px;margin-bottom:14px
-}
-.logo-mini{
-  width:92px;max-width:44vw;
-  filter: drop-shadow(0 14px 34px rgba(255,47,146,.18));
-  cursor:pointer;
-}
-.step-pill{
-  font-size:12px;opacity:.75;padding:8px 10px;border-radius:999px;
-  background:rgba(27,0,34,.35);
-  border:1px solid rgba(255,255,255,.12)
-}
+    .scale{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      margin-top:14px;
+    }
 
-.card{
-  background:var(--panel);
-  border:1px solid var(--stroke);
-  border-radius:18px;
-  padding:18px;
-  backdrop-filter:blur(10px);
-}
+    .scale-dot{
+      width:18px;
+      height:18px;
+      border-radius:999px;
+      border:2px solid rgba(255,255,255,.35);
+      cursor:pointer;
+      transition: transform .12s ease, background .12s ease, border-color .12s ease;
+      flex:0 0 auto;
+    }
+    .scale-dot.active{
+      background:var(--pink);
+      border-color:var(--pink);
+      transform:scale(1.2);
+    }
 
-h1{margin:0 0 10px 0;font-size:20px;font-weight:900}
-.question{
-  font-size:16px;
-  line-height:1.4;
-  margin-bottom:18px;
-  font-weight:600;
-}
+    .scale-labels{
+      display:flex;
+      justify-content:space-between;
+      font-size:11px;
+      opacity:.6;
+      margin-top:8px;
+    }
 
-.scale{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:8px;
-}
+    .progress{
+      display:flex;
+      justify-content:center;
+      gap:6px;
+      margin-top:12px;
+    }
 
-.dot{
-  width:18px;height:18px;border-radius:999px;
-  border:2px solid rgba(255,255,255,.4);
-  cursor:pointer;
-  transition:all .15s ease;
-}
-.dot.active{
-  background:var(--pink);
-  border-color:var(--pink);
-  transform:scale(1.2);
-}
-
-.scale-labels{
-  display:flex;
-  justify-content:space-between;
-  font-size:11px;
-  opacity:.6;
-  margin-top:6px;
-}
-
-.btn{
-  width:100%;
-  padding:16px;
-  border-radius:999px;
-  font-size:16px;
-  font-weight:900;
-  cursor:pointer;
-  user-select:none;
-  margin-top:18px;
-}
-.btn-primary{
-  border:none;color:#fff;
-  background:linear-gradient(135deg,var(--pink),rgba(124,58,237,.95));
-  box-shadow:0 18px 50px rgba(255,47,146,.18);
-}
-.btn-primary[disabled]{opacity:.6;cursor:not-allowed}
-.btn-secondary{
-  background:rgba(27,0,34,.35);
-  border:1.5px solid rgba(255,47,146,.40);
-  color:#fff;
-}
-
-.dots{
-  display:flex;
-  justify-content:center;
-  gap:6px;
-  margin-top:14px;
-}
-.small-dot{
-  width:6px;height:6px;border-radius:999px;
-  background:rgba(255,255,255,.2);
-}
-.small-dot.active{
-  background:var(--pink);
-  transform:scale(1.4);
-}
-</style>
+    .progress-dot{
+      width:6px;
+      height:6px;
+      border-radius:999px;
+      background:rgba(255,255,255,.20);
+      transition: transform .12s ease, background .12s ease;
+    }
+    .progress-dot.active{
+      background:var(--pink);
+      transform:scale(1.4);
+    }
+  </style>
 </head>
 
 <body>
-<div class="page">
-  <div class="top">
-    <img src="logo.png" class="logo-mini" onclick="location.href='hub.html'">
-    <div class="step-pill" id="stepCounter">1/10</div>
-  </div>
-
-  <div class="card">
-    <h1>Match mindset</h1>
-    <div class="question" id="questionText"></div>
-
-    <div class="scale" id="scale"></div>
-
-    <div class="scale-labels">
-      <span>Disaccordo</span>
-      <span>Accordo</span>
+  <div class="page">
+    <div class="top">
+      <img src="logo.png" class="logo-mini" alt="meety" onclick="goHub()">
+      <div class="step-pill" id="stepCounter">1/10</div>
     </div>
 
-    <button class="btn btn-secondary" onclick="prev()">Indietro</button>
-    <button class="btn btn-primary" id="nextBtn" onclick="next()">Avanti</button>
-  </div>
+    <div class="card">
+      <div class="section">
+        <div class="question" id="questionText"></div>
 
-  <div class="dots" id="progressDots"></div>
-</div>
+        <div class="scale" id="scale"></div>
+
+        <div class="scale-labels">
+          <span>Disaccordo</span>
+          <span>Accordo</span>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="prev()">Indietro</button>
+        <button class="btn btn-primary" id="nextBtn" onclick="next()">Avanti</button>
+      </div>
+    </div>
+
+    <div class="progress" id="progressDots"></div>
+  </div>
 
 <script>
 const API_BASE = "https://matchme-production-73a8.up.railway.app";
@@ -166,6 +106,11 @@ if(localStorage.getItem("profile_complete") !== "true"){
 const sessionToken = (localStorage.getItem("session_token") || "").trim();
 if(!sessionToken){
   location.href = "step1.html";
+}
+
+function goHub(){
+  sessionStorage.setItem("force_home", "1");
+  location.href = "hub.html";
 }
 
 const QUESTIONS = [
@@ -190,8 +135,8 @@ const progressDots = document.getElementById("progressDots");
 const nextBtn = document.getElementById("nextBtn");
 
 QUESTIONS.forEach(() => {
-  const d=document.createElement("div");
-  d.className="small-dot";
+  const d = document.createElement("div");
+  d.className = "progress-dot";
   progressDots.appendChild(d);
 });
 
@@ -199,22 +144,22 @@ function render(){
   qText.textContent = QUESTIONS[current-1];
   stepCounter.textContent = current + "/10";
 
-  scale.innerHTML="";
+  scale.innerHTML = "";
   for(let i=1;i<=5;i++){
-    const dot=document.createElement("div");
-    dot.className="dot";
-    if(parseInt(localStorage.getItem("q"+current))===i){
+    const dot = document.createElement("div");
+    dot.className = "scale-dot";
+    if(parseInt(localStorage.getItem("q"+current)) === i){
       dot.classList.add("active");
     }
-    dot.onclick=()=>{
-      localStorage.setItem("q"+current,i);
+    dot.onclick = () => {
+      localStorage.setItem("q"+current, i);
       render();
     };
     scale.appendChild(dot);
   }
 
-  document.querySelectorAll(".small-dot").forEach((d,i)=>{
-    d.classList.toggle("active", i===current-1);
+  document.querySelectorAll(".progress-dot").forEach((d,i)=>{
+    d.classList.toggle("active", i === current-1);
   });
 
   nextBtn.textContent = (current === 10) ? "Finisci" : "Avanti";
@@ -257,7 +202,7 @@ async function submitAnswers(){
       return;
     }
 
-    location.href="results.html";
+    location.href = "results.html";
 
   }catch(e){
     alert("Errore connessione. Controlla internet e riprova.");
@@ -279,7 +224,7 @@ function next(){
 }
 
 function prev(){
-  if(current>1){
+  if(current > 1){
     current--;
     render();
   }

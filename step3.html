@@ -5,21 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>meety · Profilo</title>
 
-  <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="ui.css">
 </head>
 
 <body>
   <div class="page">
     <div class="top">
-      <img src="logo.png" class="logo-mini" alt="meety" onclick="location.href='index.html'">
+      <img src="logo.png" class="logo-mini" alt="meety" onclick="goHome()">
       <div class="step-pill">3/4</div>
     </div>
 
     <div class="card">
-
       <div class="section">
-        <p class="label">Stato <span class="req">*</span></p>
+        <div class="label">Stato<span class="req">*</span></div>
         <div class="grid2" id="status">
           <div class="pill" data-v="Single">Single</div>
           <div class="pill" data-v="Impegnato/a">Impegnato/a</div>
@@ -29,7 +27,7 @@
       </div>
 
       <div class="section">
-        <p class="label">Sei qui per <span class="req">*</span></p>
+        <div class="label">Sei qui per<span class="req">*</span></div>
         <div class="grid2" id="purpose">
           <div class="pill" data-v="Flirt">Flirt</div>
           <div class="pill" data-v="Conoscere gente">Conoscere gente</div>
@@ -42,7 +40,6 @@
         <button class="btn btn-secondary" onclick="back()">Indietro</button>
         <button class="btn btn-primary" onclick="next()">Avanti</button>
       </div>
-
     </div>
 
     <div class="dots">
@@ -58,6 +55,12 @@
 
   // guardrail: se step2 non completato, torna lì
   if(!localStorage.getItem("gender_me") || !localStorage.getItem("gender_seek")) location.href="step2.html";
+
+  // ✅ HOME “VERA”: evita rimbalzi su index
+  function goHome(){
+    sessionStorage.setItem("force_home", "1");
+    location.href = "index.html";
+  }
 
   function pick(containerId, key){
     const box = document.getElementById(containerId);

@@ -3,21 +3,21 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>meety · Profilo</title>
+  <title>meety · Profilo (3/4)</title>
   <link rel="stylesheet" href="style.css">
 
   <style>
     :root{
-      --bg1:#120018;
-      --bg2:#0b0012;
-      --pink:#ff2f92;
-      --violet:#7c3aed;
+      --bg1:#120018; --bg2:#0b0012;
+      --pink:#ff2f92; --violet:#7c3aed;
       --panel: rgba(27,0,34,.35);
       --stroke: rgba(255,47,146,.35);
       --ink:#fff;
 
-      /* Altezza “standard” card: uguale tra step2/step3 (e idealmente step4) */
-      --card-min: 560px;
+      /* 🔧 micro-tuning senza impazzire */
+      --cardMin: 560px;          /* altezza “percepita” della card (uniformità fra step) */
+      --pillMinH: 84px;          /* altezza bottoni opzioni */
+      --actionH: 60px;           /* altezza pulsanti Indietro/Avanti */
     }
 
     *{box-sizing:border-box}
@@ -57,7 +57,7 @@
       animation:var(--anim,none) 260ms cubic-bezier(.2,.8,.2,1) both;
     }
     @keyframes inRight{from{transform:translateX(24px);opacity:0}to{transform:none;opacity:1}}
-    @keyframes inLeft {from{transform:translateX(-24px);opacity:0}to{transform:none;opacity:1}}
+    @keyframes inLeft{from{transform:translateX(-24px);opacity:0}to{transform:none;opacity:1}}
 
     .top{
       display:flex;
@@ -82,56 +82,53 @@
       white-space:nowrap;
     }
 
-    /* CARD: stessa dimensione “percepita” di step2 */
     .card{
       background:var(--panel);
       border:1px solid var(--stroke);
       border-radius:18px;
-      padding:16px;
+      padding:18px;
       backdrop-filter:blur(10px);
 
-      min-height: var(--card-min);
+      /* uniformità tra step: stessa “massa” visiva */
+      min-height: var(--cardMin);
       max-height: calc(100svh - 120px);
       overflow:hidden;
 
       display:flex;
       flex-direction:column;
+      gap:16px;
     }
 
-    .content{
-      flex:1;
-      min-height:0;
-    }
-
-    /* Titoli sezione come step2 */
     .section{
-      margin-top:14px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
     }
-    .section:first-child{margin-top:2px;}
 
     .title-row{
       display:flex;
-      align-items:baseline;
-      gap:10px;
-      margin:0 0 10px 0;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
     }
+
     .title{
       margin:0;
-      font-size:30px;
+      font-size:28px;      /* come step2 */
       font-weight:950;
       letter-spacing:.2px;
       line-height:1.05;
-      color:#fff;
-    }
-    .req{
-      font-size:30px;
-      font-weight:950;
-      line-height:1;
-      color:var(--pink);
-      transform: translateY(2px);
     }
 
-    /* Grid 2x2 compatta, con bottoni uguali */
+    .req{
+      font-size:34px;      /* asterisco “semplice rosa” */
+      font-weight:900;
+      color: var(--pink);
+      line-height:1;
+      margin-top:2px;
+      flex:0 0 auto;
+    }
+
     .grid{
       display:grid;
       grid-template-columns:1fr 1fr;
@@ -139,71 +136,67 @@
     }
 
     .pill{
-      width:100%;
+      min-height: var(--pillMinH);
       border-radius:18px;
-      border:1px solid rgba(255,255,255,.14);
-      background:rgba(27,0,34,.32);
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(27,0,34,.45);
       color:rgba(255,255,255,.92);
-
-      cursor:pointer;
-      user-select:none;
-      -webkit-tap-highlight-color:transparent;
 
       display:flex;
       align-items:center;
       justify-content:center;
-      text-align:center;
 
-      /* più piccole rispetto allo screen che mi hai mandato */
-      min-height:74px;
-      padding:14px 12px;
-
+      padding:16px 14px;
       font-size:18px;
       font-weight:900;
-      line-height:1.05;
+      text-align:center;
+      cursor:pointer;
+      user-select:none;
+      -webkit-tap-highlight-color:transparent;
 
-      /* per testi lunghi: */
       white-space:normal;
       word-break:break-word;
+      line-height:1.12;
     }
 
     .pill.active{
-      border-color:rgba(255,47,146,.85);
+      border-color:rgba(255,47,146,.75);
       background:rgba(255,47,146,.14);
       box-shadow:0 12px 30px rgba(255,47,146,.12);
     }
 
-    /* Footer bottoni in riga, come step2 */
     .actions{
+      margin-top:auto; /* spinge i bottoni in basso come step2 */
       display:flex;
-      gap:12px;
-      margin-top:16px;
+      gap:14px;
     }
+
     .btn{
       flex:1;
-      padding:16px 14px;
+      height: var(--actionH);
       border-radius:999px;
       font-size:18px;
       font-weight:950;
       cursor:pointer;
       user-select:none;
       -webkit-tap-highlight-color:transparent;
-      transition:transform .05s ease;
+      transition: transform .05s ease;
       white-space:nowrap;
     }
     .btn:active{transform:scale(.98)}
 
     .btn-secondary{
-      background:rgba(27,0,34,.35);
-      border:1.5px solid rgba(255,47,146,.45);
-      color:rgba(255,255,255,.92);
-      backdrop-filter:blur(8px);
+      background: rgba(27,0,34,.35);
+      border: 1.5px solid rgba(255,47,146,.45);
+      color: rgba(255,255,255,.92);
+      backdrop-filter: blur(8px);
     }
+
     .btn-primary{
       border:none;
       color:#fff;
-      background:linear-gradient(135deg, rgba(255,47,146,1), rgba(124,58,237,.95));
-      box-shadow:0 18px 50px rgba(255,47,146,.18);
+      background: linear-gradient(135deg, rgba(255,47,146,1), rgba(124,58,237,.95));
+      box-shadow: 0 18px 50px rgba(255,47,146,.18);
     }
 
     .dots{
@@ -220,11 +213,11 @@
     .dot.active{background:rgba(255,47,146,.85);transform:scale(1.25)}
 
     @media(max-width:360px){
-      :root{ --card-min: 540px; }
-      .title{font-size:28px;}
-      .req{font-size:28px;}
-      .pill{min-height:70px;font-size:17px;}
-      .btn{font-size:17px;}
+      :root{ --pillMinH: 78px; --cardMin: 540px; }
+      .title{font-size:26px}
+      .req{font-size:30px}
+      .pill{font-size:17px}
+      .actions{gap:12px}
     }
   </style>
 </head>
@@ -237,36 +230,32 @@
     </div>
 
     <div class="card">
-      <div class="content">
-
-        <div class="section">
-          <div class="title-row">
-            <h2 class="title">Il tuo stato sentimentale</h2>
-            <div class="req">*</div>
-          </div>
-
-          <div class="grid" id="status">
-            <div class="pill" data-v="Single">Single</div>
-            <div class="pill" data-v="Mi sto frequentando">Mi sto frequentando</div>
-            <div class="pill" data-v="In una relazione">In una relazione</div>
-            <div class="pill" data-v="Situazione complicata">Situazione complicata</div>
-          </div>
+      <div class="section">
+        <div class="title-row">
+          <h2 class="title">Il tuo stato sentimentale</h2>
+          <div class="req">*</div>
         </div>
 
-        <div class="section">
-          <div class="title-row">
-            <h2 class="title">Sei qui per...</h2>
-            <div class="req">*</div>
-          </div>
+        <div class="grid" id="status">
+          <div class="pill" data-v="Single">Single</div>
+          <div class="pill" data-v="Mi sto frequentando">Mi sto frequentando</div>
+          <div class="pill" data-v="In una relazione">In una relazione</div>
+          <div class="pill" data-v="Situazione complicata">Situazione complicata</div>
+        </div>
+      </div>
 
-          <div class="grid" id="purpose">
-            <div class="pill" data-v="Conoscere gente">Conoscere gente</div>
-            <div class="pill" data-v="Divertirmi">Divertirmi</div>
-            <div class="pill" data-v="Trovare moglie">Trovare moglie</div>
-            <div class="pill" data-v="Vedere che succede">Vedere che succede</div>
-          </div>
+      <div class="section">
+        <div class="title-row">
+          <h2 class="title">Sei qui per...</h2>
+          <div class="req">*</div>
         </div>
 
+        <div class="grid" id="purpose">
+          <div class="pill" data-v="Conoscere gente">Conoscere gente</div>
+          <div class="pill" data-v="Divertirmi">Divertirmi</div>
+          <div class="pill" data-v="Trovare moglie">Trovare moglie</div>
+          <div class="pill" data-v="Vedere che succede">Vedere che succede</div>
+        </div>
       </div>
 
       <div class="actions">
@@ -294,11 +283,10 @@
 
   function pick(containerId, key){
     const box = document.getElementById(containerId);
-    const pills = Array.from(box.querySelectorAll(".pill"));
 
-    pills.forEach(p=>{
-      p.addEventListener("click", ()=>{
-        pills.forEach(x=>x.classList.remove("active"));
+    box.querySelectorAll(".pill").forEach(p => {
+      p.addEventListener("click", () => {
+        box.querySelectorAll(".pill").forEach(x => x.classList.remove("active"));
         p.classList.add("active");
         localStorage.setItem(key, p.dataset.v);
       });
@@ -306,7 +294,9 @@
 
     const saved = localStorage.getItem(key);
     if(saved){
-      pills.forEach(p=>p.classList.toggle("active", p.dataset.v === saved));
+      box.querySelectorAll(".pill").forEach(p => {
+        p.classList.toggle("active", p.dataset.v === saved);
+      });
     }
   }
 

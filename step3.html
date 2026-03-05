@@ -3,17 +3,23 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>meety · Profilo (3/4)</title>
+  <title>meety · Profilo</title>
   <link rel="stylesheet" href="style.css">
 
   <style>
     :root{
-      --bg1:#120018; --bg2:#0b0012;
-      --pink:#ff2f92; --violet:#7c3aed;
+      --bg1:#120018;
+      --bg2:#0b0012;
+      --pink:#ff2f92;
+      --violet:#7c3aed;
       --panel: rgba(27,0,34,.35);
       --stroke: rgba(255,47,146,.35);
       --ink:#fff;
+
+      /* Altezza “standard” card: uguale tra step2/step3 (e idealmente step4) */
+      --card-min: 560px;
     }
+
     *{box-sizing:border-box}
 
     body{
@@ -28,7 +34,7 @@
       background:
         radial-gradient(1200px 800px at 20% 10%, rgba(124,58,237,.22), transparent 55%),
         radial-gradient(900px 700px at 80% 20%, rgba(255,47,146,.18), transparent 55%),
-        linear-gradient(180deg, var(--bg1), var(--bg2));
+        linear-gradient(180deg,var(--bg1),var(--bg2));
       padding:18px;
     }
 
@@ -48,7 +54,7 @@
     .page{
       width:100%;
       max-width:420px;
-      animation: var(--anim, none) 260ms cubic-bezier(.2,.8,.2,1) both;
+      animation:var(--anim,none) 260ms cubic-bezier(.2,.8,.2,1) both;
     }
     @keyframes inRight{from{transform:translateX(24px);opacity:0}to{transform:none;opacity:1}}
     @keyframes inLeft {from{transform:translateX(-24px);opacity:0}to{transform:none;opacity:1}}
@@ -63,7 +69,7 @@
     .logo-mini{
       width:92px;
       max-width:44vw;
-      filter: drop-shadow(0 14px 34px rgba(255,47,146,.18));
+      filter:drop-shadow(0 14px 34px rgba(255,47,146,.18));
       cursor:pointer;
     }
     .step-pill{
@@ -71,101 +77,132 @@
       opacity:.78;
       padding:8px 10px;
       border-radius:999px;
-      background: rgba(27,0,34,.35);
+      background:rgba(27,0,34,.35);
       border:1px solid rgba(255,255,255,.12);
       white-space:nowrap;
     }
 
+    /* CARD: stessa dimensione “percepita” di step2 */
     .card{
       background:var(--panel);
       border:1px solid var(--stroke);
       border-radius:18px;
       padding:16px;
-      backdrop-filter: blur(10px);
+      backdrop-filter:blur(10px);
+
+      min-height: var(--card-min);
+      max-height: calc(100svh - 120px);
       overflow:hidden;
+
+      display:flex;
+      flex-direction:column;
     }
 
-    .section{margin-top:10px}
-    .section + .section{margin-top:16px}
+    .content{
+      flex:1;
+      min-height:0;
+    }
 
-    .label{
-      margin:0 0 10px 0;
-      font-size:18px;
-      font-weight:950;
-      letter-spacing:.2px;
+    /* Titoli sezione come step2 */
+    .section{
+      margin-top:14px;
+    }
+    .section:first-child{margin-top:2px;}
+
+    .title-row{
       display:flex;
       align-items:baseline;
-      gap:8px;
-      color:var(--ink);
+      gap:10px;
+      margin:0 0 10px 0;
+    }
+    .title{
+      margin:0;
+      font-size:30px;
+      font-weight:950;
+      letter-spacing:.2px;
+      line-height:1.05;
+      color:#fff;
     }
     .req{
-      color:var(--pink);
+      font-size:30px;
       font-weight:950;
-      font-size:18px;
       line-height:1;
+      color:var(--pink);
+      transform: translateY(2px);
     }
 
+    /* Grid 2x2 compatta, con bottoni uguali */
     .grid{
       display:grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns:1fr 1fr;
       gap:12px;
     }
 
-    /* bottoni TUTTI uguali: stessa altezza, testo centrato */
     .pill{
-      min-height:64px;                /* uguale per tutti */
-      padding:14px 12px;
-      border-radius:16px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(27,0,34,.45);
-      color: rgba(255,255,255,.92);
-      font-size:16px;
-      font-weight:900;
-      text-align:center;
+      width:100%;
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(27,0,34,.32);
+      color:rgba(255,255,255,.92);
+
       cursor:pointer;
       user-select:none;
       -webkit-tap-highlight-color:transparent;
+
       display:flex;
       align-items:center;
       justify-content:center;
-      line-height:1.15;
-      transition: transform .06s ease, box-shadow .15s ease, background .15s ease, border-color .15s ease;
-    }
-    .pill:active{transform:scale(.99)}
-    .pill.active{
-      border-color: rgba(255,47,146,.75);
-      background: rgba(255,47,146,.14);
-      box-shadow: 0 12px 30px rgba(255,47,146,.12);
+      text-align:center;
+
+      /* più piccole rispetto allo screen che mi hai mandato */
+      min-height:74px;
+      padding:14px 12px;
+
+      font-size:18px;
+      font-weight:900;
+      line-height:1.05;
+
+      /* per testi lunghi: */
+      white-space:normal;
+      word-break:break-word;
     }
 
-    .btn-row{
+    .pill.active{
+      border-color:rgba(255,47,146,.85);
+      background:rgba(255,47,146,.14);
+      box-shadow:0 12px 30px rgba(255,47,146,.12);
+    }
+
+    /* Footer bottoni in riga, come step2 */
+    .actions{
       display:flex;
-      justify-content:space-between;
       gap:12px;
-      margin-top:18px;
+      margin-top:16px;
     }
     .btn{
       flex:1;
-      padding:14px 12px;
+      padding:16px 14px;
       border-radius:999px;
-      font-size:15px;
+      font-size:18px;
       font-weight:950;
       cursor:pointer;
       user-select:none;
       -webkit-tap-highlight-color:transparent;
-      transition: transform .05s ease;
+      transition:transform .05s ease;
       white-space:nowrap;
     }
-    .btn:active{transform:scale(.99)}
+    .btn:active{transform:scale(.98)}
+
     .btn-secondary{
-      background: rgba(27,0,34,.35);
-      border: 1.5px solid rgba(255,47,146,.45);
-      color: rgba(255,255,255,.92);
+      background:rgba(27,0,34,.35);
+      border:1.5px solid rgba(255,47,146,.45);
+      color:rgba(255,255,255,.92);
+      backdrop-filter:blur(8px);
     }
     .btn-primary{
       border:none;
       color:#fff;
-      background: linear-gradient(135deg, var(--pink), rgba(124,58,237,.95));
+      background:linear-gradient(135deg, rgba(255,47,146,1), rgba(124,58,237,.95));
       box-shadow:0 18px 50px rgba(255,47,146,.18);
     }
 
@@ -177,14 +214,17 @@
     }
     .dot{
       width:8px;height:8px;border-radius:999px;
-      background: rgba(255,255,255,.18);
-      border:1px solid rgba(255,255,255,.10)
+      background:rgba(255,255,255,.18);
+      border:1px solid rgba(255,255,255,.10);
     }
-    .dot.active{background: rgba(255,47,146,.85); transform: scale(1.25)}
+    .dot.active{background:rgba(255,47,146,.85);transform:scale(1.25)}
 
-    @media (max-width:360px){
-      .grid{grid-template-columns:1fr}
-      .pill{min-height:58px}
+    @media(max-width:360px){
+      :root{ --card-min: 540px; }
+      .title{font-size:28px;}
+      .req{font-size:28px;}
+      .pill{min-height:70px;font-size:17px;}
+      .btn{font-size:17px;}
     }
   </style>
 </head>
@@ -197,27 +237,39 @@
     </div>
 
     <div class="card">
-      <div class="section">
-        <p class="label">Stato <span class="req">*</span></p>
-        <div class="grid" id="status">
-          <div class="pill" data-v="Single">Single</div>
-          <div class="pill" data-v="Impegnato/a">Impegnato/a</div>
-          <div class="pill" data-v="Complicato">Complicato</div>
-          <div class="pill" data-v="Preferisco non dirlo">Preferisco non dirlo</div>
+      <div class="content">
+
+        <div class="section">
+          <div class="title-row">
+            <h2 class="title">Il tuo stato sentimentale</h2>
+            <div class="req">*</div>
+          </div>
+
+          <div class="grid" id="status">
+            <div class="pill" data-v="Single">Single</div>
+            <div class="pill" data-v="Mi sto frequentando">Mi sto frequentando</div>
+            <div class="pill" data-v="In una relazione">In una relazione</div>
+            <div class="pill" data-v="Situazione complicata">Situazione complicata</div>
+          </div>
         </div>
+
+        <div class="section">
+          <div class="title-row">
+            <h2 class="title">Sei qui per...</h2>
+            <div class="req">*</div>
+          </div>
+
+          <div class="grid" id="purpose">
+            <div class="pill" data-v="Conoscere gente">Conoscere gente</div>
+            <div class="pill" data-v="Divertirmi">Divertirmi</div>
+            <div class="pill" data-v="Trovare moglie">Trovare moglie</div>
+            <div class="pill" data-v="Vedere che succede">Vedere che succede</div>
+          </div>
+        </div>
+
       </div>
 
-      <div class="section">
-        <p class="label">Sei qui per <span class="req">*</span></p>
-        <div class="grid" id="purpose">
-          <div class="pill" data-v="Flirt">Flirt</div>
-          <div class="pill" data-v="Conoscere gente">Conoscere gente</div>
-          <div class="pill" data-v="Divertirmi">Divertirmi</div>
-          <div class="pill" data-v="Vediamo che succede">Vediamo che succede</div>
-        </div>
-      </div>
-
-      <div class="btn-row">
+      <div class="actions">
         <button class="btn btn-secondary" onclick="back()">Indietro</button>
         <button class="btn btn-primary" onclick="next()">Avanti</button>
       </div>
@@ -229,20 +281,24 @@
   </div>
 
 <script>
-  const dir=sessionStorage.getItem("nav_dir");
-  if(dir==="prev") document.documentElement.style.setProperty("--anim","inLeft");
-  if(dir==="next") document.documentElement.style.setProperty("--anim","inRight");
+  // animazione in base alla direzione
+  const dir = sessionStorage.getItem("nav_dir");
+  if(dir === "prev") document.documentElement.style.setProperty("--anim","inLeft");
+  if(dir === "next") document.documentElement.style.setProperty("--anim","inRight");
   sessionStorage.removeItem("nav_dir");
 
   // guardrail: se step2 non completato, torna lì
-  if(!localStorage.getItem("gender_me") || !localStorage.getItem("gender_seek")) location.href="step2.html";
+  if(!localStorage.getItem("gender_me") || !localStorage.getItem("gender_seek")){
+    location.href="step2.html";
+  }
 
   function pick(containerId, key){
     const box = document.getElementById(containerId);
+    const pills = Array.from(box.querySelectorAll(".pill"));
 
-    box.querySelectorAll(".pill").forEach(p=>{
-      p.addEventListener("click",()=>{
-        box.querySelectorAll(".pill").forEach(x=>x.classList.remove("active"));
+    pills.forEach(p=>{
+      p.addEventListener("click", ()=>{
+        pills.forEach(x=>x.classList.remove("active"));
         p.classList.add("active");
         localStorage.setItem(key, p.dataset.v);
       });
@@ -250,9 +306,7 @@
 
     const saved = localStorage.getItem(key);
     if(saved){
-      box.querySelectorAll(".pill").forEach(p=>{
-        p.classList.toggle("active", p.dataset.v===saved);
-      });
+      pills.forEach(p=>p.classList.toggle("active", p.dataset.v === saved));
     }
   }
 

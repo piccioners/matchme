@@ -5,64 +5,231 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>meety · Profilo (2/4)</title>
   <link rel="stylesheet" href="style.css">
+
   <style>
-    :root{--bg1:#120018;--bg2:#0b0012;--pink:#ff2f92;--panel:rgba(27,0,34,.35);--stroke:rgba(255,47,146,.35);--ink:#fff}
+    :root{
+      --bg1:#120018; --bg2:#0b0012;
+      --pink:#ff2f92; --violet:#7c3aed;
+      --panel: rgba(27,0,34,.35);
+      --stroke: rgba(255,47,146,.35);
+      --ink:#fff;
+    }
     *{box-sizing:border-box}
-    body{margin:0;height:100svh;overflow:hidden;display:flex;align-items:center;justify-content:center;color:var(--ink);
+
+    body{
+      margin:0;
+      height:100svh;
+      overflow:hidden;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:var(--ink);
       font-family:system-ui,-apple-system,BlinkMacSystemFont;
-      background: radial-gradient(1200px 800px at 20% 10%, rgba(124,58,237,.22), transparent 55%),
-                  radial-gradient(900px 700px at 80% 20%, rgba(255,47,146,.18), transparent 55%),
-                  linear-gradient(180deg,var(--bg1),var(--bg2));
-      padding:20px;}
-    .page{width:100%;max-width:420px;animation:var(--anim,none) 260ms cubic-bezier(.2,.8,.2,1) both;}
+      background:
+        radial-gradient(1200px 800px at 20% 10%, rgba(124,58,237,.22), transparent 55%),
+        radial-gradient(900px 700px at 80% 20%, rgba(255,47,146,.18), transparent 55%),
+        linear-gradient(180deg, var(--bg1), var(--bg2));
+      padding:18px;
+    }
+
+    body::before{
+      content:"";
+      position:fixed;
+      inset:-20%;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(255,255,255,.06), transparent 45%),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.18'/%3E%3C/svg%3E");
+      mix-blend-mode:overlay;
+      opacity:.18;
+      pointer-events:none;
+      transform:rotate(6deg);
+    }
+
+    .page{
+      width:100%;
+      max-width:420px;
+      animation: var(--anim, none) 260ms cubic-bezier(.2,.8,.2,1) both;
+    }
     @keyframes inRight{from{transform:translateX(24px);opacity:0}to{transform:none;opacity:1}}
-    @keyframes inLeft{from{transform:translateX(-24px);opacity:0}to{transform:none;opacity:1}}
-    .top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
-    .logo-mini{width:92px;max-width:44vw;filter:drop-shadow(0 14px 34px rgba(255,47,146,.18))}
-    .step-pill{font-size:12px;opacity:.75;padding:8px 10px;border-radius:999px;background:rgba(27,0,34,.35);border:1px solid rgba(255,255,255,.12)}
-    .card{background:var(--panel);border:1px solid var(--stroke);border-radius:18px;padding:16px;backdrop-filter:blur(10px)}
-    h1{margin:0 0 6px;font-size:22px;font-weight:900}
-    .sub{margin:0 0 14px;opacity:.78;font-size:14px;line-height:1.35}
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
-    .pill{padding:14px 12px;border-radius:14px;border:1px solid rgba(255,255,255,.12);background:rgba(27,0,34,.45);
-      color:rgba(255,255,255,.92);font-size:14px;font-weight:800;text-align:center;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;
-      white-space:normal;word-break:break-word;line-height:1.15}
-    .pill.active{border-color:rgba(255,47,146,.75);background:rgba(255,47,146,.14);box-shadow:0 12px 30px rgba(255,47,146,.12)}
-    .btn{width:100%;padding:16px;border-radius:999px;font-size:16px;font-weight:900;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;margin-top:12px}
-    .btn-primary{border:none;color:#fff;background:linear-gradient(135deg,var(--pink),rgba(124,58,237,.95));box-shadow:0 18px 50px rgba(255,47,146,.18)}
-    .btn-secondary{background:rgba(27,0,34,.35);border:1.5px solid rgba(255,47,146,.40);color:rgba(255,255,255,.92)}
-    .dots{display:flex;justify-content:center;gap:8px;margin-top:14px}
-    .dot{width:8px;height:8px;border-radius:999px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.10)}
-    .dot.active{background:rgba(255,47,146,.85);transform:scale(1.25)}
-    @media(max-width:360px){.grid{grid-template-columns:1fr}}
+    @keyframes inLeft {from{transform:translateX(-24px);opacity:0}to{transform:none;opacity:1}}
+
+    .top{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:12px;
+    }
+    .logo-mini{
+      width:92px;
+      max-width:44vw;
+      filter: drop-shadow(0 14px 34px rgba(255,47,146,.18));
+      cursor:pointer;
+    }
+    .step-pill{
+      font-size:12px;
+      opacity:.78;
+      padding:8px 10px;
+      border-radius:999px;
+      background: rgba(27,0,34,.35);
+      border:1px solid rgba(255,255,255,.12);
+      white-space:nowrap;
+    }
+
+    /* Card stabile (coerente con step1) */
+    .card{
+      background:var(--panel);
+      border:1px solid var(--stroke);
+      border-radius:18px;
+      padding:16px;
+      backdrop-filter: blur(10px);
+      min-height: 420px;
+      max-height: calc(100svh - 120px);
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+    }
+
+    .field{margin-top:14px}
+    .label-row{
+      display:flex;
+      align-items:baseline;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:6px;
+    }
+    .label{
+      font-size:16px;
+      font-weight:900;
+      letter-spacing:.2px;
+      margin:0;
+    }
+    /* asterisco semplice rosa */
+    .req{
+      font-size:18px;
+      font-weight:950;
+      color: var(--pink);
+      line-height:1;
+    }
+    .help{
+      margin:0 0 10px 0;
+      font-size:12px;
+      opacity:.72;
+      line-height:1.3;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+    @media(max-width:360px){ .grid{grid-template-columns:1fr} }
+
+    .pill{
+      padding:16px 12px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(27,0,34,.45);
+      color: rgba(255,255,255,.92);
+      font-size:15px;
+      font-weight:900;
+      text-align:center;
+      cursor:pointer;
+      user-select:none;
+      -webkit-tap-highlight-color:transparent;
+      white-space:normal;
+      word-break:break-word;
+      line-height:1.15;
+      transition: transform .05s ease, box-shadow .15s ease, background .15s ease, border-color .15s ease;
+    }
+    .pill:active{ transform: scale(.99); }
+
+    .pill.active{
+      border-color: rgba(255,47,146,.75);
+      background: rgba(255,47,146,.14);
+      box-shadow: 0 12px 30px rgba(255,47,146,.12);
+    }
+
+    .spacer{flex:1} /* spinge i bottoni in basso per coerenza */
+
+    .btn{
+      width:100%;
+      padding:16px;
+      border-radius:999px;
+      font-size:16px;
+      font-weight:900;
+      cursor:pointer;
+      user-select:none;
+      -webkit-tap-highlight-color:transparent;
+      margin-top:12px;
+      transition: transform .05s ease;
+    }
+    .btn:active{ transform:scale(.99); }
+
+    .btn-primary{
+      border:none;
+      color:#fff;
+      background: linear-gradient(135deg, var(--pink), rgba(124,58,237,.95));
+      box-shadow:0 18px 50px rgba(255,47,146,.18);
+    }
+    .btn-secondary{
+      background: rgba(27,0,34,.35);
+      border:1.5px solid rgba(255,47,146,.40);
+      color: rgba(255,255,255,.92);
+    }
+
+    .dots{
+      display:flex;
+      justify-content:center;
+      gap:8px;
+      margin-top:12px;
+    }
+    .dot{
+      width:8px;height:8px;border-radius:999px;
+      background: rgba(255,255,255,.18);
+      border:1px solid rgba(255,255,255,.10)
+    }
+    .dot.active{background: rgba(255,47,146,.85); transform: scale(1.25)}
   </style>
 </head>
+
 <body>
   <div class="page">
     <div class="top">
-      <img src="logo.png" class="logo-mini" alt="meety">
-      <div class="step-pill">Step 2/4</div>
+      <img src="logo.png" class="logo-mini" alt="meety" onclick="location.href='index.html'">
+      <div class="step-pill">2/4</div>
     </div>
 
     <div class="card">
-      <h1>Preferenze</h1>
-      <p class="sub">Scegli in modo semplice.</p>
-
-      <div style="opacity:.85;font-size:13px;margin-top:6px">Io sono *</div>
-      <div class="grid" id="me">
-        <div class="pill" data-v="Uomo">Uomo</div>
-        <div class="pill" data-v="Donna">Donna</div>
-        <div class="pill" data-v="Altro">Altro</div>
-        <div class="pill" data-v="Preferisco non dirlo">Preferisco non dirlo</div>
+      <div class="field">
+        <div class="label-row">
+          <div class="label">Io sono</div>
+          <div class="req">*</div>
+        </div>
+        <p class="help">Serve solo per filtrare i match durante la serata.</p>
+        <div class="grid" id="me">
+          <div class="pill" data-v="Uomo">Uomo</div>
+          <div class="pill" data-v="Donna">Donna</div>
+          <div class="pill" data-v="Altro">Altro</div>
+          <div class="pill" data-v="Preferisco non dirlo">Preferisco non dirlo</div>
+        </div>
       </div>
 
-      <div style="opacity:.85;font-size:13px;margin-top:16px">Cerco *</div>
-      <div class="grid" id="seek">
-        <div class="pill" data-v="Uomo">Uomo</div>
-        <div class="pill" data-v="Donna">Donna</div>
-        <div class="pill" data-v="Tutti">Tutti</div>
-        <div class="pill" data-v="Indifferente">Indifferente</div>
+      <div class="field">
+        <div class="label-row">
+          <div class="label">Cerco</div>
+          <div class="req">*</div>
+        </div>
+        <p class="help">Chi vuoi vedere nei risultati.</p>
+        <div class="grid" id="seek">
+          <div class="pill" data-v="Uomo">Uomo</div>
+          <div class="pill" data-v="Donna">Donna</div>
+          <div class="pill" data-v="Tutti">Tutti</div>
+          <div class="pill" data-v="Indifferente">Indifferente</div>
+        </div>
       </div>
+
+      <div class="spacer"></div>
 
       <button class="btn btn-secondary" onclick="back()">Indietro</button>
       <button class="btn btn-primary" onclick="next()">Avanti</button>
@@ -104,6 +271,7 @@
     sessionStorage.setItem("nav_dir","prev");
     location.href="step1.html";
   }
+
   function next(){
     if(!localStorage.getItem("gender_me") || !localStorage.getItem("gender_seek")){
       alert("Seleziona entrambe le opzioni");

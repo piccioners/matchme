@@ -6,7 +6,7 @@
   --ink:#fff;
 
   /* 🔧 “rettangolo” uguale per tutti: altezza card */
-  --card-h: 72svh;          /* alza/abbassa qui: 70-76svh di solito è perfetto */
+  --card-h: 78svh;          /* alza/abbassa qui: 70-76svh di solito è perfetto */
   --page-pad: 18px;         /* padding esterno */
   --top-gap: 12px;          /* spazio tra header e card */
 }

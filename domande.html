@@ -1,282 +1,308 @@
 <!doctype html>
 <html lang="it">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>meety · Domande</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>meety · Domande</title>
 
-  <link rel="stylesheet" href="ui.css">
+<link rel="stylesheet" href="ui.css">
 
-  <style>
-    .quiz-card{
-      padding:16px;
-      height:auto;
-      min-height:320px;
-    }
+<style>
 
-    .question-wrap{
-      min-height:72px;
-      display:flex;
-      align-items:flex-start;
-    }
+.quiz-card{
+  padding:18px;
+  height:auto;
+  min-height:340px;
+}
 
-    .question{
-      font-size:16px;
-      line-height:1.4;
-      font-weight:650;
-      opacity:.96;
-      margin:0;
-    }
+/* domanda */
 
-    .scale{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:10px;
-      margin-top:18px;
-    }
+.question-wrap{
+  min-height:80px;
+  display:flex;
+  align-items:flex-start;
+}
 
-    .scale-dot{
-      width:18px;
-      height:18px;
-      border-radius:999px;
-      border:2px solid rgba(255,255,255,.35);
-      cursor:pointer;
-      transition: transform .12s ease, background .12s ease, border-color .12s ease;
-      flex:0 0 auto;
-    }
+.question{
+  font-size:20px;
+  line-height:1.35;
+  font-weight:700;
+  opacity:.98;
+  margin:0;
+}
 
-    .scale-dot.active{
-      background:var(--pink);
-      border-color:var(--pink);
-      transform:scale(1.2);
-    }
+/* scala */
 
-    .scale-labels{
-      display:flex;
-      justify-content:space-between;
-      font-size:11px;
-      opacity:.6;
-      margin-top:8px;
-    }
+.scale{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:24px;
+  margin-top:26px;
+}
 
-    .progress{
-      display:flex;
-      justify-content:center;
-      gap:6px;
-      margin-top:12px;
-    }
+.scale-dot{
+  width:26px;
+  height:26px;
+  border-radius:999px;
+  border:2px solid rgba(255,255,255,.35);
+  cursor:pointer;
+  transition: transform .12s ease, background .12s ease, border-color .12s ease;
+}
 
-    .progress-dot{
-      width:6px;
-      height:6px;
-      border-radius:999px;
-      background:rgba(255,255,255,.20);
-      transition: transform .12s ease, background .12s ease;
-    }
+.scale-dot.active{
+  background:var(--pink);
+  border-color:var(--pink);
+  transform:scale(1.15);
+}
 
-    .progress-dot.active{
-      background:var(--pink);
-      transform:scale(1.4);
-    }
+.scale-labels{
+  display:flex;
+  justify-content:space-between;
+  font-size:11px;
+  opacity:.6;
+  margin-top:10px;
+}
 
-    @media (max-height: 700px){
-      .quiz-card{
-        min-height:300px;
-        padding:14px;
-      }
+/* progress */
 
-      .question-wrap{
-        min-height:64px;
-      }
+.progress{
+  display:flex;
+  justify-content:center;
+  gap:6px;
+  margin-top:12px;
+}
 
-      .question{
-        font-size:15px;
-      }
+.progress-dot{
+  width:6px;
+  height:6px;
+  border-radius:999px;
+  background:rgba(255,255,255,.20);
+  transition: transform .12s ease, background .12s ease;
+}
 
-      .scale{
-        margin-top:14px;
-      }
+.progress-dot.active{
+  background:var(--pink);
+  transform:scale(1.4);
+}
 
-      .scale-dot{
-        width:16px;
-        height:16px;
-      }
-    }
-  </style>
+</style>
 </head>
 
 <body>
-  <div class="page">
-    <div class="top">
-      <img src="logo.png" class="logo-mini" alt="meety" onclick="goHub()">
-      <div class="step-pill" id="stepCounter">1/10</div>
-    </div>
 
-    <div class="card quiz-card">
-      <div class="section">
-        <div class="question-wrap">
-          <p class="question" id="questionText"></p>
-        </div>
+<div class="page">
 
-        <div class="scale" id="scale"></div>
+<div class="top">
+<img src="logo.png" class="logo-mini" alt="meety" onclick="goHub()">
+<div class="step-pill" id="stepCounter">1/10</div>
+</div>
 
-        <div class="scale-labels">
-          <span>Disaccordo</span>
-          <span>Accordo</span>
-        </div>
-      </div>
+<div class="card quiz-card">
 
-      <div class="btn-row">
-        <button class="btn btn-secondary" onclick="prev()">Indietro</button>
-        <button class="btn btn-primary" id="nextBtn" onclick="next()">Avanti</button>
-      </div>
-    </div>
+<div class="section">
 
-    <div class="progress" id="progressDots"></div>
-  </div>
+<div class="question-wrap">
+<p class="question" id="questionText"></p>
+</div>
+
+<div class="scale" id="scale"></div>
+
+<div class="scale-labels">
+<span>Disaccordo</span>
+<span>Accordo</span>
+</div>
+
+</div>
+
+<div class="btn-row">
+<button class="btn btn-secondary" onclick="prev()">Indietro</button>
+<button class="btn btn-primary" id="nextBtn" onclick="next()">Avanti</button>
+</div>
+
+</div>
+
+<div class="progress" id="progressDots"></div>
+
+</div>
 
 <script>
+
 const API_BASE = "https://matchme-production-73a8.up.railway.app";
 
-// Guardrail: profilo completo + token, altrimenti non puoi salvare niente
+/* guardrail */
+
 if(localStorage.getItem("profile_complete") !== "true"){
-  location.href = "step1.html";
+location.href="step1.html";
 }
 
-const sessionToken = (localStorage.getItem("session_token") || "").trim();
+const sessionToken=(localStorage.getItem("session_token")||"").trim();
+
 if(!sessionToken){
-  location.href = "step1.html";
+location.href="step1.html";
 }
 
 function goHub(){
-  sessionStorage.setItem("force_home", "1");
-  location.href = "hub.html";
+sessionStorage.setItem("force_home","1");
+location.href="hub.html";
 }
 
-const QUESTIONS = [
-  "Mi piace conoscere persone molto diverse da me.",
-  "Credo che l'attrazione mentale sia più importante di quella fisica.",
-  "Mi annoio facilmente nelle conversazioni superficiali.",
-  "Mi piace prendere l'iniziativa.",
-  "Cerco qualcuno con ambizione.",
-  "Mi piace stare al centro dell'attenzione.",
-  "Preferisco relazioni stabili rispetto a qualcosa di casuale.",
-  "Mi affido molto all'intuito.",
-  "Mi piace mettermi in gioco.",
-  "Per me il divertimento viene prima di tutto."
+/* domande */
+
+const QUESTIONS=[
+"Mi piace conoscere persone molto diverse da me.",
+"Credo che l'attrazione mentale sia più importante di quella fisica.",
+"Mi annoio facilmente nelle conversazioni superficiali.",
+"Mi piace prendere l'iniziativa.",
+"Cerco qualcuno con ambizione.",
+"Mi piace stare al centro dell'attenzione.",
+"Preferisco relazioni stabili rispetto a qualcosa di casuale.",
+"Mi affido molto all'intuito.",
+"Mi piace mettermi in gioco.",
+"Per me il divertimento viene prima di tutto."
 ];
 
-let current = 1;
+let current=1;
 
-const qText = document.getElementById("questionText");
-const scale = document.getElementById("scale");
-const stepCounter = document.getElementById("stepCounter");
-const progressDots = document.getElementById("progressDots");
-const nextBtn = document.getElementById("nextBtn");
+const qText=document.getElementById("questionText");
+const scale=document.getElementById("scale");
+const stepCounter=document.getElementById("stepCounter");
+const progressDots=document.getElementById("progressDots");
+const nextBtn=document.getElementById("nextBtn");
 
-QUESTIONS.forEach(() => {
-  const d = document.createElement("div");
-  d.className = "progress-dot";
-  progressDots.appendChild(d);
+/* progress dots */
+
+QUESTIONS.forEach(()=>{
+const d=document.createElement("div");
+d.className="progress-dot";
+progressDots.appendChild(d);
 });
 
 function render(){
-  qText.textContent = QUESTIONS[current - 1];
-  stepCounter.textContent = current + "/10";
 
-  scale.innerHTML = "";
+qText.textContent=QUESTIONS[current-1];
+stepCounter.textContent=current+"/10";
 
-  for(let i = 1; i <= 5; i++){
-    const dot = document.createElement("div");
-    dot.className = "scale-dot";
+scale.innerHTML="";
 
-    if(parseInt(localStorage.getItem("q" + current)) === i){
-      dot.classList.add("active");
-    }
+for(let i=1;i<=5;i++){
 
-    dot.onclick = () => {
-      localStorage.setItem("q" + current, i);
-      render();
-    };
+const dot=document.createElement("div");
+dot.className="scale-dot";
 
-    scale.appendChild(dot);
-  }
-
-  document.querySelectorAll(".progress-dot").forEach((d, i) => {
-    d.classList.toggle("active", i === current - 1);
-  });
-
-  nextBtn.textContent = (current === 10) ? "Finisci" : "Avanti";
+if(parseInt(localStorage.getItem("q"+current))===i){
+dot.classList.add("active");
 }
+
+dot.onclick=()=>{
+localStorage.setItem("q"+current,i);
+render();
+};
+
+scale.appendChild(dot);
+}
+
+document.querySelectorAll(".progress-dot").forEach((d,i)=>{
+d.classList.toggle("active",i===current-1);
+});
+
+nextBtn.textContent=(current===10)?"Finisci":"Avanti";
+
+}
+
+/* lettura risposte */
 
 function readAnswers10(){
-  const a = [];
-  for(let i = 1; i <= 10; i++){
-    const v = parseInt(localStorage.getItem("q" + i) || "0", 10);
-    if(!v) return null;
-    a.push(v);
-  }
-  return a;
+
+const a=[];
+
+for(let i=1;i<=10;i++){
+
+const v=parseInt(localStorage.getItem("q"+i)||"0",10);
+
+if(!v) return null;
+
+a.push(v);
+
 }
+
+return a;
+
+}
+
+/* submit */
 
 async function submitAnswers(){
-  const answers = readAnswers10();
-  if(!answers){
-    alert("Completa tutte le domande");
-    return;
-  }
 
-  nextBtn.disabled = true;
+const answers=readAnswers10();
 
-  try{
-    const res = await fetch(API_BASE + "/api/answers", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + sessionToken
-      },
-      body: JSON.stringify({ answers })
-    });
-
-    const data = await res.json().catch(() => null);
-
-    if(!res.ok || !data || !data.ok){
-      alert("Errore nel salvataggio delle risposte. Riprova.");
-      nextBtn.disabled = false;
-      return;
-    }
-
-    location.href = "results.html";
-
-  }catch(e){
-    alert("Errore connessione. Controlla internet e riprova.");
-    nextBtn.disabled = false;
-  }
+if(!answers){
+alert("Completa tutte le domande");
+return;
 }
 
-function next(){
-  if(!localStorage.getItem("q" + current)){
-    alert("Seleziona una risposta");
-    return;
-  }
+nextBtn.disabled=true;
 
-  if(current < 10){
-    current++;
-    render();
-  }else{
-    submitAnswers();
-  }
+try{
+
+const res=await fetch(API_BASE+"/api/answers",{
+method:"POST",
+headers:{
+"Content-Type":"application/json",
+"Authorization":"Bearer "+sessionToken
+},
+body:JSON.stringify({answers})
+});
+
+const data=await res.json().catch(()=>null);
+
+if(!res.ok || !data || !data.ok){
+alert("Errore nel salvataggio delle risposte. Riprova.");
+nextBtn.disabled=false;
+return;
+}
+
+location.href="results.html";
+
+}catch(e){
+
+alert("Errore connessione. Controlla internet e riprova.");
+nextBtn.disabled=false;
+
+}
+
+}
+
+/* navigazione */
+
+function next(){
+
+if(!localStorage.getItem("q"+current)){
+alert("Seleziona una risposta");
+return;
+}
+
+if(current<10){
+current++;
+render();
+}else{
+submitAnswers();
+}
+
 }
 
 function prev(){
-  if(current > 1){
-    current--;
-    render();
-  }
+
+if(current>1){
+current--;
+render();
+}
+
 }
 
 render();
+
 </script>
+
 </body>
 </html>

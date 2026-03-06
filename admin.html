@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>meety · Admin</title>
+  <link rel="stylesheet" href="ui.css">
+
+  <style>
+    .admin-card{
+      height:auto;
+      min-height:520px;
+    }
+
+    .admin-login{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+
+    .admin-panel{
+      display:none;
+    }
+
+    .admin-panel.show{
+      display:block;
+    }
+
+    .admin-login.hide{
+      display:none;
+    }
+
+    .status-box{
+      margin-top:14px;
+      padding:12px 14px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(27,0,34,.35);
+      font-size:13px;
+      line-height:1.35;
+      white-space:pre-wrap;
+      word-break:break-word;
+      min-height:72px;
+    }
+
+    .mini-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+    }
+
+    @media (max-width: 380px){
+      .mini-grid{
+        grid-template-columns:1fr;
+      }
+    }
+
+    .tiny-note{
+      margin-top:10px;
+      font-size:12px;
+      opacity:.58;
+      line-height:1.3;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page">
+    <div class="top">
+      <img src="logo.png" class="logo-mini" alt="meety" onclick="goHome()">
+      <div class="step-pill">ADMIN</div>
+    </div>
+
+    <div class="card admin-card">
+      <div class="section">
+        <div class="label">Pannello admin</div>
+        <div class="help">Pagina non linkata. Se sei qui, almeno hai trovato la porta.</div>
+      </div>
+
+      <!-- LOGIN -->
+      <div id="loginBox" class="admin-login">
+        <div class="section">
+          <div class="label">Password pagina<span class="req">*</span></div>
+          <input id="pagePassword" type="password" placeholder="Inserisci password admin">
+        </div>
+
+        <div class="section">
+          <div class="label">Admin key backend<span class="req">*</span></div>
+          <input id="adminKey" type="password" placeholder="Inserisci ADMIN_KEY">
+          <div class="note">La password apre la pagina. La ADMIN_KEY autorizza le azioni vere sul server.</div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-secondary" onclick="goHome()">Esci</button>
+          <button class="btn btn-primary" onclick="unlockAdmin()">Entra</button>
+        </div>
+      </div>
+
+      <!-- PANEL -->
+      <div id="adminPanel" class="admin-panel">
+        <div class="section">
+          <div class="label">Evento target<span class="req">*</span></div>
+          <input id="eventId" placeholder="Es. GAETA_2026_06_15">
+          <div class="note">Se vuoto, prova a usare l'event_id salvato in locale.</div>
+        </div>
+
+        <div class="section">
+          <div class="label">Seed demo</div>
+          <div class="mini-grid">
+            <input id="seedCount" type="number" min="1" max="50" placeholder="Numero utenti demo">
+            <button class="btn btn-secondary" onclick="seedDemo()" style="margin:0;">Crea demo</button>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="label">Pulizia evento</div>
+          <button class="btn btn-secondary" onclick="clearEvent()">Svuota evento</button>
+          <div class="note">Cancella tutti gli utenti dell'evento indicato. Operazione irreversibile.</div>
+        </div>
+
+        <div class="section">
+          <div class="label">Azioni future</div>
+          <div class="help">Qui aggiungeremo: verifica token, lista utenti, elimina singolo utente, moderazione nomi.</div>
+        </div>
+
+        <div class="status-box" id="statusBox">In attesa di istruzioni.</div>
+
+        <div class="tiny-note">
+          Suggerimento: questa pagina non è linkata da nessuna parte. Aprila solo tu andando direttamente su <strong>/admin.html</strong>.
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-secondary" onclick="lockAdmin()">Blocca</button>
+          <button class="btn btn-primary" onclick="goHome()">Home</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const API_BASE = "https://matchme-production-73a8.up.railway.app";
+
+  // Password locale pagina: cambiala come vuoi
+  const PAGE_PASSWORD = "meety-admin-estate";
+
+  const loginBox = document.getElementById("loginBox");
+  const adminPanel = document.getElementById("adminPanel");
+  const statusBox = document.getElementById("statusBox");
+  const eventIdInput = document.getElementById("eventId");
+  const adminKeyInput = document.getElementById("adminKey");
+  const pagePasswordInput = document.getElementById("pagePassword");
+  const seedCountInput = document.getElementById("seedCount");
+
+  function goHome(){
+    sessionStorage.setItem("force_home", "1");
+    location.href = "index.html";
+  }
+
+  function getEventId(){
+    const typed = (eventIdInput.value || "").trim();
+    if(typed) return typed;
+
+    const localEvent = (localStorage.getItem("event_id") || "").trim();
+    if(localEvent){
+      eventIdInput.value = localEvent;
+      return localEvent;
+    }
+
+    return "";
+  }
+
+  function getAdminKey(){
+    return (sessionStorage.getItem("admin_key") || "").trim();
+  }
+
+  function setStatus(msg){
+    statusBox.textContent = msg;
+  }
+
+  function unlockAdmin(){
+    const pagePassword = (pagePasswordInput.value || "").trim();
+    const adminKey = (adminKeyInput.value || "").trim();
+
+    if(pagePassword !== PAGE_PASSWORD){
+      alert("Password pagina errata");
+      return;
+    }
+
+    if(!adminKey){
+      alert("Inserisci la ADMIN_KEY");
+      return;
+    }
+
+    sessionStorage.setItem("admin_unlocked", "1");
+    sessionStorage.setItem("admin_key", adminKey);
+
+    loginBox.classList.add("hide");
+    adminPanel.classList.add("show");
+
+    const localEvent = (localStorage.getItem("event_id") || "").trim();
+    if(localEvent && !eventIdInput.value){
+      eventIdInput.value = localEvent;
+    }
+
+    setStatus("Pannello sbloccato.\nPronto a eseguire azioni admin.");
+  }
+
+  function lockAdmin(){
+    sessionStorage.removeItem("admin_unlocked");
+    sessionStorage.removeItem("admin_key");
+    adminPanel.classList.remove("show");
+    loginBox.classList.remove("hide");
+    pagePasswordInput.value = "";
+    adminKeyInput.value = "";
+    setStatus("Pannello bloccato.");
+  }
+
+  function restoreAdminSession(){
+    const unlocked = sessionStorage.getItem("admin_unlocked");
+    const savedKey = sessionStorage.getItem("admin_key");
+
+    const localEvent = (localStorage.getItem("event_id") || "").trim();
+    if(localEvent && !eventIdInput.value){
+      eventIdInput.value = localEvent;
+    }
+
+    if(unlocked === "1" && savedKey){
+      loginBox.classList.add("hide");
+      adminPanel.classList.add("show");
+      setStatus("Sessione admin ripristinata.");
+    }
+  }
+
+  async function seedDemo(){
+    const adminKey = getAdminKey();
+    const eventId = getEventId();
+    const count = parseInt(seedCountInput.value || "10", 10);
+
+    if(!adminKey){
+      alert("ADMIN_KEY mancante");
+      return;
+    }
+
+    if(!eventId){
+      alert("Inserisci un event_id");
+      return;
+    }
+
+    if(!count || count < 1 || count > 50){
+      alert("Il numero demo deve essere tra 1 e 50");
+      return;
+    }
+
+    setStatus("Sto creando utenti demo...");
+
+    try{
+      const res = await fetch(API_BASE + "/api/admin/seed_demo", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Admin-Key": adminKey
+        },
+        body: JSON.stringify({
+          event_id: eventId,
+          count: count
+        })
+      });
+
+      const data = await res.json().catch(() => null);
+
+      if(!res.ok || !data || !data.ok){
+        setStatus("Errore seed demo.\n\n" + JSON.stringify(data, null, 2));
+        return;
+      }
+
+      setStatus(
+        "Seed demo completato.\n\n" +
+        "Evento: " + data.event_id + "\n" +
+        "Creati: " + data.created
+      );
+
+    }catch(e){
+      setStatus("Errore connessione durante seed demo.");
+    }
+  }
+
+  async function clearEvent(){
+    const adminKey = getAdminKey();
+    const eventId = getEventId();
+
+    if(!adminKey){
+      alert("ADMIN_KEY mancante");
+      return;
+    }
+
+    if(!eventId){
+      alert("Inserisci un event_id");
+      return;
+    }
+
+    const ok = confirm("Vuoi davvero cancellare TUTTI gli utenti dell'evento " + eventId + "?");
+    if(!ok) return;
+
+    setStatus("Sto cancellando l'evento...");
+
+    try{
+      const res = await fetch(API_BASE + "/api/admin/clear_event", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Admin-Key": adminKey
+        },
+        body: JSON.stringify({
+          event_id: eventId
+        })
+      });
+
+      const data = await res.json().catch(() => null);
+
+      if(!res.ok || !data || !data.ok){
+        setStatus("Errore clear event.\n\n" + JSON.stringify(data, null, 2));
+        return;
+      }
+
+      setStatus(
+        "Evento svuotato.\n\n" +
+        "Evento: " + data.event_id + "\n" +
+        "Eliminati: " + data.deleted
+      );
+
+    }catch(e){
+      setStatus("Errore connessione durante clear event.");
+    }
+  }
+
+  restoreAdminSession();
+</script>
+</body>
+</html>

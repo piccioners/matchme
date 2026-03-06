@@ -53,24 +53,91 @@
       border-radius:18px;
       padding:16px;
       backdrop-filter: blur(10px);
+      margin-bottom:14px;
     }
-    h1{margin:0 0 6px 0;font-size:22px;font-weight:900}
-    .sub{margin:0 0 14px 0;opacity:.78;font-size:14px;line-height:1.35}
+    h1{margin:0 0 12px 0;font-size:22px;font-weight:900}
+    .section-title{
+      margin:0 0 10px 0;
+      font-size:17px;
+      font-weight:900;
+    }
 
-    .list{display:flex;flex-direction:column;gap:10px;margin-top:10px}
+    .search-row{
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+    .search-row input{
+      flex:1;
+      min-width:0;
+      padding:14px 14px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(27,0,34,.55);
+      color:#fff;
+      font-size:15px;
+      font-weight:800;
+      outline:none;
+      -webkit-appearance:none;
+      appearance:none;
+    }
+    .search-row input::placeholder{
+      opacity:.45;
+      font-weight:750;
+    }
+
+    .list{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      margin-top:10px;
+    }
+
     .match{
       background: rgba(27,0,34,.35);
       border: 1px solid rgba(255,255,255,.10);
       border-radius:16px;
       padding:14px;
+      cursor:pointer;
+      transition: transform .08s ease, border-color .15s ease, background .15s ease;
+    }
+    .match:active{
+      transform:scale(.99);
+    }
+    .match.open{
+      border-color: rgba(255,47,146,.45);
+      background: rgba(255,47,146,.08);
+    }
+
+    .match-top{
       display:flex;
       justify-content:space-between;
+      align-items:flex-start;
       gap:10px;
     }
+
     .m-left{min-width:0}
-    .m-name{font-weight:950;font-size:15px;margin:0 0 4px 0}
-    .m-meta{opacity:.7;font-size:12px;margin:0}
-    .m-right{text-align:right;display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+    .m-name{
+      font-weight:950;
+      font-size:15px;
+      margin:0 0 4px 0;
+      line-height:1.2;
+    }
+    .m-meta{
+      opacity:.7;
+      font-size:12px;
+      margin:0;
+    }
+
+    .m-right{
+      text-align:right;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      align-items:flex-end;
+      flex:0 0 auto;
+    }
+
     .pct{
       font-weight:950;
       font-size:16px;
@@ -80,11 +147,45 @@
       background: rgba(255,47,146,.10);
       white-space:nowrap;
     }
-    .hint{
+
+    .arrow{
       font-size:12px;
       opacity:.65;
+      line-height:1;
+    }
+
+    .match-details{
+      display:none;
       margin-top:12px;
-      line-height:1.35;
+      padding-top:12px;
+      border-top:1px solid rgba(255,255,255,.08);
+    }
+
+    .match.open .match-details{
+      display:block;
+    }
+
+    .details-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px 12px;
+    }
+
+    .detail{
+      min-width:0;
+    }
+
+    .detail-k{
+      font-size:11px;
+      opacity:.6;
+      margin-bottom:3px;
+    }
+
+    .detail-v{
+      font-size:13px;
+      font-weight:800;
+      line-height:1.25;
+      word-break:break-word;
     }
 
     .btn{
@@ -103,6 +204,14 @@
       color:#fff;
     }
 
+    .btn-inline{
+      width:auto;
+      margin-top:0;
+      padding:14px 16px;
+      font-size:14px;
+      flex:0 0 auto;
+    }
+
     .empty{
       text-align:center;
       padding:8px 6px;
@@ -111,6 +220,30 @@
       font-size:18px;
       font-weight:950;
       margin:0 0 8px 0;
+    }
+    .sub{
+      margin:0;
+      opacity:.78;
+      font-size:14px;
+      line-height:1.35;
+    }
+
+    @media (max-width:420px){
+      .details-grid{
+        grid-template-columns:1fr 1fr;
+      }
+    }
+
+    @media (max-width:360px){
+      .search-row{
+        flex-direction:column;
+      }
+      .btn-inline{
+        width:100%;
+      }
+      .details-grid{
+        grid-template-columns:1fr;
+      }
     }
   </style>
 </head>
@@ -124,18 +257,23 @@
 
     <div class="card">
       <h1>I tuoi match</h1>
-      <p class="sub">Mostriamo solo match reciproci (vi cercate entrambi).</p>
-
       <div id="content"></div>
-
       <button class="btn btn-secondary" onclick="location.href='hub.html'">Torna alla Home serata</button>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Cerca per tavolo</div>
+      <div class="search-row">
+        <input id="tableSearchInput" placeholder="Es. 12">
+        <button class="btn btn-secondary btn-inline" onclick="searchByTable()">Cerca</button>
+      </div>
+      <div id="tableSearchContent"></div>
     </div>
   </div>
 
 <script>
   const API_BASE = "https://matchme-production-73a8.up.railway.app";
 
-  // Guardrail
   if(localStorage.getItem("profile_complete") !== "true"){
     location.href = "step1.html";
   }
@@ -145,11 +283,9 @@
     location.href = "step1.html";
   }
 
-  // Event pill
   const eventId = (localStorage.getItem("event_id") || "").trim();
   document.getElementById("eventPill").textContent = eventId ? eventId.replaceAll("_"," ") : "Serata";
 
-  // Risposte
   function readAnswers(){
     const a = [];
     for(let i=1;i<=10;i++){
@@ -167,6 +303,8 @@
 
   const mySeek = (localStorage.getItem("gender_seek") || "").trim();
   const myGender = (localStorage.getItem("gender_me") || "").trim();
+
+  let allParticipants = [];
 
   function compatibility(a, b){
     const n = Math.min(a.length, b.length);
@@ -224,6 +362,51 @@
     return false;
   }
 
+  function buildDetail(label, value){
+    return `
+      <div class="detail">
+        <div class="detail-k">${escapeHtml(label)}</div>
+        <div class="detail-v">${escapeHtml(value || "—")}</div>
+      </div>
+    `;
+  }
+
+  function createProfileCard(p, pctText){
+    const div = document.createElement("div");
+    div.className = "match";
+
+    div.innerHTML = `
+      <div class="match-top">
+        <div class="m-left">
+          <p class="m-name">${escapeHtml(p.name || "Sconosciuto")}</p>
+          <p class="m-meta">Tavolo ${escapeHtml(String(p.table || "—"))}</p>
+        </div>
+        <div class="m-right">
+          <div class="pct">${escapeHtml(pctText)}</div>
+          <div class="arrow">Tocca per aprire</div>
+        </div>
+      </div>
+
+      <div class="match-details">
+        <div class="details-grid">
+          ${buildDetail("Io sono", p.gender_me)}
+          ${buildDetail("Cerco", p.gender_seek)}
+          ${buildDetail("Stato", p.status)}
+          ${buildDetail("Sono qui per", p.purpose)}
+          ${buildDetail("Segno", p.zodiac)}
+          ${buildDetail("Drink", p.drink)}
+          ${buildDetail("Musica", p.music)}
+        </div>
+      </div>
+    `;
+
+    div.addEventListener("click", () => {
+      div.classList.toggle("open");
+    });
+
+    return div;
+  }
+
   async function load(){
     const content = document.getElementById("content");
 
@@ -238,22 +421,19 @@
         content.innerHTML = `
           <div class="empty">
             <p class="big">Errore caricamento match</p>
-            <p class="sub" style="margin:0;opacity:.75">Riprova tra poco.</p>
+            <p class="sub">Riprova tra poco.</p>
           </div>
         `;
         return;
       }
 
       const participants = data.participants;
+      allParticipants = participants;
 
-      // filtro: io cerco loro + loro cercano me
       const filtered = participants.filter(p => {
         if(!p || !Array.isArray(p.answers)) return false;
 
-        // 1) loro devono essere nel mio target
         if(!isCompatibleByGender(mySeek, p.gender_me)) return false;
-
-        // 2) reciprocità: io devo essere nel loro target
         if(!isReciprocal(p.gender_seek, myGender)) return false;
 
         return true;
@@ -268,9 +448,7 @@
         content.innerHTML = `
           <div class="empty">
             <p class="big">Nessun match reciproco</p>
-            <p class="sub" style="margin:0;opacity:.75">
-              Serve che ci siano altre persone compatibili e che vi cerchiate entrambi.
-            </p>
+            <p class="sub">Per ora non ci sono profili compatibili.</p>
           </div>
         `;
         return;
@@ -281,37 +459,57 @@
 
       ranked.forEach(p => {
         const pct = (typeof p.score === "number" ? p.score : 0).toFixed(1) + "%";
-        const div = document.createElement("div");
-        div.className = "match";
-        div.innerHTML = `
-          <div class="m-left">
-            <p class="m-name">${escapeHtml(p.name || "Sconosciuto")}</p>
-            <p class="m-meta">Tavolo ${escapeHtml(String(p.table || "—"))}</p>
-          </div>
-          <div class="m-right">
-            <div class="pct">${pct}</div>
-            <div class="m-meta">${escapeHtml(p.zodiac || "")}</div>
-          </div>
-        `;
-        list.appendChild(div);
+        list.appendChild(createProfileCard(p, pct));
       });
 
       content.innerHTML = "";
       content.appendChild(list);
 
-      const hint = document.createElement("div");
-      hint.className = "hint";
-      hint.textContent = "Suggerimento: se compare, è reciproco. Quindi puoi andare sereno a parlarci.";
-      content.appendChild(hint);
-
     }catch(e){
       content.innerHTML = `
         <div class="empty">
           <p class="big">Errore connessione</p>
-          <p class="sub" style="margin:0;opacity:.75">Riprova tra poco.</p>
+          <p class="sub">Riprova tra poco.</p>
         </div>
       `;
     }
+  }
+
+  function searchByTable(){
+    const container = document.getElementById("tableSearchContent");
+    const input = document.getElementById("tableSearchInput");
+    const table = (input.value || "").trim();
+
+    if(!table){
+      container.innerHTML = `
+        <div class="empty" style="padding-top:14px;">
+          <p class="sub">Inserisci un tavolo.</p>
+        </div>
+      `;
+      return;
+    }
+
+    const found = allParticipants.filter(p => String(p.table || "").trim() === table);
+
+    if(found.length === 0){
+      container.innerHTML = `
+        <div class="empty" style="padding-top:14px;">
+          <p class="big">Nessuno trovato</p>
+          <p class="sub">Nessun profilo per il tavolo ${escapeHtml(table)}.</p>
+        </div>
+      `;
+      return;
+    }
+
+    const list = document.createElement("div");
+    list.className = "list";
+
+    found.forEach(p => {
+      list.appendChild(createProfileCard(p, "Profilo"));
+    });
+
+    container.innerHTML = "";
+    container.appendChild(list);
   }
 
   load();

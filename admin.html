@@ -49,10 +49,84 @@
       gap:10px;
     }
 
-    @media (max-width: 380px){
-      .mini-grid{
-        grid-template-columns:1fr;
-      }
+    .participants-box{
+      margin-top:14px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+
+    .participant-card{
+      background: rgba(27,0,34,.35);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:16px;
+      padding:12px;
+    }
+
+    .participant-top{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:10px;
+    }
+
+    .participant-name{
+      font-size:15px;
+      font-weight:900;
+      margin:0;
+      line-height:1.2;
+    }
+
+    .participant-meta{
+      margin:4px 0 0 0;
+      font-size:12px;
+      opacity:.72;
+      line-height:1.3;
+    }
+
+    .participant-badges{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:10px;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:7px 10px;
+      border-radius:999px;
+      font-size:11px;
+      font-weight:800;
+      background: rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.10);
+      white-space:nowrap;
+    }
+
+    .badge.ok{
+      border-color: rgba(255,47,146,.35);
+      background: rgba(255,47,146,.10);
+    }
+
+    .participant-actions{
+      margin-top:12px;
+      display:flex;
+      gap:10px;
+    }
+
+    .participant-actions .btn{
+      margin-top:0;
+      padding:11px 12px;
+      font-size:13px;
+    }
+
+    .participant-token{
+      margin-top:8px;
+      font-size:11px;
+      opacity:.56;
+      word-break:break-all;
+      line-height:1.3;
     }
 
     .tiny-note{
@@ -60,6 +134,36 @@
       font-size:12px;
       opacity:.58;
       line-height:1.3;
+    }
+
+    .count-line{
+      margin-top:6px;
+      font-size:12px;
+      opacity:.7;
+    }
+
+    .empty-list{
+      padding:12px;
+      text-align:center;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(27,0,34,.25);
+      font-size:13px;
+      opacity:.78;
+    }
+
+    @media (max-width: 380px){
+      .mini-grid{
+        grid-template-columns:1fr;
+      }
+
+      .participant-top{
+        flex-direction:column;
+      }
+
+      .participant-actions{
+        flex-direction:column;
+      }
     }
   </style>
 </head>
@@ -119,8 +223,13 @@
         </div>
 
         <div class="section">
-          <div class="label">Azioni future</div>
-          <div class="help">Qui aggiungeremo: verifica token, lista utenti, elimina singolo utente, moderazione nomi.</div>
+          <div class="label">Partecipanti evento</div>
+          <div class="mini-grid">
+            <button class="btn btn-secondary" onclick="loadParticipants()" style="margin:0;">Aggiorna lista</button>
+            <button class="btn btn-secondary" onclick="collapseParticipants()" style="margin:0;">Svuota vista</button>
+          </div>
+          <div class="count-line" id="participantsCount">Nessuna lista caricata.</div>
+          <div class="participants-box" id="participantsBox"></div>
         </div>
 
         <div class="status-box" id="statusBox">In attesa di istruzioni.</div>
@@ -150,6 +259,8 @@
   const adminKeyInput = document.getElementById("adminKey");
   const pagePasswordInput = document.getElementById("pagePassword");
   const seedCountInput = document.getElementById("seedCount");
+  const participantsBox = document.getElementById("participantsBox");
+  const participantsCount = document.getElementById("participantsCount");
 
   function goHome(){
     sessionStorage.setItem("force_home", "1");
@@ -212,6 +323,8 @@
     loginBox.classList.remove("hide");
     pagePasswordInput.value = "";
     adminKeyInput.value = "";
+    participantsBox.innerHTML = "";
+    participantsCount.textContent = "Nessuna lista caricata.";
     setStatus("Pannello bloccato.");
   }
 
@@ -229,6 +342,11 @@
       adminPanel.classList.add("show");
       setStatus("Sessione admin ripristinata.");
     }
+  }
+
+  function collapseParticipants(){
+    participantsBox.innerHTML = "";
+    participantsCount.textContent = "Vista partecipanti svuotata.";
   }
 
   async function seedDemo(){
@@ -279,6 +397,8 @@
         "Creati: " + data.created
       );
 
+      await loadParticipants();
+
     }catch(e){
       setStatus("Errore connessione durante seed demo.");
     }
@@ -328,9 +448,170 @@
         "Eliminati: " + data.deleted
       );
 
+      participantsBox.innerHTML = "";
+      participantsCount.textContent = "0 partecipanti caricati.";
+
     }catch(e){
       setStatus("Errore connessione durante clear event.");
     }
+  }
+
+  async function loadParticipants(){
+    const adminKey = getAdminKey();
+    const eventId = getEventId();
+
+    if(!adminKey){
+      alert("ADMIN_KEY mancante");
+      return;
+    }
+
+    if(!eventId){
+      alert("Inserisci un event_id");
+      return;
+    }
+
+    setStatus("Sto caricando i partecipanti...");
+    participantsBox.innerHTML = "";
+    participantsCount.textContent = "Caricamento in corso...";
+
+    try{
+      const res = await fetch(API_BASE + "/api/admin/participants?event_id=" + encodeURIComponent(eventId), {
+        method: "GET",
+        headers: {
+          "X-Admin-Key": adminKey
+        }
+      });
+
+      const data = await res.json().catch(() => null);
+
+      if(!res.ok || !data || !data.ok || !Array.isArray(data.participants)){
+        participantsCount.textContent = "Errore caricamento lista.";
+        setStatus("Errore lista partecipanti.\n\n" + JSON.stringify(data, null, 2));
+        return;
+      }
+
+      participantsCount.textContent = data.count + " partecipanti caricati.";
+
+      if(data.participants.length === 0){
+        participantsBox.innerHTML = '<div class="empty-list">Nessun partecipante trovato per questo evento.</div>';
+        setStatus("Lista partecipanti vuota.");
+        return;
+      }
+
+      participantsBox.innerHTML = "";
+
+      data.participants.forEach(p => {
+        const card = document.createElement("div");
+        card.className = "participant-card";
+
+        card.innerHTML = `
+          <div class="participant-top">
+            <div>
+              <p class="participant-name">${escapeHtml(p.name || "Sconosciuto")}</p>
+              <p class="participant-meta">
+                Tavolo ${escapeHtml(String(p.table || "—"))}
+                · ${escapeHtml(p.created_at || "")}
+              </p>
+            </div>
+            <div class="badge ${p.has_answers ? "ok" : ""}">
+              ${p.has_answers ? "Quiz completato" : "Quiz mancante"}
+            </div>
+          </div>
+
+          <div class="participant-badges">
+            <div class="badge">Io: ${escapeHtml(p.gender_me || "—")}</div>
+            <div class="badge">Cerco: ${escapeHtml(p.gender_seek || "—")}</div>
+            <div class="badge">Stato: ${escapeHtml(p.status || "—")}</div>
+            <div class="badge">Scopo: ${escapeHtml(p.purpose || "—")}</div>
+            <div class="badge">Segno: ${escapeHtml(p.zodiac || "—")}</div>
+          </div>
+
+          <div class="participant-token">
+            Token: ${escapeHtml(p.session_token_short || "")}
+          </div>
+
+          <div class="participant-actions">
+            <button class="btn btn-secondary" onclick="deleteUser('${escapeJs(p.id)}','${escapeJs(p.name || '')}')">Elimina utente</button>
+          </div>
+        `;
+
+        participantsBox.appendChild(card);
+      });
+
+      setStatus("Lista partecipanti aggiornata.");
+
+    }catch(e){
+      participantsCount.textContent = "Errore connessione.";
+      setStatus("Errore connessione durante caricamento partecipanti.");
+    }
+  }
+
+  async function deleteUser(userId, userName){
+    const adminKey = getAdminKey();
+    const eventId = getEventId();
+
+    if(!adminKey){
+      alert("ADMIN_KEY mancante");
+      return;
+    }
+
+    if(!userId){
+      alert("User ID mancante");
+      return;
+    }
+
+    const ok = confirm("Vuoi eliminare l'utente " + (userName || "selezionato") + "?");
+    if(!ok) return;
+
+    setStatus("Sto eliminando l'utente...");
+
+    try{
+      const res = await fetch(API_BASE + "/api/admin/delete_user", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Admin-Key": adminKey
+        },
+        body: JSON.stringify({
+          user_id: userId
+        })
+      });
+
+      const data = await res.json().catch(() => null);
+
+      if(!res.ok || !data || !data.ok){
+        setStatus("Errore eliminazione utente.\n\n" + JSON.stringify(data, null, 2));
+        return;
+      }
+
+      setStatus(
+        "Utente eliminato.\n\n" +
+        "User ID: " + data.user_id
+      );
+
+      if(eventId){
+        await loadParticipants();
+      }
+
+    }catch(e){
+      setStatus("Errore connessione durante eliminazione utente.");
+    }
+  }
+
+  function escapeHtml(str){
+    return String(str)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function escapeJs(str){
+    return String(str)
+      .replaceAll("\\", "\\\\")
+      .replaceAll("'", "\\'")
+      .replaceAll('"', '\\"');
   }
 
   restoreAdminSession();

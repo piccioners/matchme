@@ -186,21 +186,42 @@
       .replaceAll("'","&#039;");
   }
 
-  function acceptsAnyone(seek){
-    const s = (seek || "").trim();
-    return (s === "" || s === "Tutti" || s === "Indifferente" || s === "Preferisco non dirlo");
-  }
-
   function isCompatibleByGender(mySeekValue, otherGenderMe){
-    // io cerco X -> l'altro deve "essere X", salvo che io sia in modalità non filtrante
-    if(acceptsAnyone(mySeekValue)) return true;
-    return (otherGenderMe || "").trim() === mySeekValue.trim();
+    const seek = (mySeekValue || "").trim();
+    const other = (otherGenderMe || "").trim();
+
+    if(seek === "Entrambi"){
+      return other === "Uomo" || other === "Donna" || other === "Altro";
+    }
+
+    if(seek === "Uomo"){
+      return other === "Uomo";
+    }
+
+    if(seek === "Donna"){
+      return other === "Donna";
+    }
+
+    return false;
   }
 
   function isReciprocal(otherSeek, myGenderValue){
-    // l'altro cerca X -> io devo "essere X", salvo che l'altro sia non filtrante
-    if(acceptsAnyone(otherSeek)) return true;
-    return (myGenderValue || "").trim() === (otherSeek || "").trim();
+    const seek = (otherSeek || "").trim();
+    const me = (myGenderValue || "").trim();
+
+    if(seek === "Entrambi"){
+      return me === "Uomo" || me === "Donna" || me === "Altro";
+    }
+
+    if(seek === "Uomo"){
+      return me === "Uomo";
+    }
+
+    if(seek === "Donna"){
+      return me === "Donna";
+    }
+
+    return false;
   }
 
   async function load(){

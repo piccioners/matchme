@@ -193,6 +193,96 @@ def admin_seed_demo():
     finally:
         conn.close()
 
+@app.get("/api/admin/participants")
+def admin_participants():
+    ok, err, code = require_admin()
+    if not ok:
+        return err, code
+
+    event_id = (request.args.get("event_id") or "").strip()
+    if not event_id:
+        return jsonify({"error": "missing_event_id"}), 400
+
+    conn = get_db()
+    try:
+        with conn, conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            cur.execute(f"""
+              SELECT
+                id,
+                event_id,
+                session_token,
+                created_at,
+                name,
+                table_no,
+                gender_me,
+                gender_seek,
+                status,
+                purpose,
+                zodiac,
+                drink,
+                music,
+                answers
+              FROM {TABLE_NAME}
+              WHERE event_id=%s
+              ORDER BY created_at DESC
+            """, (event_id,))
+            rows = cur.fetchall()
+
+        participants = []
+        for r in rows:
+            token = r["session_token"] or ""
+            participants.append({
+                "id": str(r["id"]),
+                "event_id": r["event_id"],
+                "session_token": token,
+                "session_token_short": (token[:8] + "..." + token[-6:]) if len(token) > 18 else token,
+                "created_at": r["created_at"].isoformat() if r["created_at"] else "",
+                "name": r["name"] or "",
+                "table": r["table_no"] or "",
+                "gender_me": r["gender_me"] or "",
+                "gender_seek": r["gender_seek"] or "",
+                "status": r["status"] or "",
+                "purpose": r["purpose"] or "",
+                "zodiac": r["zodiac"] or "",
+                "drink": r["drink"] or "",
+                "music": r["music"] or "",
+                "has_answers": r["answers"] is not None
+            })
+
+        return jsonify({
+            "ok": True,
+            "event_id": event_id,
+            "count": len(participants),
+            "participants": participants
+        })
+    finally:
+        conn.close()
+
+@app.post("/api/admin/delete_user")
+def admin_delete_user():
+    ok, err, code = require_admin()
+    if not ok:
+        return err, code
+
+    data = request.get_json(force=True, silent=True) or {}
+    user_id = (data.get("user_id") or "").strip()
+
+    if not user_id:
+        return jsonify({"error": "missing_user_id"}), 400
+
+    conn = get_db()
+    try:
+        with conn, conn.cursor() as cur:
+            cur.execute(f"DELETE FROM {TABLE_NAME} WHERE id=%s", (user_id,))
+            deleted = cur.rowcount
+
+        if deleted < 1:
+            return jsonify({"error": "user_not_found"}), 404
+
+        return jsonify({"ok": True, "deleted": deleted, "user_id": user_id})
+    finally:
+        conn.close()
+
 @app.post("/api/register")
 def register():
     data = request.get_json(force=True, silent=True) or {}

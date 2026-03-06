@@ -16,14 +16,31 @@
     }
     *{box-sizing:border-box}
     body{
-      margin:0;height:100svh;overflow:hidden;
-      display:flex;align-items:center;justify-content:center;
+      margin:0;
+      min-height:100svh;
+      overflow-y:auto;
+      overflow-x:hidden;
+      display:flex;
+      align-items:flex-start;
+      justify-content:center;
       color:var(--ink);
       font-family:system-ui,-apple-system,BlinkMacSystemFont;
       background: radial-gradient(1200px 800px at 20% 10%, rgba(124,58,237,.22), transparent 55%),
                   radial-gradient(900px 700px at 80% 20%, rgba(255,47,146,.18), transparent 55%),
                   linear-gradient(180deg,var(--bg1),var(--bg2));
       padding:20px;
+    }
+    body::before{
+      content:"";
+      position:fixed;
+      inset:-20%;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(255,255,255,.06), transparent 45%),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.18'/%3E%3C/svg%3E");
+      mix-blend-mode:overlay;
+      opacity:.18;
+      pointer-events:none;
+      transform:rotate(6deg);
     }
     .wrap{width:100%;max-width:420px}
     .top{
@@ -48,8 +65,7 @@
       padding:16px;
       backdrop-filter: blur(10px);
     }
-    h1{margin:0 0 6px 0;font-size:22px;font-weight:900}
-    .sub{margin:0 0 14px 0;opacity:.78;font-size:14px;line-height:1.35}
+    h1{margin:0 0 14px 0;font-size:22px;font-weight:900}
 
     .row{
       display:flex;
@@ -60,8 +76,19 @@
       border-top:1px solid rgba(255,255,255,.08);
     }
     .row:first-of-type{border-top:none;padding-top:2px}
-    .k{opacity:.65;font-size:13px;min-width:120px}
-    .v{font-weight:850;font-size:14px;text-align:right;line-height:1.25}
+    .k{
+      opacity:.65;
+      font-size:13px;
+      min-width:120px;
+      line-height:1.25;
+    }
+    .v{
+      font-weight:850;
+      font-size:14px;
+      text-align:right;
+      line-height:1.25;
+      word-break:break-word;
+    }
 
     .btn{
       width:100%;
@@ -86,6 +113,12 @@
       border:1.5px solid rgba(255,47,146,.40);
       color: rgba(255,255,255,.92);
     }
+    .btn-ghost{
+      background: transparent;
+      border:1px solid rgba(255,255,255,.14);
+      color: rgba(255,255,255,.82);
+    }
+
     .danger{
       margin-top:10px;
       text-align:center;
@@ -94,11 +127,13 @@
       text-decoration:underline;
       cursor:pointer;
     }
-    .tiny{
+
+    .loading{
       margin-top:10px;
       text-align:center;
       font-size:12px;
-      opacity:.45;
+      opacity:.65;
+      display:none;
     }
   </style>
 </head>
@@ -112,7 +147,6 @@
 
     <div class="card">
       <h1>Il tuo profilo</h1>
-      <p class="sub">Queste info servono a dare contesto ai match.</p>
 
       <div class="row">
         <div class="k">Nome</div>
@@ -151,43 +185,134 @@
         <div class="v" id="vMusic">—</div>
       </div>
 
+      <div class="loading" id="loading">Caricamento…</div>
+
       <button class="btn btn-primary" onclick="editProfile()">Modifica profilo</button>
-      <button class="btn btn-secondary" onclick="location.href='hub.html'">Torna alla Home serata</button>
+      <button class="btn btn-secondary" id="resultsBtn" onclick="location.href='results.html'" style="display:none;">Guarda i tuoi match</button>
+      <button class="btn btn-ghost" onclick="location.href='hub.html'">Torna alla Home serata</button>
 
       <div class="danger" onclick="resetProfile()">Reset profilo (solo se necessario)</div>
-      <div class="tiny">Se hai cambiato telefono, devi rifare il profilo su quel telefono.</div>
     </div>
   </div>
 
 <script>
-  // Guardrail: profilo non completo -> torna a step1
+  const API_BASE = "https://matchme-production-73a8.up.railway.app";
+
   if(localStorage.getItem("profile_complete") !== "true"){
     location.href = "step1.html";
   }
 
-  const get = (k) => (localStorage.getItem(k) || "").trim() || "—";
+  const loading = document.getElementById("loading");
+  const resultsBtn = document.getElementById("resultsBtn");
 
-  // Event pill
-  const eventId = (localStorage.getItem("event_id") || "").trim();
-  document.getElementById("eventPill").textContent = eventId ? eventId.replaceAll("_"," ") : "Serata";
+  const getLocal = (k) => (localStorage.getItem(k) || "").trim() || "—";
 
-  // Values
-  document.getElementById("vName").textContent   = get("name");
-  document.getElementById("vTable").textContent  = get("table") === "—" ? "—" : ("Tavolo " + get("table"));
-  document.getElementById("vMe").textContent     = get("gender_me");
-  document.getElementById("vSeek").textContent   = get("gender_seek");
-  document.getElementById("vStatus").textContent = get("status");
-  document.getElementById("vPurpose").textContent= get("purpose");
-  document.getElementById("vZodiac").textContent = get("zodiac");
-  document.getElementById("vDrink").textContent  = get("drink");
-  document.getElementById("vMusic").textContent  = get("music");
+  function setText(id, value){
+    document.getElementById(id).textContent = value || "—";
+  }
+
+  function renderProfile(profile){
+    setText("vName", profile.name || "—");
+    setText("vTable", profile.table ? ("Tavolo " + profile.table) : "—");
+    setText("vMe", profile.gender_me || "—");
+    setText("vSeek", profile.gender_seek || "—");
+    setText("vStatus", profile.status || "—");
+    setText("vPurpose", profile.purpose || "—");
+    setText("vZodiac", profile.zodiac || "—");
+    setText("vDrink", profile.drink || "—");
+    setText("vMusic", profile.music || "—");
+  }
+
+  function renderLocalFallback(){
+    const eventId = (localStorage.getItem("event_id") || "").trim();
+    document.getElementById("eventPill").textContent = eventId ? eventId.replaceAll("_"," ") : "Serata";
+
+    renderProfile({
+      name: getLocal("name"),
+      table: getLocal("table") === "—" ? "" : getLocal("table"),
+      gender_me: getLocal("gender_me"),
+      gender_seek: getLocal("gender_seek"),
+      status: getLocal("status"),
+      purpose: getLocal("purpose"),
+      zodiac: getLocal("zodiac"),
+      drink: getLocal("drink"),
+      music: getLocal("music")
+    });
+
+    const hasAnswers = localStorage.getItem("has_answers") === "true";
+    resultsBtn.style.display = hasAnswers ? "block" : "none";
+  }
+
+  async function verifyAndRender(){
+    const token = (localStorage.getItem("session_token") || "").trim();
+    if(!token){
+      location.href = "step1.html";
+      return;
+    }
+
+    loading.style.display = "block";
+
+    try{
+      const res = await fetch(API_BASE + "/api/me", {
+        method: "GET",
+        headers: { "Authorization": "Bearer " + token }
+      });
+
+      const data = await res.json().catch(() => null);
+
+      if(!res.ok || !data || !data.ok){
+        location.href = "step1.html";
+        return;
+      }
+
+      const eventId = (data.event_id || "").trim();
+      document.getElementById("eventPill").textContent = eventId ? eventId.replaceAll("_"," ") : "Serata";
+
+      renderProfile({
+        name: (data.name || "").trim(),
+        table: String(data.table || "").trim(),
+        gender_me: data.profile?.gender_me || "",
+        gender_seek: data.profile?.gender_seek || "",
+        status: data.profile?.status || "",
+        purpose: data.profile?.purpose || "",
+        zodiac: data.profile?.zodiac || "",
+        drink: data.profile?.drink || "",
+        music: data.profile?.music || ""
+      });
+
+      if(eventId) localStorage.setItem("event_id", eventId);
+      if(data.name) localStorage.setItem("name", (data.name || "").trim());
+      if(data.table) localStorage.setItem("table", String(data.table || "").trim());
+
+      if(data.profile){
+        if(data.profile.gender_me) localStorage.setItem("gender_me", data.profile.gender_me);
+        if(data.profile.gender_seek) localStorage.setItem("gender_seek", data.profile.gender_seek);
+        if(data.profile.status) localStorage.setItem("status", data.profile.status);
+        if(data.profile.purpose) localStorage.setItem("purpose", data.profile.purpose);
+        if(data.profile.zodiac) localStorage.setItem("zodiac", data.profile.zodiac);
+        if(data.profile.drink) localStorage.setItem("drink", data.profile.drink);
+        if(data.profile.music) localStorage.setItem("music", data.profile.music);
+      }
+
+      if(data.has_answers){
+        localStorage.setItem("has_answers", "true");
+        resultsBtn.style.display = "block";
+      }else{
+        localStorage.removeItem("has_answers");
+        resultsBtn.style.display = "none";
+      }
+
+      loading.style.display = "none";
+
+    }catch(e){
+      loading.style.display = "none";
+      renderLocalFallback();
+    }
+  }
 
   function editProfile(){
-    // porta allo step più “avanti” raggiunto, ma minimo 1
-    const s = parseInt(localStorage.getItem("profile_step") || "1", 10);
-    const step = (isNaN(s) || s < 1) ? 1 : (s > 4 ? 4 : s);
     sessionStorage.setItem("nav_dir","prev");
-    location.href = "step" + step + ".html";
+    location.href = "step1.html";
   }
 
   function resetProfile(){
@@ -200,6 +325,8 @@
 
     location.href = "index.html";
   }
+
+  verifyAndRender();
 </script>
 </body>
 </html>

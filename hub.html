@@ -68,14 +68,6 @@
       cursor:pointer;
     }
 
-    .hello{
-      margin: 10px 0 18px 0;
-      font-size:18px;
-      font-weight:850;
-      letter-spacing:.2px;
-      opacity:.92;
-    }
-
     .card{
       text-align:left;
       background: var(--panel);
@@ -188,19 +180,23 @@
       <div class="loading" id="loading">Sto parlando col server… (che di solito dorme)</div>
     </div>
 
-    <p class="hello">Adesso rispondi alle domande per trovare i tuoi match.</p>
+    <div id="actions">
+      <button class="btn btn-primary" id="primaryBtn" onclick="goPrimary()">
+        Rispondi alle domande
+      </button>
 
-    <button class="btn btn-primary" onclick="location.href='domande.html'">
-      Rispondi alle domande
-    </button>
+      <button class="btn btn-secondary" id="secondaryBtn" onclick="goSecondary()" style="display:none;">
+        Cambia risposte
+      </button>
 
-    <button class="btn btn-secondary" onclick="location.href='profilo.html'">
-      Il tuo profilo
-    </button>
+      <button class="btn btn-secondary" onclick="location.href='profilo.html'">
+        Il tuo profilo
+      </button>
 
-    <button class="btn btn-ghost" onclick="alert('Arriva alla fine. Ora usalo.')">
-      Come funziona
-    </button>
+      <button class="btn btn-ghost" onclick="alert('Arriva alla fine. Ora usalo.')">
+        Come funziona
+      </button>
+    </div>
 
     <div class="danger" onclick="resetProfile()">Reset profilo (solo se necessario)</div>
   </div>
@@ -212,10 +208,39 @@
     const helloMeta = document.getElementById("helloMeta");
     const tablePill = document.getElementById("tablePill");
     const loading = document.getElementById("loading");
+    const primaryBtn = document.getElementById("primaryBtn");
+    const secondaryBtn = document.getElementById("secondaryBtn");
+
+    let hasAnswersState = false;
 
     function goHome(){
       sessionStorage.setItem("force_home", "1");
       location.href = "index.html";
+    }
+
+    function goPrimary(){
+      if(hasAnswersState){
+        location.href = "results.html";
+      }else{
+        location.href = "domande.html";
+      }
+    }
+
+    function goSecondary(){
+      location.href = "domande.html";
+    }
+
+    function renderActions(hasAnswers){
+      hasAnswersState = !!hasAnswers;
+
+      if(hasAnswersState){
+        primaryBtn.textContent = "Guarda i tuoi match";
+        secondaryBtn.textContent = "Cambia risposte";
+        secondaryBtn.style.display = "block";
+      }else{
+        primaryBtn.textContent = "Rispondi alle domande";
+        secondaryBtn.style.display = "none";
+      }
     }
 
     function softResetKeepEvent(){
@@ -227,7 +252,6 @@
     async function verifyAndRender(){
       const token = (localStorage.getItem("session_token") || "").trim();
       if(!token){
-        // niente token = niente identità
         location.href = "step1.html";
         return;
       }
@@ -243,16 +267,15 @@
         const data = await res.json().catch(() => null);
 
         if(!res.ok || !data || !data.ok){
-          // token invalido o backend non capisce -> riparti pulito
           softResetKeepEvent();
           location.href = "step1.html";
           return;
         }
 
-        // Sincronizza UI dal server (non dal localStorage)
         const name = (data.name || "").trim();
         const table = String(data.table || "").trim();
         const eventId = (data.event_id || "").trim();
+        const hasAnswers = !!data.has_answers;
 
         if(name) helloName.textContent = "Ciao, " + name;
         else helloName.textContent = "Il tuo profilo";
@@ -263,23 +286,29 @@
         if(eventId) helloMeta.textContent = eventId.replaceAll("_"," ");
         else helloMeta.textContent = "Serata in corso";
 
-        // Marca profilo completo localmente (così le altre pagine non impazziscono)
         localStorage.setItem("profile_complete", "true");
 
-        // Optional: se vuoi, tieni aggiornati anche questi campi
         if(name) localStorage.setItem("name", name);
         if(table) localStorage.setItem("table", table);
         if(eventId) localStorage.setItem("event_id", eventId);
 
+        if(hasAnswers){
+          localStorage.setItem("has_answers", "true");
+        }else{
+          localStorage.removeItem("has_answers");
+        }
+
+        renderActions(hasAnswers);
+
         loading.style.display = "none";
 
       }catch(e){
-        // Se non c'è rete, NON distruggiamo tutto: mostriamo fallback locale.
         loading.style.display = "none";
 
         const name = (localStorage.getItem("name") || "").trim();
         const table = (localStorage.getItem("table") || "").trim();
         const eventId = (localStorage.getItem("event_id") || "").trim();
+        const hasAnswers = localStorage.getItem("has_answers") === "true";
 
         if(name) helloName.textContent = "Ciao, " + name;
         else helloName.textContent = "Il tuo profilo";
@@ -289,6 +318,8 @@
 
         if(eventId) helloMeta.textContent = eventId.replaceAll("_"," ");
         else helloMeta.textContent = "Offline";
+
+        renderActions(hasAnswers);
       }
     }
 

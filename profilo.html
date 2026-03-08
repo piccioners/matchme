@@ -44,16 +44,23 @@
     }
     .wrap{width:100%;max-width:420px}
     .top{
-      display:flex;align-items:center;justify-content:space-between;
-      gap:12px;margin-bottom:14px
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:14px;
     }
     .logo-mini{
-      width:92px;max-width:44vw;
+      width:92px;
+      max-width:44vw;
       filter: drop-shadow(0 14px 34px rgba(255,47,146,.18));
       cursor:pointer;
     }
     .pill{
-      font-size:12px;opacity:.75;padding:8px 10px;border-radius:999px;
+      font-size:12px;
+      opacity:.75;
+      padding:8px 10px;
+      border-radius:999px;
       background: rgba(27,0,34,.35);
       border:1px solid rgba(255,255,255,.12);
       white-space:nowrap;
@@ -65,7 +72,11 @@
       padding:16px;
       backdrop-filter: blur(10px);
     }
-    h1{margin:0 0 14px 0;font-size:22px;font-weight:900}
+    h1{
+      margin:0 0 14px 0;
+      font-size:22px;
+      font-weight:900;
+    }
 
     .row{
       display:flex;
@@ -75,7 +86,10 @@
       padding:12px 0;
       border-top:1px solid rgba(255,255,255,.08);
     }
-    .row:first-of-type{border-top:none;padding-top:2px}
+    .row:first-of-type{
+      border-top:none;
+      padding-top:2px;
+    }
     .k{
       opacity:.65;
       font-size:13px;
@@ -88,6 +102,64 @@
       text-align:right;
       line-height:1.25;
       word-break:break-word;
+    }
+
+    .edit-box{
+      display:none;
+    }
+    .edit-box.show{
+      display:block;
+    }
+    .view-box.hide{
+      display:none;
+    }
+
+    .field{
+      margin-top:14px;
+    }
+    .field:first-child{
+      margin-top:0;
+    }
+    .label{
+      margin:0 0 8px 0;
+      font-size:14px;
+      font-weight:900;
+      opacity:.96;
+    }
+    .help{
+      margin:0 0 8px 0;
+      font-size:12px;
+      opacity:.68;
+      line-height:1.25;
+    }
+    .req{
+      color:var(--pink);
+      margin-left:6px;
+    }
+
+    input,select{
+      width:100%;
+      padding:13px 14px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(27,0,34,.55);
+      color:#fff;
+      font-size:15px;
+      font-weight:800;
+      outline:none;
+      -webkit-appearance:none;
+      appearance:none;
+    }
+    input::placeholder{
+      opacity:.45;
+      font-weight:750;
+    }
+
+    .note{
+      margin-top:6px;
+      font-size:12px;
+      opacity:.58;
+      line-height:1.25;
     }
 
     .btn{
@@ -104,7 +176,8 @@
     }
     .btn:active{transform:scale(.98)}
     .btn-primary{
-      border:none;color:#fff;
+      border:none;
+      color:#fff;
       background: linear-gradient(135deg, var(--pink), rgba(124,58,237,.95));
       box-shadow:0 18px 50px rgba(255,47,146,.18);
     }
@@ -117,6 +190,16 @@
       background: transparent;
       border:1px solid rgba(255,255,255,.14);
       color: rgba(255,255,255,.82);
+    }
+
+    .btn-row{
+      display:flex;
+      gap:10px;
+      margin-top:12px;
+    }
+    .btn-row .btn{
+      margin-top:0;
+      flex:1;
     }
 
     .danger{
@@ -135,6 +218,12 @@
       opacity:.65;
       display:none;
     }
+
+    @media (max-width:380px){
+      .btn-row{
+        flex-direction:column;
+      }
+    }
   </style>
 </head>
 
@@ -148,48 +237,166 @@
     <div class="card">
       <h1>Il tuo profilo</h1>
 
-      <div class="row">
-        <div class="k">Nome</div>
-        <div class="v" id="vName">—</div>
+      <div id="viewBox" class="view-box">
+        <div class="row">
+          <div class="k">Nome</div>
+          <div class="v" id="vName">—</div>
+        </div>
+        <div class="row">
+          <div class="k">Tavolo</div>
+          <div class="v" id="vTable">—</div>
+        </div>
+        <div class="row">
+          <div class="k">Io sono</div>
+          <div class="v" id="vMe">—</div>
+        </div>
+        <div class="row">
+          <div class="k">Cerco</div>
+          <div class="v" id="vSeek">—</div>
+        </div>
+        <div class="row">
+          <div class="k">Stato</div>
+          <div class="v" id="vStatus">—</div>
+        </div>
+        <div class="row">
+          <div class="k">Sono qui per</div>
+          <div class="v" id="vPurpose">—</div>
+        </div>
+        <div class="row">
+          <div class="k">Segno</div>
+          <div class="v" id="vZodiac">—</div>
+        </div>
+        <div class="row">
+          <div class="k">Drink</div>
+          <div class="v" id="vDrink">—</div>
+        </div>
+        <div class="row">
+          <div class="k">Musica</div>
+          <div class="v" id="vMusic">—</div>
+        </div>
       </div>
-      <div class="row">
-        <div class="k">Tavolo</div>
-        <div class="v" id="vTable">—</div>
-      </div>
-      <div class="row">
-        <div class="k">Io sono</div>
-        <div class="v" id="vMe">—</div>
-      </div>
-      <div class="row">
-        <div class="k">Cerco</div>
-        <div class="v" id="vSeek">—</div>
-      </div>
-      <div class="row">
-        <div class="k">Stato</div>
-        <div class="v" id="vStatus">—</div>
-      </div>
-      <div class="row">
-        <div class="k">Sono qui per</div>
-        <div class="v" id="vPurpose">—</div>
-      </div>
-      <div class="row">
-        <div class="k">Segno</div>
-        <div class="v" id="vZodiac">—</div>
-      </div>
-      <div class="row">
-        <div class="k">Drink</div>
-        <div class="v" id="vDrink">—</div>
-      </div>
-      <div class="row">
-        <div class="k">Musica</div>
-        <div class="v" id="vMusic">—</div>
+
+      <div id="editBox" class="edit-box">
+        <div class="field">
+          <div class="label">Il tuo tavolo<span class="req">*</span></div>
+          <select id="fTable">
+            <option value="">Seleziona tavolo</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <div class="label">Il tuo nome<span class="req">*</span></div>
+          <input id="fName" placeholder="Es. Marco">
+          <div class="note">Niente insulti o nomi offensivi.</div>
+        </div>
+
+        <div class="field">
+          <div class="label">Come ti definisci<span class="req">*</span></div>
+          <select id="fGenderMe">
+            <option value="">Seleziona</option>
+            <option value="Uomo">Uomo</option>
+            <option value="Donna">Donna</option>
+            <option value="Altro">Altro</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <div class="label">Cosa cerchi<span class="req">*</span></div>
+          <select id="fGenderSeek">
+            <option value="">Seleziona</option>
+            <option value="Uomo">Uomo</option>
+            <option value="Donna">Donna</option>
+            <option value="Entrambi">Entrambi</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <div class="label">Stato<span class="req">*</span></div>
+          <select id="fStatus">
+            <option value="">Seleziona</option>
+            <option value="Single">Single</option>
+            <option value="Impegnato/a">Impegnato/a</option>
+            <option value="Complicato">Complicato</option>
+            <option value="Preferisco non dirlo">Preferisco non dirlo</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <div class="label">Sei qui per<span class="req">*</span></div>
+          <select id="fPurpose">
+            <option value="">Seleziona</option>
+            <option value="Flirt">Flirt</option>
+            <option value="Conoscere gente">Conoscere gente</option>
+            <option value="Divertirmi">Divertirmi</option>
+            <option value="Vediamo che succede">Vediamo che succede</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <div class="label">Segno zodiacale<span class="req">*</span></div>
+          <select id="fZodiac">
+            <option value="">Seleziona</option>
+            <option value="Ariete ♈">Ariete ♈</option>
+            <option value="Toro ♉">Toro ♉</option>
+            <option value="Gemelli ♊">Gemelli ♊</option>
+            <option value="Cancro ♋">Cancro ♋</option>
+            <option value="Leone ♌">Leone ♌</option>
+            <option value="Vergine ♍">Vergine ♍</option>
+            <option value="Bilancia ♎">Bilancia ♎</option>
+            <option value="Scorpione ♏">Scorpione ♏</option>
+            <option value="Sagittario ♐">Sagittario ♐</option>
+            <option value="Capricorno ♑">Capricorno ♑</option>
+            <option value="Acquario ♒">Acquario ♒</option>
+            <option value="Pesci ♓">Pesci ♓</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <div class="label">Cosa bevi di solito?<span class="req">*</span></div>
+          <select id="fDrink">
+            <option value="">Seleziona</option>
+            <option value="Spritz / Aperitivo">Spritz / Aperitivo</option>
+            <option value="Gin Tonic">Gin Tonic</option>
+            <option value="Birra">Birra</option>
+            <option value="Vino">Vino</option>
+            <option value="Cocktail dolce">Cocktail dolce</option>
+            <option value="Cocktail amaro">Cocktail amaro</option>
+            <option value="Analcolico">Analcolico</option>
+            <option value="Bevo qualsiasi cosa">Bevo qualsiasi cosa</option>
+            <option value="Totalmente astemio/a">Totalmente astemio/a</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <div class="label">Che musica ascolti?<span class="req">*</span></div>
+          <select id="fMusic">
+            <option value="">Seleziona</option>
+            <option value="Pop">Pop</option>
+            <option value="Rap / Trap">Rap / Trap</option>
+            <option value="House">House</option>
+            <option value="Techno / EDM">Techno / EDM</option>
+            <option value="Reggaeton">Reggaeton</option>
+            <option value="Rock">Rock</option>
+            <option value="Indie">Indie</option>
+            <option value="Un po' di tutto">Un po' di tutto</option>
+          </select>
+        </div>
       </div>
 
       <div class="loading" id="loading">Caricamento…</div>
 
-      <button class="btn btn-primary" onclick="editProfile()">Modifica profilo</button>
-      <button class="btn btn-secondary" id="resultsBtn" onclick="location.href='results.html'" style="display:none;">Guarda i tuoi match</button>
-      <button class="btn btn-ghost" onclick="location.href='hub.html'">Torna alla Home serata</button>
+      <div id="viewActions">
+        <button class="btn btn-primary" onclick="enterEditMode()">Modifica profilo</button>
+        <button class="btn btn-secondary" id="resultsBtn" onclick="location.href='results.html'" style="display:none;">Guarda i tuoi match</button>
+        <button class="btn btn-ghost" onclick="location.href='hub.html'">Torna alla Home serata</button>
+      </div>
+
+      <div id="editActions" style="display:none;">
+        <div class="btn-row">
+          <button class="btn btn-secondary" onclick="cancelEdit()">Annulla</button>
+          <button class="btn btn-primary" id="saveBtn" onclick="saveProfile()">Salva modifiche</button>
+        </div>
+      </div>
 
       <div class="danger" onclick="resetProfile()">Reset profilo (solo se necessario)</div>
     </div>
@@ -204,8 +411,58 @@
 
   const loading = document.getElementById("loading");
   const resultsBtn = document.getElementById("resultsBtn");
+  const viewBox = document.getElementById("viewBox");
+  const editBox = document.getElementById("editBox");
+  const viewActions = document.getElementById("viewActions");
+  const editActions = document.getElementById("editActions");
+  const saveBtn = document.getElementById("saveBtn");
+
+  const TAVOLI = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50];
+
+  const BANNED_WORDS = [
+    "cazzo","merda","dio","porco","puttana","stronzo",
+    "troia","bastardo","negro","frocio"
+  ];
+  const BANNED_JOIN = ["cazzo","merda","puttana","stronzo","troia","bastardo"];
 
   const getLocal = (k) => (localStorage.getItem(k) || "").trim() || "—";
+
+  function fillTableOptions(){
+    const select = document.getElementById("fTable");
+    select.innerHTML = '<option value="">Seleziona tavolo</option>';
+    TAVOLI.forEach(t => {
+      const o = document.createElement("option");
+      o.value = String(t);
+      o.textContent = "Tavolo " + t;
+      select.appendChild(o);
+    });
+  }
+
+  function normalizeName(raw){
+    let s = String(raw || "").trim().toLowerCase();
+    try{ s = s.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); }catch(e){}
+    s = s.replace(/[^a-z0-9 ]+/g, " ");
+    s = s.replace(/\s+/g, " ").trim();
+    s = s.replace(/([a-z])\1{2,}/g, "$1");
+    return s;
+  }
+
+  function isBanned(name){
+    const n = normalizeName(name);
+    const words = n.split(" ").filter(Boolean);
+
+    for(const w of BANNED_WORDS){
+      if(words.includes(w)) return true;
+    }
+
+    const joined = words.join("");
+    if(joined.length >= 6){
+      for(const w of BANNED_JOIN){
+        if(joined.includes(w)) return true;
+      }
+    }
+    return false;
+  }
 
   function setText(id, value){
     document.getElementById(id).textContent = value || "—";
@@ -223,21 +480,53 @@
     setText("vMusic", profile.music || "—");
   }
 
+  function fillEditForm(profile){
+    document.getElementById("fName").value = profile.name || "";
+    document.getElementById("fTable").value = profile.table || "";
+    document.getElementById("fGenderMe").value = profile.gender_me || "";
+    document.getElementById("fGenderSeek").value = profile.gender_seek || "";
+    document.getElementById("fStatus").value = profile.status || "";
+    document.getElementById("fPurpose").value = profile.purpose || "";
+    document.getElementById("fZodiac").value = profile.zodiac || "";
+    document.getElementById("fDrink").value = profile.drink || "";
+    document.getElementById("fMusic").value = profile.music || "";
+  }
+
+  function currentProfileFromLocal(){
+    return {
+      name: getLocal("name") === "—" ? "" : getLocal("name"),
+      table: getLocal("table") === "—" ? "" : getLocal("table"),
+      gender_me: getLocal("gender_me") === "—" ? "" : getLocal("gender_me"),
+      gender_seek: getLocal("gender_seek") === "—" ? "" : getLocal("gender_seek"),
+      status: getLocal("status") === "—" ? "" : getLocal("status"),
+      purpose: getLocal("purpose") === "—" ? "" : getLocal("purpose"),
+      zodiac: getLocal("zodiac") === "—" ? "" : getLocal("zodiac"),
+      drink: getLocal("drink") === "—" ? "" : getLocal("drink"),
+      music: getLocal("music") === "—" ? "" : getLocal("music")
+    };
+  }
+
+  function enterEditMode(){
+    fillEditForm(currentProfileFromLocal());
+    viewBox.classList.add("hide");
+    editBox.classList.add("show");
+    viewActions.style.display = "none";
+    editActions.style.display = "block";
+  }
+
+  function cancelEdit(){
+    editBox.classList.remove("show");
+    viewBox.classList.remove("hide");
+    editActions.style.display = "none";
+    viewActions.style.display = "block";
+  }
+
   function renderLocalFallback(){
     const eventId = (localStorage.getItem("event_id") || "").trim();
     document.getElementById("eventPill").textContent = eventId ? eventId.replaceAll("_"," ") : "Serata";
 
-    renderProfile({
-      name: getLocal("name"),
-      table: getLocal("table") === "—" ? "" : getLocal("table"),
-      gender_me: getLocal("gender_me"),
-      gender_seek: getLocal("gender_seek"),
-      status: getLocal("status"),
-      purpose: getLocal("purpose"),
-      zodiac: getLocal("zodiac"),
-      drink: getLocal("drink"),
-      music: getLocal("music")
-    });
+    const profile = currentProfileFromLocal();
+    renderProfile(profile);
 
     const hasAnswers = localStorage.getItem("has_answers") === "true";
     resultsBtn.style.display = hasAnswers ? "block" : "none";
@@ -268,7 +557,7 @@
       const eventId = (data.event_id || "").trim();
       document.getElementById("eventPill").textContent = eventId ? eventId.replaceAll("_"," ") : "Serata";
 
-      renderProfile({
+      const profile = {
         name: (data.name || "").trim(),
         table: String(data.table || "").trim(),
         gender_me: data.profile?.gender_me || "",
@@ -278,21 +567,21 @@
         zodiac: data.profile?.zodiac || "",
         drink: data.profile?.drink || "",
         music: data.profile?.music || ""
-      });
+      };
+
+      renderProfile(profile);
 
       if(eventId) localStorage.setItem("event_id", eventId);
-      if(data.name) localStorage.setItem("name", (data.name || "").trim());
-      if(data.table) localStorage.setItem("table", String(data.table || "").trim());
+      if(profile.name) localStorage.setItem("name", profile.name);
+      if(profile.table) localStorage.setItem("table", profile.table);
 
-      if(data.profile){
-        if(data.profile.gender_me) localStorage.setItem("gender_me", data.profile.gender_me);
-        if(data.profile.gender_seek) localStorage.setItem("gender_seek", data.profile.gender_seek);
-        if(data.profile.status) localStorage.setItem("status", data.profile.status);
-        if(data.profile.purpose) localStorage.setItem("purpose", data.profile.purpose);
-        if(data.profile.zodiac) localStorage.setItem("zodiac", data.profile.zodiac);
-        if(data.profile.drink) localStorage.setItem("drink", data.profile.drink);
-        if(data.profile.music) localStorage.setItem("music", data.profile.music);
-      }
+      if(profile.gender_me) localStorage.setItem("gender_me", profile.gender_me);
+      if(profile.gender_seek) localStorage.setItem("gender_seek", profile.gender_seek);
+      if(profile.status) localStorage.setItem("status", profile.status);
+      if(profile.purpose) localStorage.setItem("purpose", profile.purpose);
+      if(profile.zodiac) localStorage.setItem("zodiac", profile.zodiac);
+      if(profile.drink) localStorage.setItem("drink", profile.drink);
+      if(profile.music) localStorage.setItem("music", profile.music);
 
       if(data.has_answers){
         localStorage.setItem("has_answers", "true");
@@ -310,9 +599,106 @@
     }
   }
 
-  function editProfile(){
-    sessionStorage.setItem("nav_dir","prev");
-    location.href = "step1.html";
+  async function saveProfile(){
+    const token = (localStorage.getItem("session_token") || "").trim();
+    if(!token){
+      location.href = "step1.html";
+      return;
+    }
+
+    const nameRaw = document.getElementById("fName").value.trim();
+    const table = document.getElementById("fTable").value;
+    const genderMe = document.getElementById("fGenderMe").value;
+    const genderSeek = document.getElementById("fGenderSeek").value;
+    const status = document.getElementById("fStatus").value;
+    const purpose = document.getElementById("fPurpose").value;
+    const zodiac = document.getElementById("fZodiac").value;
+    const drink = document.getElementById("fDrink").value;
+    const music = document.getElementById("fMusic").value;
+
+    if(!nameRaw || !table || !genderMe || !genderSeek || !status || !purpose || !zodiac || !drink || !music){
+      alert("Completa tutti i campi");
+      return;
+    }
+
+    const prettyName = nameRaw.replace(/\s+/g, " ").trim();
+    if(prettyName.length < 2){
+      alert("Inserisci un nome più lungo");
+      return;
+    }
+    if(prettyName.length > 24){
+      alert("Nome troppo lungo");
+      return;
+    }
+    if(isBanned(prettyName)){
+      alert("Scegli un nome diverso");
+      return;
+    }
+
+    saveBtn.disabled = true;
+    loading.style.display = "block";
+
+    try{
+      const res = await fetch(API_BASE + "/api/profile", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + token
+        },
+        body: JSON.stringify({
+          name: prettyName,
+          table: table,
+          gender_me: genderMe,
+          gender_seek: genderSeek,
+          status: status,
+          purpose: purpose,
+          zodiac: zodiac,
+          drink: drink,
+          music: music
+        })
+      });
+
+      const data = await res.json().catch(() => null);
+
+      if(!res.ok || !data || !data.ok){
+        alert("Errore salvataggio profilo. Riprova.");
+        saveBtn.disabled = false;
+        loading.style.display = "none";
+        return;
+      }
+
+      localStorage.setItem("name", prettyName);
+      localStorage.setItem("table", table);
+      localStorage.setItem("gender_me", genderMe);
+      localStorage.setItem("gender_seek", genderSeek);
+      localStorage.setItem("status", status);
+      localStorage.setItem("purpose", purpose);
+      localStorage.setItem("zodiac", zodiac);
+      localStorage.setItem("drink", drink);
+      localStorage.setItem("music", music);
+      localStorage.setItem("profile_complete", "true");
+      localStorage.setItem("profile_step", "4");
+
+      renderProfile({
+        name: prettyName,
+        table: table,
+        gender_me: genderMe,
+        gender_seek: genderSeek,
+        status: status,
+        purpose: purpose,
+        zodiac: zodiac,
+        drink: drink,
+        music: music
+      });
+
+      cancelEdit();
+
+    }catch(e){
+      alert("Errore connessione. Controlla internet e riprova.");
+    }finally{
+      saveBtn.disabled = false;
+      loading.style.display = "none";
+    }
   }
 
   function resetProfile(){
@@ -326,6 +712,7 @@
     location.href = "index.html";
   }
 
+  fillTableOptions();
   verifyAndRender();
 </script>
 </body>

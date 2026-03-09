@@ -63,7 +63,7 @@
       backdrop-filter: blur(10px);
     }
     h1{
-      margin:0 0 14px 0;
+      margin:0 0 20px 0;
       font-size:22px;
       font-weight:900;
     }
@@ -78,7 +78,7 @@
     }
     .row:first-of-type{
       border-top:none;
-      padding-top:2px;
+      padding-top:4px;
     }
     .k{
       opacity:.65;
@@ -96,16 +96,20 @@
 
     .edit-box{
       display:none;
+      margin-top:4px;
     }
     .edit-box.show{
       display:block;
+    }
+    .view-box{
+      margin-top:4px;
     }
     .view-box.hide{
       display:none;
     }
 
     .field{
-      margin-top:14px;
+      margin-top:16px;
     }
     .field:first-child{
       margin-top:0;
@@ -116,15 +120,9 @@
       font-weight:900;
       opacity:.96;
     }
-    .help{
-      margin:0 0 8px 0;
-      font-size:12px;
-      opacity:.68;
-      line-height:1.25;
-    }
     .req{
       color:var(--pink);
-      margin-left:6px;
+      margin-left:0;
     }
 
     input,select{
@@ -143,13 +141,6 @@
     input::placeholder{
       opacity:.45;
       font-weight:750;
-    }
-
-    .note{
-      margin-top:6px;
-      font-size:12px;
-      opacity:.58;
-      line-height:1.25;
     }
 
     .btn{
@@ -235,23 +226,23 @@
           <div class="v" id="vSeek">—</div>
         </div>
         <div class="row">
-          <div class="k">Stato sentimentale</div>
+          <div class="k">Stato</div>
           <div class="v" id="vStatus">—</div>
         </div>
         <div class="row">
-          <div class="k">Sei qui per...</div>
+          <div class="k">Sono qui per</div>
           <div class="v" id="vPurpose">—</div>
         </div>
         <div class="row">
-          <div class="k">Segno zodiacale</div>
+          <div class="k">Segno</div>
           <div class="v" id="vZodiac">—</div>
         </div>
         <div class="row">
-          <div class="k">Cosa ti piace bere?</div>
+          <div class="k">Drink</div>
           <div class="v" id="vDrink">—</div>
         </div>
         <div class="row">
-          <div class="k">Che musica ascolti?</div>
+          <div class="k">Musica</div>
           <div class="v" id="vMusic">—</div>
         </div>
       </div>
@@ -267,11 +258,10 @@
         <div class="field">
           <div class="label">Il tuo nome<span class="req">*</span></div>
           <input id="fName" placeholder="Es. Marco">
-          <div class="note">Niente insulti o nomi offensivi.</div>
         </div>
 
         <div class="field">
-          <div class="label">Come ti definisci?<span class="req">*</span></div>
+          <div class="label">Come ti definisci<span class="req">*</span></div>
           <select id="fGenderMe">
             <option value="">Seleziona</option>
             <option value="Uomo">Uomo</option>
@@ -281,7 +271,7 @@
         </div>
 
         <div class="field">
-          <div class="label">Cosa cerchi?<span class="req">*</span></div>
+          <div class="label">Cosa cerchi<span class="req">*</span></div>
           <select id="fGenderSeek">
             <option value="">Seleziona</option>
             <option value="Uomo">Uomo</option>
@@ -291,7 +281,7 @@
         </div>
 
         <div class="field">
-          <div class="label">Stato sentimentale<span class="req">*</span></div>
+          <div class="label">Stato<span class="req">*</span></div>
           <select id="fStatus">
             <option value="">Seleziona</option>
             <option value="Single">Single</option>
@@ -302,7 +292,7 @@
         </div>
 
         <div class="field">
-          <div class="label">Sei qui per...<span class="req">*</span></div>
+          <div class="label">Sei qui per<span class="req">*</span></div>
           <select id="fPurpose">
             <option value="">Seleziona</option>
             <option value="Flirt">Flirt</option>
@@ -366,10 +356,9 @@
       <div class="loading" id="loading">Caricamento…</div>
 
       <div id="viewActions">
-        <button class="btn btn-primary" onclick="enterEditMode()">Modifica profilo</button>
-        <button class="btn btn-secondary" id="resultsBtn" onclick="location.href='results.html'" style="display:none;">Guarda i tuoi match</button>
-        <button class="btn btn-ghost" onclick="location.href='hub.html'">Torna alla Home serata</button>
+        <button class="btn btn-secondary" onclick="enterEditMode()">Modifica profilo</button>
         <button class="btn btn-ghost" onclick="resetProfile()">Reset profilo</button>
+        <button class="btn btn-primary" onclick="location.href='hub.html'">Torna alla Home serata</button>
       </div>
 
       <div id="editActions" style="display:none;">
@@ -389,7 +378,6 @@
   }
 
   const loading = document.getElementById("loading");
-  const resultsBtn = document.getElementById("resultsBtn");
   const viewBox = document.getElementById("viewBox");
   const editBox = document.getElementById("editBox");
   const viewActions = document.getElementById("viewActions");
@@ -503,9 +491,6 @@
   function renderLocalFallback(){
     const profile = currentProfileFromLocal();
     renderProfile(profile);
-
-    const hasAnswers = localStorage.getItem("has_answers") === "true";
-    resultsBtn.style.display = hasAnswers ? "block" : "none";
   }
 
   async function verifyAndRender(){
@@ -560,10 +545,8 @@
 
       if(data.has_answers){
         localStorage.setItem("has_answers", "true");
-        resultsBtn.style.display = "block";
       }else{
         localStorage.removeItem("has_answers");
-        resultsBtn.style.display = "none";
       }
 
       loading.style.display = "none";

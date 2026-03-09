@@ -46,8 +46,7 @@
     .top{
       display:flex;
       align-items:center;
-      justify-content:space-between;
-      gap:12px;
+      justify-content:flex-start;
       margin-bottom:14px;
     }
     .logo-mini{
@@ -55,15 +54,6 @@
       max-width:44vw;
       filter: drop-shadow(0 14px 34px rgba(255,47,146,.18));
       cursor:pointer;
-    }
-    .pill{
-      font-size:12px;
-      opacity:.75;
-      padding:8px 10px;
-      border-radius:999px;
-      background: rgba(27,0,34,.35);
-      border:1px solid rgba(255,255,255,.12);
-      white-space:nowrap;
     }
     .card{
       background:var(--panel);
@@ -202,15 +192,6 @@
       flex:1;
     }
 
-    .danger{
-      margin-top:10px;
-      text-align:center;
-      font-size:12px;
-      opacity:.55;
-      text-decoration:underline;
-      cursor:pointer;
-    }
-
     .loading{
       margin-top:10px;
       text-align:center;
@@ -231,7 +212,6 @@
   <div class="wrap">
     <div class="top">
       <img src="logo.png" alt="meety" class="logo-mini" onclick="location.href='hub.html'">
-      <div class="pill" id="eventPill">Serata</div>
     </div>
 
     <div class="card">
@@ -255,23 +235,23 @@
           <div class="v" id="vSeek">—</div>
         </div>
         <div class="row">
-          <div class="k">Stato</div>
+          <div class="k">Stato sentimentale</div>
           <div class="v" id="vStatus">—</div>
         </div>
         <div class="row">
-          <div class="k">Sono qui per</div>
+          <div class="k">Sei qui per...</div>
           <div class="v" id="vPurpose">—</div>
         </div>
         <div class="row">
-          <div class="k">Segno</div>
+          <div class="k">Segno zodiacale</div>
           <div class="v" id="vZodiac">—</div>
         </div>
         <div class="row">
-          <div class="k">Drink</div>
+          <div class="k">Cosa ti piace bere?</div>
           <div class="v" id="vDrink">—</div>
         </div>
         <div class="row">
-          <div class="k">Musica</div>
+          <div class="k">Che musica ascolti?</div>
           <div class="v" id="vMusic">—</div>
         </div>
       </div>
@@ -291,7 +271,7 @@
         </div>
 
         <div class="field">
-          <div class="label">Come ti definisci<span class="req">*</span></div>
+          <div class="label">Come ti definisci?<span class="req">*</span></div>
           <select id="fGenderMe">
             <option value="">Seleziona</option>
             <option value="Uomo">Uomo</option>
@@ -301,7 +281,7 @@
         </div>
 
         <div class="field">
-          <div class="label">Cosa cerchi<span class="req">*</span></div>
+          <div class="label">Cosa cerchi?<span class="req">*</span></div>
           <select id="fGenderSeek">
             <option value="">Seleziona</option>
             <option value="Uomo">Uomo</option>
@@ -311,7 +291,7 @@
         </div>
 
         <div class="field">
-          <div class="label">Stato<span class="req">*</span></div>
+          <div class="label">Stato sentimentale<span class="req">*</span></div>
           <select id="fStatus">
             <option value="">Seleziona</option>
             <option value="Single">Single</option>
@@ -322,7 +302,7 @@
         </div>
 
         <div class="field">
-          <div class="label">Sei qui per<span class="req">*</span></div>
+          <div class="label">Sei qui per...<span class="req">*</span></div>
           <select id="fPurpose">
             <option value="">Seleziona</option>
             <option value="Flirt">Flirt</option>
@@ -389,6 +369,7 @@
         <button class="btn btn-primary" onclick="enterEditMode()">Modifica profilo</button>
         <button class="btn btn-secondary" id="resultsBtn" onclick="location.href='results.html'" style="display:none;">Guarda i tuoi match</button>
         <button class="btn btn-ghost" onclick="location.href='hub.html'">Torna alla Home serata</button>
+        <button class="btn btn-ghost" onclick="resetProfile()">Reset profilo</button>
       </div>
 
       <div id="editActions" style="display:none;">
@@ -397,8 +378,6 @@
           <button class="btn btn-primary" id="saveBtn" onclick="saveProfile()">Salva modifiche</button>
         </div>
       </div>
-
-      <div class="danger" onclick="resetProfile()">Reset profilo (solo se necessario)</div>
     </div>
   </div>
 
@@ -522,9 +501,6 @@
   }
 
   function renderLocalFallback(){
-    const eventId = (localStorage.getItem("event_id") || "").trim();
-    document.getElementById("eventPill").textContent = eventId ? eventId.replaceAll("_"," ") : "Serata";
-
     const profile = currentProfileFromLocal();
     renderProfile(profile);
 
@@ -555,7 +531,6 @@
       }
 
       const eventId = (data.event_id || "").trim();
-      document.getElementById("eventPill").textContent = eventId ? eventId.replaceAll("_"," ") : "Serata";
 
       const profile = {
         name: (data.name || "").trim(),

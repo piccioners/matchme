@@ -31,21 +31,21 @@
         linear-gradient(180deg,var(--bg1),var(--bg2));
       padding:20px;
     }
-    .wrap{width:100%;max-width:420px}
+    .wrap{
+      width:100%;
+      max-width:420px;
+    }
     .top{
-      display:flex;align-items:center;justify-content:space-between;
-      gap:12px;margin-bottom:14px
+      display:flex;
+      align-items:center;
+      justify-content:flex-start;
+      margin-bottom:14px;
     }
     .logo-mini{
-      width:92px;max-width:44vw;
+      width:92px;
+      max-width:44vw;
       filter: drop-shadow(0 14px 34px rgba(255,47,146,.18));
       cursor:pointer;
-    }
-    .pill{
-      font-size:12px;opacity:.75;padding:8px 10px;border-radius:999px;
-      background: rgba(27,0,34,.35);
-      border:1px solid rgba(255,255,255,.12);
-      white-space:nowrap;
     }
     .card{
       background:var(--panel);
@@ -55,7 +55,11 @@
       backdrop-filter: blur(10px);
       margin-bottom:14px;
     }
-    h1{margin:0 0 12px 0;font-size:22px;font-weight:900}
+    h1{
+      margin:0 0 14px 0;
+      font-size:22px;
+      font-weight:900;
+    }
     .section-title{
       margin:0 0 10px 0;
       font-size:17px;
@@ -112,36 +116,42 @@
     .match-top{
       display:flex;
       justify-content:space-between;
-      align-items:flex-start;
-      gap:10px;
+      align-items:center;
+      gap:12px;
     }
 
-    .m-left{min-width:0}
+    .m-left{
+      min-width:0;
+      flex:1;
+    }
     .m-name{
       font-weight:950;
-      font-size:15px;
-      margin:0 0 4px 0;
-      line-height:1.2;
+      font-size:17px;
+      margin:0 0 6px 0;
+      line-height:1.15;
+      letter-spacing:.1px;
     }
     .m-meta{
-      opacity:.7;
-      font-size:12px;
+      opacity:.82;
+      font-size:13px;
+      font-weight:700;
       margin:0;
+      line-height:1.2;
     }
 
     .m-right{
       text-align:right;
       display:flex;
       flex-direction:column;
-      gap:6px;
+      gap:5px;
       align-items:flex-end;
       flex:0 0 auto;
     }
 
     .pct{
-      font-weight:950;
-      font-size:16px;
-      padding:8px 10px;
+      font-weight:900;
+      font-size:14px;
+      padding:7px 10px;
       border-radius:999px;
       border:1px solid rgba(255,47,146,.35);
       background: rgba(255,47,146,.10);
@@ -149,8 +159,8 @@
     }
 
     .arrow{
-      font-size:12px;
-      opacity:.65;
+      font-size:11px;
+      opacity:.6;
       line-height:1;
     }
 
@@ -168,7 +178,7 @@
     .details-grid{
       display:grid;
       grid-template-columns:1fr 1fr;
-      gap:10px 12px;
+      gap:9px 12px;
     }
 
     .detail{
@@ -176,15 +186,15 @@
     }
 
     .detail-k{
-      font-size:11px;
-      opacity:.6;
+      font-size:10px;
+      opacity:.58;
       margin-bottom:3px;
     }
 
     .detail-v{
-      font-size:13px;
+      font-size:12px;
       font-weight:800;
-      line-height:1.25;
+      line-height:1.22;
       word-break:break-word;
     }
 
@@ -210,6 +220,10 @@
       padding:14px 16px;
       font-size:14px;
       flex:0 0 auto;
+    }
+
+    .bottom-home{
+      margin-top:2px;
     }
 
     .empty{
@@ -244,6 +258,9 @@
       .details-grid{
         grid-template-columns:1fr;
       }
+      .match-top{
+        align-items:flex-start;
+      }
     }
   </style>
 </head>
@@ -252,13 +269,11 @@
   <div class="wrap">
     <div class="top">
       <img src="logo.png" class="logo-mini" onclick="location.href='hub.html'">
-      <div class="pill" id="eventPill">Serata</div>
     </div>
 
     <div class="card">
       <h1>I tuoi match</h1>
       <div id="content"></div>
-      <button class="btn btn-secondary" onclick="location.href='hub.html'">Torna alla Home serata</button>
     </div>
 
     <div class="card">
@@ -269,6 +284,8 @@
       </div>
       <div id="tableSearchContent"></div>
     </div>
+
+    <button class="btn btn-secondary bottom-home" onclick="location.href='hub.html'">Torna alla Home serata</button>
   </div>
 
 <script>
@@ -282,9 +299,6 @@
   if(!sessionToken){
     location.href = "step1.html";
   }
-
-  const eventId = (localStorage.getItem("event_id") || "").trim();
-  document.getElementById("eventPill").textContent = eventId ? eventId.replaceAll("_"," ") : "Serata";
 
   function readAnswers(){
     const a = [];

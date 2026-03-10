@@ -33,12 +33,19 @@
 
 /* scala */
 
-.scale{
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  gap:24px;
+.scale-wrap{
+  width:100%;
   margin-top:26px;
+}
+
+.scale{
+  width:100%;
+  max-width:320px;
+  margin:0 auto;
+  display:grid;
+  grid-template-columns:repeat(5, 1fr);
+  align-items:center;
+  justify-items:center;
 }
 
 .scale-dot{
@@ -57,11 +64,26 @@
 }
 
 .scale-labels{
-  display:flex;
-  justify-content:space-between;
+  width:100%;
+  max-width:320px;
+  margin:10px auto 0 auto;
+  display:grid;
+  grid-template-columns:repeat(5, 1fr);
   font-size:11px;
   opacity:.6;
-  margin-top:10px;
+  align-items:start;
+}
+
+.scale-label-left{
+  grid-column:1;
+  justify-self:center;
+  text-align:center;
+}
+
+.scale-label-right{
+  grid-column:5;
+  justify-self:center;
+  text-align:center;
 }
 
 /* progress */
@@ -106,11 +128,13 @@
 <p class="question" id="questionText"></p>
 </div>
 
-<div class="scale" id="scale"></div>
+<div class="scale-wrap">
+  <div class="scale" id="scale"></div>
 
-<div class="scale-labels">
-<span>Disaccordo</span>
-<span>Accordo</span>
+  <div class="scale-labels">
+    <span class="scale-label-left">Disaccordo</span>
+    <span class="scale-label-right">D’accordo</span>
+  </div>
 </div>
 
 </div>
@@ -133,33 +157,33 @@ const API_BASE = "https://matchme-production-73a8.up.railway.app";
 /* guardrail */
 
 if(localStorage.getItem("profile_complete") !== "true"){
-location.href="step1.html";
+  location.href="step1.html";
 }
 
 const sessionToken=(localStorage.getItem("session_token")||"").trim();
 
 if(!sessionToken){
-location.href="step1.html";
+  location.href="step1.html";
 }
 
 function goHub(){
-sessionStorage.setItem("force_home","1");
-location.href="hub.html";
+  sessionStorage.setItem("force_home","1");
+  location.href="hub.html";
 }
 
 /* domande */
 
 const QUESTIONS=[
-"Mi piace conoscere persone molto diverse da me.",
-"Credo che l'attrazione mentale sia più importante di quella fisica.",
-"Mi annoio facilmente nelle conversazioni superficiali.",
-"Mi piace prendere l'iniziativa.",
-"Cerco qualcuno con ambizione.",
-"Mi piace stare al centro dell'attenzione.",
-"Preferisco relazioni stabili rispetto a qualcosa di casuale.",
-"Mi affido molto all'intuito.",
-"Mi piace mettermi in gioco.",
-"Per me il divertimento viene prima di tutto."
+  "Mi piace conoscere persone molto diverse da me.",
+  "Credo che l'attrazione mentale sia più importante di quella fisica.",
+  "Mi annoio facilmente nelle conversazioni superficiali.",
+  "Mi piace prendere l'iniziativa.",
+  "Cerco qualcuno con ambizione.",
+  "Mi piace stare al centro dell'attenzione.",
+  "Preferisco relazioni stabili rispetto a qualcosa di casuale.",
+  "Mi affido molto all'intuito.",
+  "Mi piace mettermi in gioco.",
+  "Per me il divertimento viene prima di tutto."
 ];
 
 let current=1;
@@ -173,131 +197,128 @@ const nextBtn=document.getElementById("nextBtn");
 /* progress dots */
 
 QUESTIONS.forEach(()=>{
-const d=document.createElement("div");
-d.className="progress-dot";
-progressDots.appendChild(d);
+  const d=document.createElement("div");
+  d.className="progress-dot";
+  progressDots.appendChild(d);
 });
 
 function render(){
 
-qText.textContent=QUESTIONS[current-1];
-stepCounter.textContent=current+"/10";
+  qText.textContent=QUESTIONS[current-1];
+  stepCounter.textContent=current+"/10";
 
-scale.innerHTML="";
+  scale.innerHTML="";
 
-for(let i=1;i<=5;i++){
+  for(let i=1;i<=5;i++){
 
-const dot=document.createElement("div");
-dot.className="scale-dot";
+    const dot=document.createElement("div");
+    dot.className="scale-dot";
 
-if(parseInt(localStorage.getItem("q"+current))===i){
-dot.classList.add("active");
-}
+    if(parseInt(localStorage.getItem("q"+current))===i){
+      dot.classList.add("active");
+    }
 
-dot.onclick=()=>{
-localStorage.setItem("q"+current,i);
-render();
-};
+    dot.onclick=()=>{
+      localStorage.setItem("q"+current,i);
+      render();
+    };
 
-scale.appendChild(dot);
-}
+    scale.appendChild(dot);
+  }
 
-document.querySelectorAll(".progress-dot").forEach((d,i)=>{
-d.classList.toggle("active",i===current-1);
-});
+  document.querySelectorAll(".progress-dot").forEach((d,i)=>{
+    d.classList.toggle("active",i===current-1);
+  });
 
-nextBtn.textContent=(current===10)?"Finisci":"Avanti";
-
+  nextBtn.textContent=(current===10)?"Finisci":"Avanti";
 }
 
 /* lettura risposte */
 
 function readAnswers10(){
 
-const a=[];
+  const a=[];
 
-for(let i=1;i<=10;i++){
+  for(let i=1;i<=10;i++){
 
-const v=parseInt(localStorage.getItem("q"+i)||"0",10);
+    const v=parseInt(localStorage.getItem("q"+i)||"0",10);
 
-if(!v) return null;
+    if(!v) return null;
 
-a.push(v);
+    a.push(v);
+  }
 
-}
-
-return a;
-
+  return a;
 }
 
 /* submit */
 
 async function submitAnswers(){
 
-const answers=readAnswers10();
+  const answers=readAnswers10();
 
-if(!answers){
-alert("Completa tutte le domande");
-return;
-}
+  if(!answers){
+    alert("Completa tutte le domande");
+    return;
+  }
 
-nextBtn.disabled=true;
+  nextBtn.disabled=true;
 
-try{
+  try{
 
-const res=await fetch(API_BASE+"/api/answers",{
-method:"POST",
-headers:{
-"Content-Type":"application/json",
-"Authorization":"Bearer "+sessionToken
-},
-body:JSON.stringify({answers})
-});
+    const res=await fetch(API_BASE+"/api/answers",{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json",
+        "Authorization":"Bearer "+sessionToken
+      },
+      body:JSON.stringify({answers})
+    });
 
-const data=await res.json().catch(()=>null);
+    const data=await res.json().catch(()=>null);
 
-if(!res.ok || !data || !data.ok){
-alert("Errore nel salvataggio delle risposte. Riprova.");
-nextBtn.disabled=false;
-return;
-}
+    if(!res.ok || !data || !data.ok){
+      alert("Errore nel salvataggio delle risposte. Riprova.");
+      nextBtn.disabled=false;
+      return;
+    }
 
-location.href="results.html";
+    location.href="results.html";
 
-}catch(e){
+  }catch(e){
 
-alert("Errore connessione. Controlla internet e riprova.");
-nextBtn.disabled=false;
-
-}
-
+    alert("Errore connessione. Controlla internet e riprova.");
+    nextBtn.disabled=false;
+  }
 }
 
 /* navigazione */
 
 function next(){
 
-if(!localStorage.getItem("q"+current)){
-alert("Seleziona una risposta");
-return;
-}
+  if(!localStorage.getItem("q"+current)){
+    alert("Seleziona una risposta");
+    return;
+  }
 
-if(current<10){
-current++;
-render();
-}else{
-submitAnswers();
-}
-
+  if(current<10){
+    current++;
+    render();
+  }else{
+    submitAnswers();
+  }
 }
 
 function prev(){
 
-if(current>1){
-current--;
-render();
-}
+  if(current>1){
+    current--;
+    render();
+    return;
+  }
 
+  sessionStorage.setItem("force_home","1");
+  location.href="hub.html";
 }
 
 render();

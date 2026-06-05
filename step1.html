@@ -6,6 +6,17 @@
   <title>meety · Crea il tuo profilo</title>
 
   <link rel="stylesheet" href="ui.css">
+
+  <style>
+    #table.placeholder{
+      color:rgba(255,255,255,.45);
+    }
+
+    #table option{
+      color:#fff;
+      background:#120018;
+    }
+  </style>
 </head>
 
 <body>
@@ -19,8 +30,8 @@
       <div class="stack">
         <div class="section">
           <div class="label">Il tuo tavolo<span class="req">*</span></div>
-          <div class="help">Inserisci il numero del tavolo in cui ti trovi</div>
-          <select id="table">
+          <div class="help">Inserisci il numero del tavolo in cui ti trovi.</div>
+          <select id="table" class="placeholder">
             <option value="">Seleziona il numero</option>
           </select>
         </div>
@@ -64,6 +75,15 @@
   const BANNED_JOIN = ["cazzo","merda","puttana","stronzo","troia","bastardo"];
 
   const tableSelect=document.getElementById("table");
+
+  function updateTablePlaceholder(){
+    if(tableSelect.value){
+      tableSelect.classList.remove("placeholder");
+    }else{
+      tableSelect.classList.add("placeholder");
+    }
+  }
+
   TAVOLI.forEach(t=>{
     const o=document.createElement("option");
     o.value=String(t);
@@ -73,6 +93,9 @@
 
   if(localStorage.getItem("table")) tableSelect.value=localStorage.getItem("table");
   if(localStorage.getItem("name")) document.getElementById("name").value=localStorage.getItem("name");
+
+  tableSelect.addEventListener("change", updateTablePlaceholder);
+  updateTablePlaceholder();
 
   function normalizeName(raw){
     let s = String(raw || "").trim().toLowerCase();

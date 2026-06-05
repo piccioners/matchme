@@ -69,28 +69,43 @@
     }
 
     .card{
-      text-align:center;
+      text-align:left;
       background: var(--panel);
       border: 1px solid var(--stroke);
       border-radius:18px;
-      padding:18px 14px;
+      padding:14px;
       backdrop-filter: blur(10px);
       margin-bottom:16px;
     }
 
-    .hello{
-      font-weight:950;
-      font-size:28px;
-      line-height:1.15;
-      margin:0;
-      letter-spacing:.2px;
+    .who{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
     }
 
-    .table-text{
-      margin:8px 0 0 0;
-      opacity:.72;
-      font-size:14px;
-      font-weight:750;
+    .hello{
+      font-weight:900;
+      font-size:20px;
+      line-height:1.15;
+      margin:0;
+      letter-spacing:.1px;
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      padding:10px 12px;
+      border-radius:999px;
+      background: rgba(255,47,146,.10);
+      border: 1px solid rgba(255,47,146,.25);
+      font-size:13px;
+      font-weight:800;
+      white-space:nowrap;
+      flex:0 0 auto;
     }
 
     .btn{
@@ -129,7 +144,7 @@
     }
 
     .danger{
-      margin-top:10px;
+      margin-top:28px;
       font-size:12px;
       opacity:.45;
       text-decoration:underline;
@@ -153,8 +168,10 @@
     </div>
 
     <div class="card">
-      <p class="hello" id="helloName">Caricamento…</p>
-      <p class="table-text" id="tableText">Verifica profilo</p>
+      <div class="who">
+        <p class="hello" id="helloName">Caricamento…</p>
+        <div class="pill" id="tablePill">Tavolo —</div>
+      </div>
       <div class="loading" id="loading">Sto parlando col server…</div>
     </div>
 
@@ -183,7 +200,7 @@
     const API_BASE = "https://matchme-production-73a8.up.railway.app";
 
     const helloName = document.getElementById("helloName");
-    const tableText = document.getElementById("tableText");
+    const tablePill = document.getElementById("tablePill");
     const loading = document.getElementById("loading");
     const primaryBtn = document.getElementById("primaryBtn");
     const secondaryBtn = document.getElementById("secondaryBtn");
@@ -257,8 +274,8 @@
         if(name) helloName.textContent = "Ciao, " + name;
         else helloName.textContent = "Ciao";
 
-        if(table) tableText.textContent = "Tavolo " + table;
-        else tableText.textContent = "";
+        if(table) tablePill.textContent = "Tavolo " + table;
+        else tablePill.textContent = "Tavolo —";
 
         localStorage.setItem("profile_complete", "true");
 
@@ -286,8 +303,8 @@
         if(name) helloName.textContent = "Ciao, " + name;
         else helloName.textContent = "Ciao";
 
-        if(table) tableText.textContent = "Tavolo " + table;
-        else tableText.textContent = "Offline";
+        if(table) tablePill.textContent = "Tavolo " + table;
+        else tablePill.textContent = "Tavolo —";
 
         renderActions(hasAnswers);
       }

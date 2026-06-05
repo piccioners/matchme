@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>meety · Home serata</title>
+  <title>meety · Home</title>
   <link rel="stylesheet" href="style.css">
 
   <style>
@@ -57,7 +57,7 @@
       align-items:center;
       justify-content:center;
       gap:10px;
-      margin-bottom:18px;
+      margin-bottom:20px;
     }
 
     .logo-mini{
@@ -69,45 +69,28 @@
     }
 
     .card{
-      text-align:left;
+      text-align:center;
       background: var(--panel);
       border: 1px solid var(--stroke);
       border-radius:18px;
-      padding:14px;
+      padding:18px 14px;
       backdrop-filter: blur(10px);
       margin-bottom:16px;
     }
 
-    .who{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-    }
-
-    .who .name{
-      font-weight:800;
-      font-size:16px;
+    .hello{
+      font-weight:950;
+      font-size:28px;
+      line-height:1.15;
       margin:0;
+      letter-spacing:.2px;
     }
 
-    .who .meta{
-      opacity:.7;
-      font-size:12px;
-      margin:4px 0 0 0;
-    }
-
-    .pill{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding:10px 12px;
-      border-radius:999px;
-      background: rgba(255,47,146,.10);
-      border: 1px solid rgba(255,47,146,.25);
-      font-size:13px;
-      font-weight:700;
-      white-space:nowrap;
+    .table-text{
+      margin:8px 0 0 0;
+      opacity:.72;
+      font-size:14px;
+      font-weight:750;
     }
 
     .btn{
@@ -170,14 +153,9 @@
     </div>
 
     <div class="card">
-      <div class="who">
-        <div>
-          <p class="name" id="helloName">Caricamento…</p>
-          <p class="meta" id="helloMeta">Verifica profilo</p>
-        </div>
-        <div class="pill" id="tablePill">Tavolo —</div>
-      </div>
-      <div class="loading" id="loading">Sto parlando col server… (che di solito dorme)</div>
+      <p class="hello" id="helloName">Caricamento…</p>
+      <p class="table-text" id="tableText">Verifica profilo</p>
+      <div class="loading" id="loading">Sto parlando col server…</div>
     </div>
 
     <div id="actions">
@@ -198,15 +176,14 @@
       </button>
     </div>
 
-    <div class="danger" onclick="resetProfile()">Reset profilo (solo se necessario)</div>
+    <div class="danger" onclick="resetProfile()">Reset profilo</div>
   </div>
 
   <script>
     const API_BASE = "https://matchme-production-73a8.up.railway.app";
 
     const helloName = document.getElementById("helloName");
-    const helloMeta = document.getElementById("helloMeta");
-    const tablePill = document.getElementById("tablePill");
+    const tableText = document.getElementById("tableText");
     const loading = document.getElementById("loading");
     const primaryBtn = document.getElementById("primaryBtn");
     const secondaryBtn = document.getElementById("secondaryBtn");
@@ -278,13 +255,10 @@
         const hasAnswers = !!data.has_answers;
 
         if(name) helloName.textContent = "Ciao, " + name;
-        else helloName.textContent = "Il tuo profilo";
+        else helloName.textContent = "Ciao";
 
-        if(table) tablePill.textContent = "Tavolo " + table;
-        else tablePill.textContent = "Tavolo —";
-
-        if(eventId) helloMeta.textContent = eventId.replaceAll("_"," ");
-        else helloMeta.textContent = "Serata in corso";
+        if(table) tableText.textContent = "Tavolo " + table;
+        else tableText.textContent = "";
 
         localStorage.setItem("profile_complete", "true");
 
@@ -307,17 +281,13 @@
 
         const name = (localStorage.getItem("name") || "").trim();
         const table = (localStorage.getItem("table") || "").trim();
-        const eventId = (localStorage.getItem("event_id") || "").trim();
         const hasAnswers = localStorage.getItem("has_answers") === "true";
 
         if(name) helloName.textContent = "Ciao, " + name;
-        else helloName.textContent = "Il tuo profilo";
+        else helloName.textContent = "Ciao";
 
-        if(table) tablePill.textContent = "Tavolo " + table;
-        else tablePill.textContent = "Tavolo —";
-
-        if(eventId) helloMeta.textContent = eventId.replaceAll("_"," ");
-        else helloMeta.textContent = "Offline";
+        if(table) tableText.textContent = "Tavolo " + table;
+        else tableText.textContent = "Offline";
 
         renderActions(hasAnswers);
       }

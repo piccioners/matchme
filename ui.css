@@ -34,11 +34,12 @@
   --card-pad: clamp(12px, 2.2svh, 16px);
   --section-gap: clamp(10px, 2svh, 16px);
 
-  /* Pill responsive (questa è la parte che salva step2) */
+  /* Pill responsive */
   --pill-font: clamp(14px, 2.0svh, 16px);
   --pill-pad-y: clamp(10px, 1.8svh, 14px);
   --pill-pad-x: clamp(10px, 2.2svh, 14px);
   --pill-min-h: clamp(46px, 6.8svh, 56px);
+  --pill-fixed-h: 72px;
 
   /* Bottoni responsive */
   --btn-font: clamp(14px, 2.0svh, 15px);
@@ -236,7 +237,9 @@ input::placeholder{ opacity:.45; font-weight:750; }
   justify-content:center;
 
   min-height: var(--pill-min-h);
+  height: var(--pill-fixed-h);
 }
+
 .pill:active{ transform:scale(.99); }
 
 .pill.active{

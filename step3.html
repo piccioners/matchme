@@ -6,6 +6,12 @@
   <title>meety · Crea il tuo profilo</title>
 
   <link rel="stylesheet" href="ui.css">
+
+  <style>
+    .step3-grid .pill{
+      height:72px;
+    }
+  </style>
 </head>
 
 <body>
@@ -18,7 +24,7 @@
     <div class="card">
       <div class="section">
         <div class="label">Il tuo stato sentimentale è...<span class="req">*</span></div>
-        <div class="grid2" id="status">
+        <div class="grid2 step3-grid" id="status">
           <div class="pill" data-v="Single">Single</div>
           <div class="pill" data-v="Impegnato/a">Impegnato/a</div>
           <div class="pill" data-v="Complicato">Complicato</div>
@@ -28,7 +34,7 @@
 
       <div class="section">
         <div class="label">Sei qui per...<span class="req">*</span></div>
-        <div class="grid2" id="purpose">
+        <div class="grid2 step3-grid" id="purpose">
           <div class="pill" data-v="Divertirmi">Divertirmi</div>
           <div class="pill" data-v="Conoscere nuove persone">Conoscere nuove persone</div>
           <div class="pill" data-v="Trovare moglie/marito">Trovare moglie/marito</div>

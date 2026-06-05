@@ -3,9 +3,43 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>meety · Profilo</title>
+  <title>meety · Crea il tuo profilo</title>
 
   <link rel="stylesheet" href="ui.css">
+
+  <style>
+    .step4-content{
+      flex:1;
+      display:flex;
+      flex-direction:column;
+    }
+
+    .step4-title{
+      margin-bottom:8px;
+    }
+
+    .step4-fields{
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-evenly;
+      gap:16px;
+      padding:4px 0 8px 0;
+    }
+
+    .step4-fields .section{
+      margin-top:0;
+    }
+
+    select.placeholder{
+      color:rgba(255,255,255,.45);
+    }
+
+    select option{
+      color:#fff;
+      background:#120018;
+    }
+  </style>
 </head>
 
 <body>
@@ -16,58 +50,62 @@
     </div>
 
     <div class="card">
-      <div class="section">
-        <div class="label">Qualcosa su di te...</div>
-      </div>
+      <div class="step4-content">
+        <div class="section step4-title">
+          <div class="label">Dicci qualcosa su di te...</div>
+        </div>
 
-      <div class="section">
-        <div class="label">Segno zodiacale<span class="req">*</span></div>
-        <select id="zodiac">
-          <option value="">Seleziona il tuo segno</option>
-          <option>♈ Ariete</option>
-          <option>♉ Toro</option>
-          <option>♊ Gemelli</option>
-          <option>♋ Cancro</option>
-          <option>♌ Leone</option>
-          <option>♍ Vergine</option>
-          <option>♎ Bilancia</option>
-          <option>♏ Scorpione</option>
-          <option>♐ Sagittario</option>
-          <option>♑ Capricorno</option>
-          <option>♒ Acquario</option>
-          <option>♓ Pesci</option>
-        </select>
-      </div>
+        <div class="step4-fields">
+          <div class="section">
+            <div class="label">Segno zodiacale<span class="req">*</span></div>
+            <select id="zodiac" class="placeholder">
+              <option value="">Seleziona il tuo segno</option>
+              <option>♈ Ariete</option>
+              <option>♉ Toro</option>
+              <option>♊ Gemelli</option>
+              <option>♋ Cancro</option>
+              <option>♌ Leone</option>
+              <option>♍ Vergine</option>
+              <option>♎ Bilancia</option>
+              <option>♏ Scorpione</option>
+              <option>♐ Sagittario</option>
+              <option>♑ Capricorno</option>
+              <option>♒ Acquario</option>
+              <option>♓ Pesci</option>
+            </select>
+          </div>
 
-      <div class="section">
-        <div class="label">Cosa bevi di solito?<span class="req">*</span></div>
-        <select id="drink">
-          <option value="">Seleziona</option>
-          <option>Spritz / Aperitivo</option>
-          <option>Gin Tonic</option>
-          <option>Birra</option>
-          <option>Vino</option>
-          <option>Cocktail dolce</option>
-          <option>Cocktail amaro</option>
-          <option>Analcolico</option>
-          <option>Bevo qualsiasi cosa</option>
-          <option>Totalmente astemio/a</option>
-        </select>
-      </div>
+          <div class="section">
+            <div class="label">Cosa bevi di solito?<span class="req">*</span></div>
+            <select id="drink" class="placeholder">
+              <option value="">Seleziona</option>
+              <option>Spritz / Aperitivo</option>
+              <option>Gin Tonic</option>
+              <option>Birra</option>
+              <option>Vino</option>
+              <option>Cocktail dolce</option>
+              <option>Cocktail amaro</option>
+              <option>Analcolico</option>
+              <option>Bevo qualsiasi cosa</option>
+              <option>Totalmente astemio/a</option>
+            </select>
+          </div>
 
-      <div class="section">
-        <div class="label">Che musica ascolti?<span class="req">*</span></div>
-        <select id="music">
-          <option value="">Seleziona</option>
-          <option>Pop</option>
-          <option>Rap / Trap</option>
-          <option>House</option>
-          <option>Techno / EDM</option>
-          <option>Reggaeton</option>
-          <option>Rock</option>
-          <option>Indie</option>
-          <option>Un po' di tutto</option>
-        </select>
+          <div class="section">
+            <div class="label">Che musica ascolti?<span class="req">*</span></div>
+            <select id="music" class="placeholder">
+              <option value="">Seleziona</option>
+              <option>Pop</option>
+              <option>Rap / Trap</option>
+              <option>House</option>
+              <option>Techno / EDM</option>
+              <option>Reggaeton</option>
+              <option>Rock</option>
+              <option>Indie</option>
+              <option>Un po' di tutto</option>
+            </select>
+          </div>
+        </div>
       </div>
 
       <div class="btn-row">
@@ -91,13 +129,34 @@
 
   if(!localStorage.getItem("status") || !localStorage.getItem("purpose")) location.href="step3.html";
 
+  function updateSelectPlaceholder(select){
+    if(select.value){
+      select.classList.remove("placeholder");
+    }else{
+      select.classList.add("placeholder");
+    }
+  }
+
+  function setupSelect(id){
+    const select = document.getElementById(id);
+    select.addEventListener("change", () => updateSelectPlaceholder(select));
+    updateSelectPlaceholder(select);
+  }
+
   const restore = (id, key) => {
     const v = localStorage.getItem(key);
-    if(v) document.getElementById(id).value = v;
+    const el = document.getElementById(id);
+    if(v) el.value = v;
+    updateSelectPlaceholder(el);
   };
+
   restore("zodiac","zodiac");
   restore("drink","drink");
   restore("music","music");
+
+  setupSelect("zodiac");
+  setupSelect("drink");
+  setupSelect("music");
 
   // ✅ HOME “VERA”: evita rimbalzi su index
   function goHome(){

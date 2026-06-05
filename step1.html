@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>meety · Profilo</title>
+  <title>meety · Crea il tuo profilo</title>
 
   <link rel="stylesheet" href="ui.css">
 </head>
@@ -19,9 +19,9 @@
       <div class="stack">
         <div class="section">
           <div class="label">Il tuo tavolo<span class="req">*</span></div>
-          <div class="help">Il numero del tavolo in cui ti trovi.</div>
+          <div class="help">Inserisci il numero del tavolo in cui ti trovi</div>
           <select id="table">
-            <option value="">Seleziona tavolo</option>
+            <option value="">Seleziona il numero</option>
           </select>
         </div>
 
@@ -30,9 +30,8 @@
 
         <div class="section">
           <div class="label">Il tuo nome<span class="req">*</span></div>
-          <div class="help">Il nome che verrà mostrato nei match.</div>
-          <input id="name" placeholder="Es. Marco">
-          <div class="note">Niente insulti o nomi offensivi: verranno rimossi.</div>
+          <div class="help">Scegli il nome che verrà mostrato nei match.</div>
+          <input id="name" placeholder="Es. Luca">
         </div>
       </div>
 
@@ -116,7 +115,7 @@
     const prettyName = name.replace(/\s+/g, " ").trim();
     if(prettyName.length < 2){ alert("Inserisci un nome più lungo"); return; }
     if(prettyName.length > 24){ alert("Nome troppo lungo"); return; }
-    if(isBanned(prettyName)){ alert("Scegli un nome diverso"); return; }
+    if(isBanned(prettyName)){ alert("Scegli un nome diverso, birbone!"); return; }
 
     localStorage.setItem("name", prettyName);
     localStorage.setItem("table", table);

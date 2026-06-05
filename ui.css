@@ -1,15 +1,3 @@
-Sì: il problema era qui:
-
-```css
-.label{
-  display:flex;
-  gap:8px;
-}
-```
-
-Quel `gap:8px` separava testo e asterisco. Qui sotto trovi **tutto `ui.css` completo corretto**. Ho cambiato solo la parte necessaria: tolto il gap e aggiunto `margin-left:0` su `.req`.
-
-```css
 :root{
   --bg1:#120018; --bg2:#0b0012;
   --pink:#ff2f92; --violet:#7c3aed;
@@ -323,4 +311,3 @@ input::placeholder{ opacity:.45; font-weight:750; }
   background: rgba(255,47,146,.85);
   transform: scale(1.25);
 }
-```

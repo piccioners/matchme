@@ -226,7 +226,7 @@
           <div class="v" id="vSeek">—</div>
         </div>
         <div class="row">
-          <div class="k">Stato</div>
+          <div class="k">Stato sentimentale</div>
           <div class="v" id="vStatus">—</div>
         </div>
         <div class="row">
@@ -234,15 +234,15 @@
           <div class="v" id="vPurpose">—</div>
         </div>
         <div class="row">
-          <div class="k">Segno</div>
+          <div class="k">Segno zodiacale</div>
           <div class="v" id="vZodiac">—</div>
         </div>
         <div class="row">
-          <div class="k">Drink</div>
+          <div class="k">Cosa bevi</div>
           <div class="v" id="vDrink">—</div>
         </div>
         <div class="row">
-          <div class="k">Musica</div>
+          <div class="k">Cosa ascolti</div>
           <div class="v" id="vMusic">—</div>
         </div>
       </div>
@@ -257,11 +257,11 @@
 
         <div class="field">
           <div class="label">Il tuo nome<span class="req">*</span></div>
-          <input id="fName" placeholder="Es. Marco">
+          <input id="fName" placeholder="Es. Luca">
         </div>
 
         <div class="field">
-          <div class="label">Come ti definisci<span class="req">*</span></div>
+          <div class="label">Come ti definisci?<span class="req">*</span></div>
           <select id="fGenderMe">
             <option value="">Seleziona</option>
             <option value="Uomo">Uomo</option>
@@ -271,7 +271,7 @@
         </div>
 
         <div class="field">
-          <div class="label">Cosa cerchi<span class="req">*</span></div>
+          <div class="label">Cosa stai cercando?<span class="req">*</span></div>
           <select id="fGenderSeek">
             <option value="">Seleziona</option>
             <option value="Uomo">Uomo</option>
@@ -281,7 +281,7 @@
         </div>
 
         <div class="field">
-          <div class="label">Stato<span class="req">*</span></div>
+          <div class="label">Il tuo stato sentimentale è...<span class="req">*</span></div>
           <select id="fStatus">
             <option value="">Seleziona</option>
             <option value="Single">Single</option>
@@ -292,13 +292,13 @@
         </div>
 
         <div class="field">
-          <div class="label">Sei qui per<span class="req">*</span></div>
+          <div class="label">Sei qui per...<span class="req">*</span></div>
           <select id="fPurpose">
             <option value="">Seleziona</option>
-            <option value="Flirt">Flirt</option>
-            <option value="Conoscere gente">Conoscere gente</option>
             <option value="Divertirmi">Divertirmi</option>
-            <option value="Vediamo che succede">Vediamo che succede</option>
+            <option value="Conoscere nuove persone">Conoscere nuove persone</option>
+            <option value="Trovare moglie/marito">Trovare moglie/marito</option>
+            <option value="Vedere che succede">Vedere che succede</option>
           </select>
         </div>
 
@@ -306,18 +306,18 @@
           <div class="label">Segno zodiacale<span class="req">*</span></div>
           <select id="fZodiac">
             <option value="">Seleziona</option>
-            <option value="Ariete ♈">Ariete ♈</option>
-            <option value="Toro ♉">Toro ♉</option>
-            <option value="Gemelli ♊">Gemelli ♊</option>
-            <option value="Cancro ♋">Cancro ♋</option>
-            <option value="Leone ♌">Leone ♌</option>
-            <option value="Vergine ♍">Vergine ♍</option>
-            <option value="Bilancia ♎">Bilancia ♎</option>
-            <option value="Scorpione ♏">Scorpione ♏</option>
-            <option value="Sagittario ♐">Sagittario ♐</option>
-            <option value="Capricorno ♑">Capricorno ♑</option>
-            <option value="Acquario ♒">Acquario ♒</option>
-            <option value="Pesci ♓">Pesci ♓</option>
+            <option value="♈ Ariete">♈ Ariete</option>
+            <option value="♉ Toro">♉ Toro</option>
+            <option value="♊ Gemelli">♊ Gemelli</option>
+            <option value="♋ Cancro">♋ Cancro</option>
+            <option value="♌ Leone">♌ Leone</option>
+            <option value="♍ Vergine">♍ Vergine</option>
+            <option value="♎ Bilancia">♎ Bilancia</option>
+            <option value="♏ Scorpione">♏ Scorpione</option>
+            <option value="♐ Sagittario">♐ Sagittario</option>
+            <option value="♑ Capricorno">♑ Capricorno</option>
+            <option value="♒ Acquario">♒ Acquario</option>
+            <option value="♓ Pesci">♓ Pesci</option>
           </select>
         </div>
 
@@ -358,7 +358,7 @@
       <div id="viewActions">
         <button class="btn btn-primary" onclick="enterEditMode()">Modifica profilo</button>
         <button class="btn btn-ghost" onclick="resetProfile()">Reset profilo</button>
-        <button class="btn btn-secondary" onclick="location.href='hub.html'">Torna alla Home serata</button>
+        <button class="btn btn-secondary" onclick="location.href='hub.html'">Torna alla Home</button>
       </div>
 
       <div id="editActions" style="display:none;">
@@ -435,14 +435,38 @@
     document.getElementById(id).textContent = value || "—";
   }
 
+  function normalizePurpose(value){
+    if(value === "Conoscere conoscere nuove persone") return "Conoscere nuove persone";
+    if(value === "Conoscere gente") return "Conoscere nuove persone";
+    return value || "";
+  }
+
+  function normalizeZodiac(value){
+    const map = {
+      "Ariete ♈":"♈ Ariete",
+      "Toro ♉":"♉ Toro",
+      "Gemelli ♊":"♊ Gemelli",
+      "Cancro ♋":"♋ Cancro",
+      "Leone ♌":"♌ Leone",
+      "Vergine ♍":"♍ Vergine",
+      "Bilancia ♎":"♎ Bilancia",
+      "Scorpione ♏":"♏ Scorpione",
+      "Sagittario ♐":"♐ Sagittario",
+      "Capricorno ♑":"♑ Capricorno",
+      "Acquario ♒":"♒ Acquario",
+      "Pesci ♓":"♓ Pesci"
+    };
+    return map[value] || value || "";
+  }
+
   function renderProfile(profile){
     setText("vName", profile.name || "—");
     setText("vTable", profile.table ? ("Tavolo " + profile.table) : "—");
     setText("vMe", profile.gender_me || "—");
     setText("vSeek", profile.gender_seek || "—");
     setText("vStatus", profile.status || "—");
-    setText("vPurpose", profile.purpose || "—");
-    setText("vZodiac", profile.zodiac || "—");
+    setText("vPurpose", normalizePurpose(profile.purpose) || "—");
+    setText("vZodiac", normalizeZodiac(profile.zodiac) || "—");
     setText("vDrink", profile.drink || "—");
     setText("vMusic", profile.music || "—");
   }
@@ -453,8 +477,8 @@
     document.getElementById("fGenderMe").value = profile.gender_me || "";
     document.getElementById("fGenderSeek").value = profile.gender_seek || "";
     document.getElementById("fStatus").value = profile.status || "";
-    document.getElementById("fPurpose").value = profile.purpose || "";
-    document.getElementById("fZodiac").value = profile.zodiac || "";
+    document.getElementById("fPurpose").value = normalizePurpose(profile.purpose);
+    document.getElementById("fZodiac").value = normalizeZodiac(profile.zodiac);
     document.getElementById("fDrink").value = profile.drink || "";
     document.getElementById("fMusic").value = profile.music || "";
   }
@@ -523,8 +547,8 @@
         gender_me: data.profile?.gender_me || "",
         gender_seek: data.profile?.gender_seek || "",
         status: data.profile?.status || "",
-        purpose: data.profile?.purpose || "",
-        zodiac: data.profile?.zodiac || "",
+        purpose: normalizePurpose(data.profile?.purpose || ""),
+        zodiac: normalizeZodiac(data.profile?.zodiac || ""),
         drink: data.profile?.drink || "",
         music: data.profile?.music || ""
       };
@@ -589,7 +613,7 @@
       return;
     }
     if(isBanned(prettyName)){
-      alert("Scegli un nome diverso");
+      alert("Scegli un nome diverso, birbone!");
       return;
     }
 

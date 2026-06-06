@@ -55,26 +55,24 @@
       backdrop-filter: blur(10px);
       margin-bottom:14px;
     }
-    h1{
+    h1,
+    .section-title{
       margin:0 0 14px 0;
       font-size:22px;
       font-weight:900;
-    }
-    .section-title{
-      margin:0 0 10px 0;
-      font-size:17px;
-      font-weight:900;
+      line-height:1.15;
     }
 
     .search-row{
       display:flex;
       gap:10px;
-      align-items:center;
+      align-items:stretch;
     }
     .search-row input{
       flex:1;
       min-width:0;
-      padding:14px 14px;
+      height:50px;
+      padding:0 14px;
       border-radius:14px;
       border:1px solid rgba(255,255,255,.12);
       background: rgba(27,0,34,.55);
@@ -207,7 +205,19 @@
       cursor:pointer;
       user-select:none;
       margin-top:12px;
+      transition: transform .05s ease;
     }
+    .btn:active{
+      transform:scale(.98);
+    }
+
+    .btn-primary{
+      border:none;
+      color:#fff;
+      background: linear-gradient(135deg, var(--pink), rgba(124,58,237,.95));
+      box-shadow:0 18px 50px rgba(255,47,146,.18);
+    }
+
     .btn-secondary{
       background: rgba(27,0,34,.35);
       border:1.5px solid rgba(255,47,146,.40);
@@ -216,14 +226,19 @@
 
     .btn-inline{
       width:auto;
+      height:50px;
       margin-top:0;
-      padding:14px 16px;
+      padding:0 18px;
       font-size:14px;
       flex:0 0 auto;
+      display:flex;
+      align-items:center;
+      justify-content:center;
     }
 
     .bottom-home{
       margin-top:2px;
+      margin-bottom:8px;
     }
 
     .empty{
@@ -285,7 +300,7 @@
       <div id="tableSearchContent"></div>
     </div>
 
-    <button class="btn btn-secondary bottom-home" onclick="location.href='hub.html'">Torna alla Home serata</button>
+    <button class="btn btn-primary bottom-home" onclick="location.href='hub.html'">Torna alla Home</button>
   </div>
 
 <script>
@@ -336,6 +351,37 @@
       .replaceAll(">","&gt;")
       .replaceAll('"',"&quot;")
       .replaceAll("'","&#039;");
+  }
+
+  function valueFromProfile(p, key){
+    if(!p) return "";
+    if(p[key]) return p[key];
+    if(p.profile && p.profile[key]) return p.profile[key];
+    return "";
+  }
+
+  function normalizePurpose(value){
+    if(value === "Conoscere conoscere nuove persone") return "Conoscere nuove persone";
+    if(value === "Conoscere gente") return "Conoscere nuove persone";
+    return value || "";
+  }
+
+  function normalizeZodiac(value){
+    const map = {
+      "Ariete ♈":"♈ Ariete",
+      "Toro ♉":"♉ Toro",
+      "Gemelli ♊":"♊ Gemelli",
+      "Cancro ♋":"♋ Cancro",
+      "Leone ♌":"♌ Leone",
+      "Vergine ♍":"♍ Vergine",
+      "Bilancia ♎":"♎ Bilancia",
+      "Scorpione ♏":"♏ Scorpione",
+      "Sagittario ♐":"♐ Sagittario",
+      "Capricorno ♑":"♑ Capricorno",
+      "Acquario ♒":"♒ Acquario",
+      "Pesci ♓":"♓ Pesci"
+    };
+    return map[value] || value || "";
   }
 
   function isCompatibleByGender(mySeekValue, otherGenderMe){
@@ -389,11 +435,21 @@
     const div = document.createElement("div");
     div.className = "match";
 
+    const name = p.name || "Sconosciuto";
+    const table = p.table || p.table_no || "—";
+    const genderMe = valueFromProfile(p, "gender_me");
+    const genderSeek = valueFromProfile(p, "gender_seek");
+    const status = valueFromProfile(p, "status");
+    const purpose = normalizePurpose(valueFromProfile(p, "purpose"));
+    const zodiac = normalizeZodiac(valueFromProfile(p, "zodiac"));
+    const drink = valueFromProfile(p, "drink");
+    const music = valueFromProfile(p, "music");
+
     div.innerHTML = `
       <div class="match-top">
         <div class="m-left">
-          <p class="m-name">${escapeHtml(p.name || "Sconosciuto")}</p>
-          <p class="m-meta">Tavolo ${escapeHtml(String(p.table || "—"))}</p>
+          <p class="m-name">${escapeHtml(name)}</p>
+          <p class="m-meta">Tavolo ${escapeHtml(String(table))}</p>
         </div>
         <div class="m-right">
           <div class="pct">${escapeHtml(pctText)}</div>
@@ -403,13 +459,13 @@
 
       <div class="match-details">
         <div class="details-grid">
-          ${buildDetail("Io sono", p.gender_me)}
-          ${buildDetail("Cerco", p.gender_seek)}
-          ${buildDetail("Stato", p.status)}
-          ${buildDetail("Sono qui per", p.purpose)}
-          ${buildDetail("Segno", p.zodiac)}
-          ${buildDetail("Drink", p.drink)}
-          ${buildDetail("Musica", p.music)}
+          ${buildDetail("Io sono", genderMe)}
+          ${buildDetail("Cerco", genderSeek)}
+          ${buildDetail("Stato sentimentale", status)}
+          ${buildDetail("Sono qui per", purpose)}
+          ${buildDetail("Segno zodiacale", zodiac)}
+          ${buildDetail("Cosa bevo", drink)}
+          ${buildDetail("Cosa ascolto", music)}
         </div>
       </div>
     `;
@@ -447,8 +503,8 @@
       const filtered = participants.filter(p => {
         if(!p || !Array.isArray(p.answers)) return false;
 
-        if(!isCompatibleByGender(mySeek, p.gender_me)) return false;
-        if(!isReciprocal(p.gender_seek, myGender)) return false;
+        if(!isCompatibleByGender(mySeek, valueFromProfile(p, "gender_me"))) return false;
+        if(!isReciprocal(valueFromProfile(p, "gender_seek"), myGender)) return false;
 
         return true;
       });
@@ -503,7 +559,7 @@
       return;
     }
 
-    const found = allParticipants.filter(p => String(p.table || "").trim() === table);
+    const found = allParticipants.filter(p => String(p.table || p.table_no || "").trim() === table);
 
     if(found.length === 0){
       container.innerHTML = `

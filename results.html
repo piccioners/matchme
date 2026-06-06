@@ -123,6 +123,7 @@
       flex:1;
     }
     .m-name{
+      color:#fff;
       font-weight:950;
       font-size:17px;
       margin:0 0 6px 0;
@@ -333,15 +334,42 @@
   const mySeek = (localStorage.getItem("gender_seek") || "").trim();
   const myGender = (localStorage.getItem("gender_me") || "").trim();
 
+  const myProfile = {
+    purpose: normalizePurpose(localStorage.getItem("purpose") || ""),
+    drink: localStorage.getItem("drink") || "",
+    music: localStorage.getItem("music") || ""
+  };
+
   let allParticipants = [];
 
-  function compatibility(a, b){
-    const n = Math.min(a.length, b.length);
+  function compatibility(myAnswers, otherAnswers, myProfile, otherProfile){
+    const n = Math.min(myAnswers.length, otherAnswers.length);
+
     let sumDiff = 0;
-    for(let i=0;i<n;i++) sumDiff += Math.abs(a[i]-b[i]);
+    for(let i=0;i<n;i++){
+      sumDiff += Math.abs(myAnswers[i] - otherAnswers[i]);
+    }
+
     const maxDiff = 4 * n;
-    const score = 100 - (sumDiff / maxDiff) * 100;
-    return Math.max(0, Math.min(100, score));
+    let score = 100 - (sumDiff / maxDiff) * 100;
+
+    if(myProfile.purpose && otherProfile.purpose && myProfile.purpose === otherProfile.purpose){
+      score += 10;
+    }
+
+    if(myProfile.drink && otherProfile.drink && myProfile.drink === otherProfile.drink){
+      score += 5;
+    }
+
+    if(myProfile.music && otherProfile.music && myProfile.music === otherProfile.music){
+      score += 5;
+    }
+
+    return Math.max(0, Math.min(99.99, score));
+  }
+
+  function formatPercent(value){
+    return Number(value || 0).toFixed(2).replace(".", ",") + "%";
   }
 
   function escapeHtml(str){
@@ -509,10 +537,18 @@
         return true;
       });
 
-      const ranked = filtered.map(p => ({
-        ...p,
-        score: compatibility(myAnswers, p.answers)
-      })).sort((a,b)=> b.score - a.score).slice(0, 5);
+      const ranked = filtered.map(p => {
+        const otherProfile = {
+          purpose: normalizePurpose(valueFromProfile(p, "purpose")),
+          drink: valueFromProfile(p, "drink"),
+          music: valueFromProfile(p, "music")
+        };
+
+        return {
+          ...p,
+          score: compatibility(myAnswers, p.answers, myProfile, otherProfile)
+        };
+      }).sort((a,b)=> b.score - a.score).slice(0, 5);
 
       if(ranked.length === 0){
         content.innerHTML = `
@@ -528,7 +564,7 @@
       list.className = "list";
 
       ranked.forEach(p => {
-        const pct = (typeof p.score === "number" ? p.score : 0).toFixed(1) + "%";
+        const pct = formatPercent(p.score);
         list.appendChild(createProfileCard(p, pct));
       });
 

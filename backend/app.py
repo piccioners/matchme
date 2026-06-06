@@ -54,8 +54,6 @@ def init_db():
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "*"}})
 
-# IMPORTANT: con gunicorn __main__ non gira.
-# Quindi inizializziamo il DB all'avvio del processo web.
 init_db()
 
 @app.get("/api/health")
@@ -140,14 +138,14 @@ def admin_seed_demo():
         "Luca","Marco","Matteo","Andrea","Davide","Gabriele","Simone","Federico",
         "Alex","Sam","Nico","Vale"
     ]
-    zodiacs = ["Ariete","Toro","Gemelli","Cancro","Leone","Vergine","Bilancia","Scorpione","Sagittario","Capricorno","Acquario","Pesci"]
-    drinks = ["Spritz / Aperitivo","Gin Tonic","Birra","Vino","Cocktail dolce","Cocktail amaro","Analcolico","Mi va tutto"]
-    musics = ["Pop","Rap / Trap","House","Techno / EDM","Reggaeton","Rock","Indie","Di tutto"]
+    zodiacs = ["♈ Ariete","♉ Toro","♊ Gemelli","♋ Cancro","♌ Leone","♍ Vergine","♎ Bilancia","♏ Scorpione","♐ Sagittario","♑ Capricorno","♒ Acquario","♓ Pesci"]
+    drinks = ["Spritz / Aperitivo","Gin Tonic","Birra","Vino","Cocktail dolce","Cocktail amaro","Analcolico","Bevo qualsiasi cosa"]
+    musics = ["Pop","Rap / Trap","House","Techno / EDM","Reggaeton","Rock","Indie","Un po' di tutto"]
     statuses = ["Single","Impegnato/a","Complicato","Preferisco non dirlo"]
-    purposes = ["Flirt","Conoscere gente","Divertirmi","Vediamo che succede"]
+    purposes = ["Divertirmi","Conoscere nuove persone","Trovare moglie/marito","Vedere che succede"]
 
-    gender_me_options = ["Uomo","Donna","Altro","Preferisco non dirlo"]
-    gender_seek_options = ["Uomo","Donna","Tutti","Indifferente"]
+    gender_me_options = ["Uomo","Donna","Altro"]
+    gender_seek_options = ["Uomo","Donna","Entrambi"]
 
     tables_pool = ["1","2","3","4","5","6","7","8","9","10","20","21","22","23","60","61","62","63","64","65"]
 
@@ -334,17 +332,12 @@ def register():
 
 @app.post("/api/profile")
 def update_profile():
-    """
-    Update profilo del record corrente (NO nuove righe).
-    Richiede Authorization: Bearer session_token
-    """
     user, err, code = auth_user()
     if err:
         return err, code
 
     data = request.get_json(force=True, silent=True) or {}
 
-    # consentiamo update anche di name/table (utile se uno ha sbagliato)
     name = (data.get("name") or "").strip() or user["name"]
     table_no = str((data.get("table") or "")).strip() or user["table_no"]
 
@@ -465,10 +458,12 @@ def participants():
         out = []
         for r in rows:
             out.append({
-                "name": r["name"],
-                "table": r["table_no"],
+                "name": r["name"] or "",
+                "table": r["table_no"] or "",
                 "gender_me": r["gender_me"] or "",
                 "gender_seek": r["gender_seek"] or "",
+                "status": r["status"] or "",
+                "purpose": r["purpose"] or "",
                 "zodiac": r["zodiac"] or "",
                 "drink": r["drink"] or "",
                 "music": r["music"] or "",

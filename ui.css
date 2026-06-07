@@ -133,13 +133,14 @@ body::before{
   padding:var(--card-pad);
   backdrop-filter: blur(10px);
 
-  height: var(--card-h-clamped);
+  min-height: var(--card-h-clamped);
+  height:auto;
 
   display:flex;
   flex-direction:column;
 
-  /* niente scroll interno */
-  overflow:hidden;
+  /* ✅ non taglia più contenuti se il testo del telefono è ingrandito */
+  overflow:visible;
 }
 
 /* ========= SEZIONI ========= */
